@@ -1,14 +1,14 @@
 {%- comment -%} Full-screen 18+ age verification gate. Consent is remembered client-side for 30 days. {%- endcomment -%}
-<div class="age-gate" id="AgeGate" role="dialog" aria-modal="true" aria-labelledby="AgeGateTitle" hidden>
+<div class="age-gate" id="AgeGate" role="alertdialog" aria-modal="true" aria-labelledby="AgeGateTitle" aria-describedby="AgeGateText AgeGateLegal" hidden>
   <div class="age-gate__panel">
     <div class="age-gate__logo">{{ shop.name | default: 'ZAVYXO' }}</div>
     <h1 id="AgeGateTitle" class="h3">{{ settings.age_gate_headline | default: 'Welcome to ZAVYXO' }}</h1>
-    <p>{{ settings.age_gate_text | default: 'You must be 18 or older to enter this site.' }}</p>
+    <p id="AgeGateText">{{ settings.age_gate_text | default: 'You must be 18 or older to enter this site.' }}</p>
     <div class="age-gate__actions">
       <button type="button" class="btn btn--primary btn--lg" id="AgeGateConfirm">{{ 'age_gate.confirm' | t }}</button>
       <a href="{{ settings.age_gate_exit_url | default: 'https://www.google.com' }}" class="btn btn--secondary" id="AgeGateExit">{{ 'age_gate.exit' | t }}</a>
     </div>
-    <p class="age_gate__legal age-gate__legal">{{ shop.name }} sells adult-wellness products intended for adults only. By entering, you confirm you meet the legal age requirement in your jurisdiction.</p>
+    <p class="age-gate__legal" id="AgeGateLegal">{{ shop.name }} sells adult-wellness products intended for adults only. By entering, you confirm you meet the legal age requirement in your jurisdiction.</p>
   </div>
 </div>
 <script src="{{ 'age-gate.js' | asset_url }}" defer="defer"></script>

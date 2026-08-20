@@ -19,12 +19,14 @@
               {%- unless item.variant.title == 'Default Title' -%}
                 <p class="cart-line__variant">{{ item.variant.title }}</p>
               {%- endunless -%}
-              <div class="cart-line__qty">
-                <button type="button" data-cart-qty-decrease aria-label="Decrease quantity">{% render 'icon', name: 'minus' %}</button>
-                <input type="number" value="{{ item.quantity }}" min="0" data-cart-qty-input aria-label="{{ 'cart.general.quantity' | t }}">
-                <button type="button" data-cart-qty-increase aria-label="Increase quantity">{% render 'icon', name: 'plus' %}</button>
+              <div class="cart-line__controls">
+                <div class="cart-line__qty">
+                  <button type="button" data-cart-qty-decrease aria-label="Decrease quantity">{% render 'icon', name: 'minus' %}</button>
+                  <input type="number" value="{{ item.quantity }}" min="0" data-cart-qty-input aria-label="{{ 'cart.general.quantity' | t }}">
+                  <button type="button" data-cart-qty-increase aria-label="Increase quantity">{% render 'icon', name: 'plus' %}</button>
+                </div>
+                <button type="button" class="cart-line__remove" data-cart-remove>{{ 'cart.general.remove' | t }}</button>
               </div>
-              <button type="button" class="cart-line__remove" data-cart-remove>{{ 'cart.general.remove' | t }}</button>
             </div>
             <div class="cart-line__price">{{ item.final_line_price | money }}</div>
           </div>

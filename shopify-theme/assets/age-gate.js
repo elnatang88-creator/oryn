@@ -21,19 +21,34 @@
   var gate = document.getElementById('AgeGate');
   if (!gate) return;
 
-  if (isVerified()) {
+  function release() {
     gate.setAttribute('hidden', '');
     document.body.classList.remove('age-gate-pending');
+    if (window.Zavyxo && Zavyxo.ScrollLock) Zavyxo.ScrollLock.unlock('age-gate');
+  }
+
+  if (isVerified()) {
+    release();
   } else {
     gate.removeAttribute('hidden');
+    if (window.Zavyxo && Zavyxo.ScrollLock) Zavyxo.ScrollLock.lock('age-gate');
+    var confirmBtnInit = document.getElementById('AgeGateConfirm');
+    if (confirmBtnInit) confirmBtnInit.focus();
   }
 
   var confirmBtn = document.getElementById('AgeGateConfirm');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', function () {
       setVerified();
-      gate.setAttribute('hidden', '');
-      document.body.classList.remove('age-gate-pending');
+      release();
     });
   }
+
+  // Focus trap: the age gate is mandatory and has no Escape-to-close — only
+  // Tab/Shift+Tab cycling between "I Am 18 or Older" and "Exit" is allowed.
+  gate.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab' && window.Zavyxo && Zavyxo.trapFocus) {
+      Zavyxo.trapFocus(e, gate.querySelector('.age-gate__panel'));
+    }
+  });
 })();

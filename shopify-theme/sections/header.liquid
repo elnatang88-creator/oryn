@@ -137,17 +137,17 @@
 
 <div class="mobile-menu" id="MobileMenu" data-mobile-menu hidden>
   <div class="mobile-menu__backdrop" data-mobile-menu-close></div>
-  <div class="mobile-menu__panel">
+  <div class="mobile-menu__panel" role="dialog" aria-modal="true" aria-label="{{ 'accessibility.menu' | t }}">
     <div class="mobile-menu__header">
       <span class="site-header__logo">{{ shop.name | default: 'ZAVYXO' }}</span>
       <button type="button" class="icon-btn" data-mobile-menu-close aria-label="{{ 'accessibility.close' | t }}">
         {% render 'icon', name: 'close' %}
       </button>
     </div>
-    <nav aria-label="Mobile">
+    <nav class="mobile-menu__nav" aria-label="Mobile">
       {%- for link in main_menu.links -%}
         {%- if link.links.size > 0 -%}
-          <button type="button" class="mobile-menu__link" data-submenu-toggle="submenu-{{ forloop.index }}" aria-expanded="false">
+          <button type="button" class="mobile-menu__link" data-submenu-toggle="submenu-{{ forloop.index }}" aria-expanded="false" aria-controls="submenu-{{ forloop.index }}">
             {{ link.title }}
             {% render 'icon', name: 'chevron-down' %}
           </button>
@@ -162,6 +162,7 @@
       {%- endfor -%}
     </nav>
     <div class="mobile-menu__meta">
+      <p class="mobile-menu__meta-label">{{ shop.name | default: 'ZAVYXO' }}</p>
       <a href="{{ routes.account_url }}">{% render 'icon', name: 'user', class: 'icon' %} {{ 'customer.account.title' | t }}</a>
       <a href="{{ pages.wishlist.url | default: '/pages/wishlist' }}">{% render 'icon', name: 'heart', class: 'icon' %} {{ 'accessibility.wishlist' | t }}</a>
       {%- if shop.enabled_currencies.size > 1 -%}

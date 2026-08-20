@@ -4,17 +4,25 @@ Zavyxo.Cart = (function () {
   var drawer = document.getElementById('CartDrawer');
   var routes = window.Zavyxo.routes || {};
 
-  function open() {
+  var lastTrigger = null;
+
+  function isOpen() { return !!drawer && drawer.classList.contains('is-open'); }
+
+  function open(trigger) {
     drawer = document.getElementById('CartDrawer');
     if (!drawer) return;
+    lastTrigger = trigger || document.activeElement;
     drawer.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    Zavyxo.ScrollLock.lock('cart-drawer');
+    var closeBtn = drawer.querySelector('[data-cart-drawer-close]');
+    if (closeBtn) closeBtn.focus();
   }
 
   function close() {
-    if (!drawer) return;
+    if (!isOpen()) return;
     drawer.classList.remove('is-open');
-    document.body.style.overflow = '';
+    Zavyxo.ScrollLock.unlock('cart-drawer');
+    if (lastTrigger && typeof lastTrigger.focus === 'function') lastTrigger.focus();
   }
 
   function updateCartCount(count) {
@@ -132,14 +140,17 @@ Zavyxo.Cart = (function () {
   }
 
   document.addEventListener('click', function (e) {
-    if (e.target.closest('[data-cart-drawer-toggle]')) {
+    var toggle = e.target.closest('[data-cart-drawer-toggle]');
+    if (toggle) {
       e.preventDefault();
-      open();
+      open(toggle);
     }
   });
 
   document.addEventListener('keydown', function (e) {
+    if (!isOpen()) return;
     if (e.key === 'Escape') close();
+    if (e.key === 'Tab') Zavyxo.trapFocus(e, drawer.querySelector('.cart-drawer__panel'));
   });
 
   document.addEventListener('DOMContentLoaded', function () {

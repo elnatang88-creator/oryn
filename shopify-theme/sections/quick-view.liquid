@@ -1,38 +1,77 @@
 {%- comment -%}
   Compact quick-view panel, fetched via the Section Rendering API from a
-  product card's data-quick-view URL (?section_id=quick-view).
+  product card's data-quick-view URL (?section_id=quick-view). Initialized by
+  the quick-view IIFE in assets/theme.js after injection (innerHTML-inserted
+  <script> tags never execute, so all wiring happens from the caller).
 {%- endcomment -%}
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
 -%}
-<div class="quick-view" data-quick-view-content>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;">
-    <div style="border-radius:var(--radius-card);overflow:hidden;background:var(--color-bg-elevated);aspect-ratio:1/1;">
+<div class="quick-view" data-quick-view-content data-quick-view-root>
+  <div class="quick-view__grid">
+    <div class="quick-view__media">
       {%- if product.featured_image -%}
-        <img src="{{ product.featured_image | image_url: width: 700 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" style="width:100%;height:100%;object-fit:cover;">
+        <img src="{{ product.featured_image | image_url: width: 700 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" data-quick-view-image>
       {%- else -%}
         {%- capture placeholder_icon -%}{% render 'product-icon', product: product %}{%- endcapture -%}
         {% render 'media-placeholder', icon: placeholder_icon | strip, variant: product.id %}
       {%- endif -%}
     </div>
-    <div>
+    <div class="quick-view__info">
       <h2 class="h4">{{ product.title }}</h2>
       {% render 'rating-stars', product: product %}
-      <div style="margin:14px 0;">
-        {% render 'price', product: product %}
+      <div class="quick-view__price" data-quick-view-price>
+        {% render 'price', product: product, variant: current_variant %}
       </div>
-      <p style="font-size:14px;color:var(--color-text-secondary);margin-bottom:16px;">{{ product.description | strip_html | truncate: 140 }}</p>
+      <p class="quick-view__description">{{ product.description | strip_html | truncate: 140 }}</p>
 
-      {%- form 'product', product -%}
-        <input type="hidden" name="id" value="{{ current_variant.id }}">
-        <button type="submit" name="add" class="btn btn--primary btn--block btn--lg" {% unless current_variant.available %}disabled{% endunless %}>
-          {%- if current_variant.available -%}{{ 'products.product.add_to_cart' | t }}{%- else -%}{{ 'products.product.sold_out' | t }}{%- endif -%}
-        </button>
-      {%- endform -%}
+      <form data-quick-view-form>
+        <input type="hidden" name="id" value="{{ current_variant.id }}" data-quick-view-variant-input>
+
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            <div class="variant-picker" data-option-index="{{ forloop.index0 }}">
+              <div class="variant-picker__label">
+                <span>{{ option.name }}</span>
+                <strong data-selected-value>{{ option.selected_value }}</strong>
+              </div>
+              <div class="variant-pill-group" role="radiogroup" aria-label="{{ option.name }}">
+                {%- for value in option.values -%}
+                  <label class="variant-pill{% if value == option.selected_value %} is-selected{% endif %}">
+                    <input type="radio" name="qv-option-{{ forloop.parentloop.index0 }}" value="{{ value | escape }}" {% if value == option.selected_value %}checked{% endif %} class="visually-hidden" data-qv-option-input>
+                    {{ value }}
+                  </label>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+
+        <div class="quick-view__row">
+          <div class="quantity-selector">
+            <button type="button" data-quantity-change="decrease" aria-label="Decrease quantity">{% render 'icon', name: 'minus' %}</button>
+            <input type="number" name="quantity" value="1" min="1" step="1" aria-label="{{ 'products.product.quantity' | t }}">
+            <button type="button" data-quantity-change="increase" aria-label="Increase quantity">{% render 'icon', name: 'plus' %}</button>
+          </div>
+          <button
+            type="submit"
+            class="btn btn--primary btn--lg"
+            data-quick-view-add
+            style="flex:1;"
+            {% unless current_variant.available %}disabled{% endunless %}
+          >
+            <span data-quick-view-add-text>
+              {%- if current_variant.available -%}{{ 'products.product.add_to_cart' | t }}{%- else -%}{{ 'products.product.sold_out' | t }}{%- endif -%}
+            </span>
+          </button>
+        </div>
+      </form>
       <a href="{{ product.url }}" class="btn btn--secondary btn--block" style="margin-top:10px;">View Full Details</a>
     </div>
   </div>
 </div>
+
+<script type="application/json" data-quick-view-json>{{ product.variants | json }}</script>
 
 {% schema %}
 { "name": "Quick view", "settings": [] }

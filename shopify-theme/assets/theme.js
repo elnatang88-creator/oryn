@@ -2,6 +2,70 @@ document.documentElement.classList.remove('no-js');
 
 window.Zavyxo = window.Zavyxo || {};
 
+/* ---------------- Shared scroll lock ----------------
+   Every overlay (age gate, mobile menu, cart drawer, filter drawer, quick
+   view) locks/unlocks by its own id through this single reference-counted
+   module, so closing one overlay never releases the lock while another is
+   still open. Uses the position:fixed technique (not just overflow:hidden)
+   because iOS Safari still background-scrolls/bounces with overflow:hidden
+   alone. */
+Zavyxo.ScrollLock = (function () {
+  var locks = {};
+  var scrollY = 0;
+
+  function count() { return Object.keys(locks).length; }
+
+  function apply() {
+    scrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + scrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+  }
+
+  function release() {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY);
+  }
+
+  function lock(id) {
+    if (count() === 0) apply();
+    locks[id] = true;
+  }
+
+  function unlock(id) {
+    delete locks[id];
+    if (count() === 0) release();
+  }
+
+  return { lock: lock, unlock: unlock };
+})();
+
+/* ---------------- Shared focus trap ----------------
+   Keeps Tab/Shift+Tab cycling within `container` while a modal is open.
+   Call from a keydown listener on the container: Zavyxo.trapFocus(event, container) */
+Zavyxo.trapFocus = function (event, container) {
+  if (!container) return;
+  var focusable = container.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  );
+  if (!focusable.length) return;
+  var first = focusable[0];
+  var last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+};
+
 Zavyxo.formatMoney = function (cents, format) {
   if (typeof cents === 'string') cents = cents.replace('.', '');
   var value = '';
@@ -68,18 +132,25 @@ Zavyxo.formatMoney = function (cents, format) {
     menu.classList.add('is-open');
     menu.removeAttribute('hidden');
     toggle.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
+    Zavyxo.ScrollLock.lock('mobile-menu');
+    var firstLink = menu.querySelector('.mobile-menu__link, a, button');
+    if (firstLink) firstLink.focus();
   }
   function close() {
     menu.classList.remove('is-open');
     toggle.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
+    Zavyxo.ScrollLock.unlock('mobile-menu');
     setTimeout(function () { menu.setAttribute('hidden', ''); }, 300);
+    toggle.focus();
   }
   toggle.addEventListener('click', function () {
     menu.hasAttribute('hidden') || !menu.classList.contains('is-open') ? open() : close();
   });
   closeEls.forEach(function (el) { el.addEventListener('click', close); });
+  menu.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') Zavyxo.trapFocus(e, menu.querySelector('.mobile-menu__panel'));
+  });
 
   menu.querySelectorAll('[data-submenu-toggle]').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -88,10 +159,6 @@ Zavyxo.formatMoney = function (cents, format) {
       var isOpen = submenu.classList.toggle('is-open');
       btn.setAttribute('aria-expanded', isOpen);
     });
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') close();
   });
 })();
 
@@ -120,13 +187,37 @@ Zavyxo.formatMoney = function (cents, format) {
     var menu = item.querySelector('.mega-menu');
     if (!menu || !trigger) return;
     var closeTimer;
-    function openMenu() { clearTimeout(closeTimer); item.classList.add('is-open'); }
+
+    function clampToViewport() {
+      // The menu is centered under its trigger by default (left:50%, translateX(-50%)),
+      // which can push it past the viewport edge for nav items near the left/right
+      // edge of the header. Measure and nudge it back on-screen when that happens.
+      menu.style.setProperty('--mega-menu-shift', '0px');
+      var rect = menu.getBoundingClientRect();
+      var margin = 16;
+      var overflowRight = rect.right - (window.innerWidth - margin);
+      var overflowLeft = margin - rect.left;
+      if (overflowRight > 0) {
+        menu.style.setProperty('--mega-menu-shift', '-' + overflowRight + 'px');
+      } else if (overflowLeft > 0) {
+        menu.style.setProperty('--mega-menu-shift', overflowLeft + 'px');
+      }
+    }
+
+    function openMenu() {
+      clearTimeout(closeTimer);
+      item.classList.add('is-open');
+      requestAnimationFrame(clampToViewport);
+    }
     function scheduleClose() { closeTimer = setTimeout(function () { item.classList.remove('is-open'); }, 150); }
     item.addEventListener('mouseenter', openMenu);
     item.addEventListener('mouseleave', scheduleClose);
     trigger.addEventListener('focus', openMenu);
     item.addEventListener('focusout', function (e) {
       if (!item.contains(e.relatedTarget)) item.classList.remove('is-open');
+    });
+    item.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { item.classList.remove('is-open'); trigger.focus(); }
     });
   });
 })();
@@ -225,24 +316,111 @@ document.addEventListener('click', function (e) {
   var panel = document.getElementById('QuickViewPanel');
   if (!container || !panel) return;
 
+  var lastTrigger = null;
+
+  function isOpen() { return !container.hasAttribute('hidden'); }
+
   function close() {
+    if (!isOpen()) return;
     container.setAttribute('hidden', '');
     panel.innerHTML = '';
-    document.body.style.overflow = '';
+    Zavyxo.ScrollLock.unlock('quick-view');
+    if (lastTrigger) lastTrigger.focus();
   }
   container.querySelectorAll('[data-quick-view-close]').forEach(function (el) {
     el.addEventListener('click', close);
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  container.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') Zavyxo.trapFocus(e, panel);
+  });
+
+  function initQuickViewForm(root) {
+    var form = root.querySelector('[data-quick-view-form]');
+    if (!form) return;
+    var jsonEl = root.querySelector('[data-quick-view-json]');
+    var variants = [];
+    try { variants = JSON.parse(jsonEl.textContent); } catch (err) { variants = []; }
+    var idInput = form.querySelector('[data-quick-view-variant-input]');
+    var priceWrap = root.querySelector('[data-quick-view-price]');
+    var imageEl = root.querySelector('[data-quick-view-image]');
+    var addBtn = form.querySelector('[data-quick-view-add]');
+    var addText = form.querySelector('[data-quick-view-add-text]');
+    var optionInputs = form.querySelectorAll('[data-qv-option-input]');
+
+    function currentValues() {
+      var groups = {};
+      optionInputs.forEach(function (input) {
+        if (!input.checked) return;
+        var wrapper = input.closest('[data-option-index]');
+        var index = wrapper ? parseInt(wrapper.getAttribute('data-option-index'), 10) : 0;
+        groups[index] = input.value;
+      });
+      var values = [];
+      var maxIndex = -1;
+      Object.keys(groups).forEach(function (k) { maxIndex = Math.max(maxIndex, parseInt(k, 10)); });
+      for (var i = 0; i <= maxIndex; i++) values.push(groups[i]);
+      return values;
+    }
+
+    function findVariant() {
+      var values = currentValues();
+      if (!values.length) return variants[0];
+      return variants.find(function (v) {
+        var opts = [v.option1, v.option2, v.option3].filter(function (o) { return o !== null && o !== undefined; });
+        return values.every(function (val, i) { return opts[i] === val; });
+      });
+    }
+
+    function updateForVariant(variant) {
+      if (!variant) return;
+      if (idInput) idInput.value = variant.id;
+      if (priceWrap) {
+        priceWrap.innerHTML = variant.compare_at_price && variant.compare_at_price > variant.price
+          ? '<span class="sale-price">' + Zavyxo.formatMoney(variant.price) + '</span><span class="compare-at">' + Zavyxo.formatMoney(variant.compare_at_price) + '</span>'
+          : '<span>' + Zavyxo.formatMoney(variant.price) + '</span>';
+      }
+      if (imageEl && variant.featured_image) imageEl.src = variant.featured_image.src || imageEl.src;
+      if (addBtn) addBtn.disabled = !variant.available;
+      if (addText) addText.textContent = variant.available ? 'Add to Cart' : 'Sold Out';
+    }
+
+    optionInputs.forEach(function (input) {
+      input.addEventListener('change', function () {
+        var group = input.closest('[data-option-index]');
+        if (group) {
+          group.querySelectorAll('.variant-pill').forEach(function (el) { el.classList.remove('is-selected'); });
+          var pill = input.closest('.variant-pill');
+          if (pill) pill.classList.add('is-selected');
+          var strong = group.querySelector('[data-selected-value]');
+          if (strong) strong.textContent = input.value;
+        }
+        updateForVariant(findVariant());
+      });
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!idInput || !window.Zavyxo || !window.Zavyxo.Cart) return;
+      var qtyInput = form.querySelector('input[name="quantity"]');
+      var quantity = qtyInput ? Math.max(1, parseInt(qtyInput.value, 10) || 1) : 1;
+      if (addBtn) addBtn.classList.add('is-loading');
+      Zavyxo.Cart.add([{ id: idInput.value, quantity: quantity }])
+        .then(function () { close(); Zavyxo.Cart.open(); })
+        .catch(function (err) { console.error(err); })
+        .finally(function () { if (addBtn) addBtn.classList.remove('is-loading'); });
+    });
+  }
 
   document.addEventListener('click', function (e) {
     var trigger = e.target.closest('[data-quick-view]');
     if (!trigger) return;
     e.preventDefault();
+    lastTrigger = trigger;
     var url = trigger.getAttribute('data-quick-view');
     panel.innerHTML = '<div class="shimmer" style="height:320px;border-radius:12px;"></div>';
     container.removeAttribute('hidden');
-    document.body.style.overflow = 'hidden';
+    Zavyxo.ScrollLock.lock('quick-view');
     fetch(url + (url.indexOf('?') > -1 ? '&' : '?') + 'section_id=quick-view')
       .then(function (res) { return res.text(); })
       .then(function (html) {
@@ -250,20 +428,9 @@ document.addEventListener('click', function (e) {
         var section = doc.querySelector('#shopify-section-quick-view, [data-quick-view-content]');
         panel.innerHTML = section ? section.innerHTML : html;
         if (window.Zavyxo && window.Zavyxo.Wishlist) window.Zavyxo.Wishlist.refreshUI();
-        var form = panel.querySelector('form');
-        if (form) {
-          form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            var idInput = form.querySelector('input[name="id"]');
-            var submitBtn = form.querySelector('button[type="submit"]');
-            if (!idInput || !window.Zavyxo || !window.Zavyxo.Cart) return;
-            if (submitBtn) submitBtn.classList.add('is-loading');
-            Zavyxo.Cart.add([{ id: idInput.value, quantity: 1 }])
-              .then(function () { close(); Zavyxo.Cart.open(); })
-              .catch(function (err) { console.error(err); })
-              .finally(function () { if (submitBtn) submitBtn.classList.remove('is-loading'); });
-          });
-        }
+        initQuickViewForm(panel);
+        var firstFocusable = panel.querySelector('a[href], button:not([disabled])');
+        if (firstFocusable) firstFocusable.focus();
       })
       .catch(function () {
         panel.innerHTML = '<p>Unable to load product. <a href="' + url + '">View full page</a>.</p>';
