@@ -1,0 +1,26 @@
+{%- comment -%}
+  Renders a price block for a product or variant.
+  Usage: {% render 'price', product: product, class: 'product-card__price' %}
+{%- endcomment -%}
+{%- liquid
+  assign target = variant | default: product
+  assign compare_at = target.compare_at_price
+  assign price = target.price
+  assign available = target.available | default: true
+  assign on_sale = false
+  if compare_at > price
+    assign on_sale = true
+  endif
+-%}
+<div class="{{ class | default: 'price' }}" data-price-wrapper>
+  {%- if available == false -%}
+    <span class="badge badge--soldout">{{ 'products.product.sold_out' | t }}</span>
+  {%- else -%}
+    {%- if on_sale -%}
+      <span class="sale-price" data-price>{{ price | money }}</span>
+      <span class="compare-at" data-compare-price>{{ compare_at | money }}</span>
+    {%- else -%}
+      <span data-price>{{ price | money }}</span>
+    {%- endif -%}
+  {%- endif -%}
+</div>

@@ -1,0 +1,37 @@
+{%- comment -%}
+  Dynamic product feature badges, driven entirely by metafields so no unsupported
+  claims are ever hardcoded. Configure boolean metafields under the `custom` namespace:
+  waterproof, usb_rechargeable, body_safe, whisper_quiet, travel_lock,
+  remote_control, app_control, multiple_modes.
+  Usage: {% render 'feature-icons', product: product %}
+{%- endcomment -%}
+{%- liquid
+  assign features = ''
+  assign m = product.metafields.custom
+-%}
+<ul class="product-benefits">
+  {%- if m.waterproof -%}
+    <li>{% render 'icon', name: 'droplet' %} Waterproof</li>
+  {%- endif -%}
+  {%- if m.usb_rechargeable -%}
+    <li>{% render 'icon', name: 'battery' %} USB Rechargeable</li>
+  {%- endif -%}
+  {%- if m.body_safe -%}
+    <li>{% render 'icon', name: 'shield' %} Body-Safe Silicone</li>
+  {%- endif -%}
+  {%- if m.whisper_quiet -%}
+    <li>{% render 'icon', name: 'volume-mute' %} Whisper Quiet</li>
+  {%- endif -%}
+  {%- if m.travel_lock -%}
+    <li>{% render 'icon', name: 'lock' %} Travel Lock</li>
+  {%- endif -%}
+  {%- if m.remote_control -%}
+    <li>{% render 'icon', name: 'zap' %} Remote Control</li>
+  {%- endif -%}
+  {%- if m.app_control -%}
+    <li>{% render 'icon', name: 'wifi' %} App Control</li>
+  {%- endif -%}
+  {%- if m.multiple_modes -%}
+    <li>{% render 'icon', name: 'sparkle' %} Multiple Modes</li>
+  {%- endif -%}
+</ul>

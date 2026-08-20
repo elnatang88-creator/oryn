@@ -1,0 +1,192 @@
+{%- liquid
+  assign main_menu = section.settings.main_menu
+-%}
+<header class="site-header" data-site-header>
+  <div class="container site-header__inner">
+    <button type="button" class="icon-btn mobile-menu-toggle" data-mobile-menu-toggle aria-expanded="false" aria-controls="MobileMenu" aria-label="{{ 'accessibility.menu' | t }}">
+      {% render 'icon', name: 'menu' %}
+    </button>
+
+    <div class="site-header__logo">
+      <a href="{{ routes.root_url }}">
+        {%- if section.settings.logo -%}
+          <img
+            src="{{ section.settings.logo | image_url: width: 240 }}"
+            alt="{{ shop.name }}"
+            width="{{ section.settings.logo.width }}"
+            height="{{ section.settings.logo.height }}"
+          >
+        {%- else -%}
+          {{ shop.name | default: 'ZAVYXO' }}
+        {%- endif -%}
+      </a>
+    </div>
+
+    <div class="site-header__search">
+      <form action="{{ routes.search_url }}" method="get" role="search" class="site-header__search-form" data-predictive-search-form>
+        <input
+          class="input"
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="{{ 'general.search.placeholder' | t }}"
+          aria-label="{{ 'general.search.placeholder' | t }}"
+          autocomplete="off"
+          data-predictive-search-input
+        >
+        <input type="hidden" name="type" value="product">
+        <button type="submit" class="icon-btn" aria-label="{{ 'general.search.submit' | t }}">
+          {% render 'icon', name: 'search' %}
+        </button>
+        <div class="predictive-search" data-predictive-search-results></div>
+      </form>
+    </div>
+
+    <div class="site-header__actions">
+      <button type="button" class="icon-btn header-search-toggle" data-header-search-toggle aria-label="{{ 'general.search.submit' | t }}">
+        {% render 'icon', name: 'search' %}
+      </button>
+
+      <div class="site-header__meta">
+        {%- if shop.enabled_currencies.size > 1 -%}
+          {%- form 'localization', id: 'HeaderCurrencyForm' -%}
+            <select name="currency_code" onchange="this.form.submit()" aria-label="{{ 'general.currency' | t }}">
+              {%- for currency in shop.enabled_currencies -%}
+                <option value="{{ currency.iso_code }}" {% if currency.iso_code == cart.currency.iso_code %}selected{% endif %}>{{ currency.iso_code }}</option>
+              {%- endfor -%}
+            </select>
+          {%- endform -%}
+        {%- endif -%}
+        {%- if shop.enabled_locales.size > 1 -%}
+          {%- form 'localization', id: 'HeaderLocaleForm' -%}
+            <select name="locale_code" onchange="this.form.submit()" aria-label="{{ 'general.language' | t }}">
+              {%- for locale in shop.enabled_locales -%}
+                <option value="{{ locale.iso_code }}" {% if locale.iso_code == request.locale.iso_code %}selected{% endif %}>{{ locale.endonym_name | capitalize }}</option>
+              {%- endfor -%}
+            </select>
+          {%- endform -%}
+        {%- endif -%}
+      </div>
+
+      <a href="{{ routes.account_url }}" class="icon-btn site-header__desktop-icon" aria-label="{{ 'accessibility.account' | t }}">
+        {% render 'icon', name: 'user' %}
+      </a>
+      <a href="{{ pages.wishlist.url | default: '/pages/wishlist' }}" class="icon-btn site-header__desktop-icon" aria-label="{{ 'accessibility.wishlist' | t }}">
+        {% render 'icon', name: 'heart' %}
+        <span class="cart-count" data-wishlist-count hidden>0</span>
+      </a>
+      <button type="button" class="icon-btn" data-cart-drawer-toggle aria-label="{{ 'accessibility.cart' | t }}" aria-controls="CartDrawer">
+        {% render 'icon', name: 'bag' %}
+        <span class="cart-count" data-cart-count {% if cart.item_count == 0 %}hidden{% endif %}>{{ cart.item_count }}</span>
+      </button>
+    </div>
+  </div>
+
+  {%- if main_menu.links.size > 0 -%}
+    <div class="site-header__nav-row">
+      <div class="container">
+        <nav class="main-nav" aria-label="Main">
+          {%- for link in main_menu.links -%}
+            <div class="main-nav__item">
+              <a href="{{ link.url }}" class="main-nav__link{% if link.title contains 'Sale' or link.title contains 'SALE' %} main-nav__link--sale{% endif %}">
+                {{ link.title }}
+              </a>
+              {%- if link.links.size > 0 -%}
+                {%- liquid
+                  assign feature_block = nil
+                  for block in section.blocks
+                    if block.type == 'mega_menu_feature' and block.settings.menu_item_title == link.title
+                      assign feature_block = block
+                    endif
+                  endfor
+                -%}
+                <div class="mega-menu">
+                  {%- assign col_size = link.links.size | plus: 2 | divided_by: 3 -%}
+                  {%- if col_size < 1 -%}{%- assign col_size = 1 -%}{%- endif -%}
+                  {%- for child in link.links -%}
+                    {%- assign position_in_col = forloop.index0 | modulo: col_size -%}
+                    {%- if position_in_col == 0 -%}
+                      {%- unless forloop.first -%}</ul></div>{%- endunless -%}
+                      <div class="mega-menu__col"><h4><a href="{{ child.url }}">{{ child.title }}</a></h4><ul>
+                    {%- else -%}
+                      <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                  </ul></div>
+                  {%- if feature_block -%}
+                    <figure class="mega-menu__feature">
+                      {%- if feature_block.settings.image -%}
+                        <img src="{{ feature_block.settings.image | image_url: width: 500 }}" alt="{{ feature_block.settings.heading | escape }}" loading="lazy">
+                      {%- endif -%}
+                      <figcaption>
+                        <a href="{{ feature_block.settings.link }}">{{ feature_block.settings.heading }}</a>
+                      </figcaption>
+                    </figure>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </nav>
+      </div>
+    </div>
+  {%- endif -%}
+</header>
+
+<div class="mobile-menu" id="MobileMenu" data-mobile-menu hidden>
+  <div class="mobile-menu__backdrop" data-mobile-menu-close></div>
+  <div class="mobile-menu__panel">
+    <div class="mobile-menu__header">
+      <span class="site-header__logo">{{ shop.name | default: 'ZAVYXO' }}</span>
+      <button type="button" class="icon-btn" data-mobile-menu-close aria-label="{{ 'accessibility.close' | t }}">
+        {% render 'icon', name: 'close' %}
+      </button>
+    </div>
+    <nav aria-label="Mobile">
+      {%- for link in main_menu.links -%}
+        {%- if link.links.size > 0 -%}
+          <button type="button" class="mobile-menu__link" data-submenu-toggle="submenu-{{ forloop.index }}" aria-expanded="false">
+            {{ link.title }}
+            {% render 'icon', name: 'chevron-down' %}
+          </button>
+          <div class="mobile-menu__submenu" id="submenu-{{ forloop.index }}">
+            {%- for child in link.links -%}
+              <a href="{{ child.url }}">{{ child.title }}</a>
+            {%- endfor -%}
+          </div>
+        {%- else -%}
+          <a href="{{ link.url }}" class="mobile-menu__link">{{ link.title }}</a>
+        {%- endif -%}
+      {%- endfor -%}
+    </nav>
+    <div class="mobile-menu__meta">
+      <a href="{{ routes.account_url }}">{% render 'icon', name: 'user', class: 'icon' %} {{ 'customer.account.title' | t }}</a>
+      <a href="{{ pages.wishlist.url | default: '/pages/wishlist' }}">{% render 'icon', name: 'heart', class: 'icon' %} {{ 'accessibility.wishlist' | t }}</a>
+      {%- if shop.enabled_currencies.size > 1 -%}
+        <span>{{ cart.currency.iso_code }}</span>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    { "type": "image_picker", "id": "logo", "label": "Logo image" },
+    { "type": "link_list", "id": "main_menu", "label": "Main menu", "default": "main-menu" }
+  ],
+  "blocks": [
+    {
+      "type": "mega_menu_feature",
+      "name": "Mega menu feature tile",
+      "settings": [
+        { "type": "text", "id": "menu_item_title", "label": "Matches top-level menu item titled", "info": "Must exactly match a top-level menu link title, e.g. Women" },
+        { "type": "image_picker", "id": "image", "label": "Feature image" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "New Arrivals" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ]
+}
+{% endschema %}

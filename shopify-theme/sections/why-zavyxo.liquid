@@ -1,0 +1,64 @@
+<section class="section-padding">
+  <div class="container">
+    <div class="section-header" style="justify-content:center;text-align:center;">
+      <div class="section-header__title" style="width:100%;align-items:center;">
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+        <h2>{{ section.settings.heading }}</h2>
+      </div>
+    </div>
+    <div class="feature-grid" data-reveal>
+      {%- for block in section.blocks -%}
+        <div class="feature-grid__item" {{ block.shopify_attributes }}>
+          <span class="feature-grid__icon">{% render 'icon', name: block.settings.icon %}</span>
+          <h4 style="font-size:14px;">{{ block.settings.label }}</h4>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Why shop with us",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The ZAVYXO Standard" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Why Shop with ZAVYXO?" }
+  ],
+  "blocks": [
+    {
+      "type": "pillar",
+      "name": "Pillar",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "lock", "label": "Lock" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "return", "label": "Return" },
+            { "value": "globe", "label": "Globe" },
+            { "value": "award", "label": "Award" },
+            { "value": "package", "label": "Package" }
+          ],
+          "default": "shield"
+        },
+        { "type": "text", "id": "label", "label": "Label", "default": "Private & Discreet" }
+      ]
+    }
+  ],
+  "max_blocks": 5,
+  "presets": [
+    {
+      "name": "Why shop with us",
+      "blocks": [
+        { "type": "pillar", "settings": { "icon": "lock", "label": "Private & Discreet" } },
+        { "type": "pillar", "settings": { "icon": "award", "label": "Trusted Quality" } },
+        { "type": "pillar", "settings": { "icon": "return", "label": "Easy Returns" } },
+        { "type": "pillar", "settings": { "icon": "shield", "label": "Secure Checkout" } },
+        { "type": "pillar", "settings": { "icon": "globe", "label": "Worldwide Shipping" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

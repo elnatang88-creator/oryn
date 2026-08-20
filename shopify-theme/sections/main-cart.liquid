@@ -1,0 +1,60 @@
+<div class="container section-padding" data-cart-page style="padding-block: clamp(24px, 4vw, 56px);">
+  <h1 class="h2" style="margin-bottom:32px;">{{ 'cart.general.title' | t }}</h1>
+
+  {%- if cart.item_count > 0 -%}
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:48px;align-items:start;" class="cart-page-grid">
+      <div class="surface" style="padding:24px;">
+        {%- for item in cart.items -%}
+          <div class="cart-line" data-cart-line data-line-key="{{ item.key }}" style="padding-block:18px;{% unless forloop.last %}border-bottom:1px solid var(--color-border);{% endunless %}">
+            <a href="{{ item.url }}" class="cart-line__image">
+              {%- if item.image -%}
+                <img src="{{ item.image | image_url: width: 200 }}" alt="{{ item.image.alt | escape }}" loading="lazy">
+              {%- endif -%}
+            </a>
+            <div class="cart-line__info">
+              <a href="{{ item.url }}" class="cart-line__title">{{ item.product.title }}</a>
+              {%- unless item.variant.title == 'Default Title' -%}
+                <p class="cart-line__variant">{{ item.variant.title }}</p>
+              {%- endunless -%}
+              <div class="cart-line__qty">
+                <button type="button" data-cart-qty-decrease aria-label="Decrease quantity">{% render 'icon', name: 'minus' %}</button>
+                <input type="number" value="{{ item.quantity }}" min="0" data-cart-qty-input aria-label="{{ 'cart.general.quantity' | t }}">
+                <button type="button" data-cart-qty-increase aria-label="Increase quantity">{% render 'icon', name: 'plus' %}</button>
+              </div>
+              <button type="button" class="cart-line__remove" data-cart-remove>{{ 'cart.general.remove' | t }}</button>
+            </div>
+            <div class="cart-line__price">{{ item.final_line_price | money }}</div>
+          </div>
+        {%- endfor -%}
+      </div>
+
+      <div class="surface" style="padding:24px;position:sticky;top:110px;">
+        <div class="cart-drawer__subtotal">
+          <span>{{ 'cart.general.subtotal' | t }}</span>
+          <span>{{ cart.total_price | money }}</span>
+        </div>
+        <p class="cart-drawer__note" style="text-align:left;margin:12px 0 20px;">{{ settings.cart_shipping_note }}</p>
+        <a href="/checkout" class="btn btn--primary btn--lg btn--block">{{ 'cart.general.checkout' | t }}</a>
+        <a href="{{ routes.all_products_collection_url }}" class="btn btn--secondary btn--block" style="margin-top:12px;">{{ 'cart.general.continue_shopping' | t }}</a>
+      </div>
+    </div>
+  {%- else -%}
+    <div class="cart-drawer__empty" style="padding-block:80px;">
+      {% render 'icon', name: 'bag' %}
+      <h3 class="h4">{{ 'cart.general.empty' | t }}</h3>
+      <p>{{ 'cart.general.empty_text' | t }}</p>
+      <a href="{{ routes.all_products_collection_url }}" class="btn btn--primary">{{ 'cart.general.continue_shopping' | t }}</a>
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+  @media (max-width: 749px) { .cart-page-grid { grid-template-columns: 1fr !important; } }
+</style>
+
+{% schema %}
+{
+  "name": "Cart page",
+  "settings": []
+}
+{% endschema %}

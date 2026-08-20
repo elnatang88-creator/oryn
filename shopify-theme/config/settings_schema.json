@@ -1,0 +1,380 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "ZAVYXO",
+    "theme_version": "1.0.0",
+    "theme_author": "ZAVYXO",
+    "theme_documentation_url": "https://zavyxo.com",
+    "theme_support_url": "https://zavyxo.com/pages/contact"
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Surfaces"
+      },
+      {
+        "type": "color",
+        "id": "color_bg_primary",
+        "label": "Primary background",
+        "default": "#0a0710"
+      },
+      {
+        "type": "color",
+        "id": "color_bg_secondary",
+        "label": "Secondary surface",
+        "default": "#130f1c"
+      },
+      {
+        "type": "color",
+        "id": "color_bg_elevated",
+        "label": "Elevated surface (cards)",
+        "default": "#1a1524"
+      },
+      {
+        "type": "color",
+        "id": "color_border",
+        "label": "Border",
+        "default": "#2c2438"
+      },
+      {
+        "type": "header",
+        "content": "Accents"
+      },
+      {
+        "type": "color",
+        "id": "color_accent_primary",
+        "label": "Primary accent (electric purple)",
+        "default": "#8b2fe8"
+      },
+      {
+        "type": "color",
+        "id": "color_accent_secondary",
+        "label": "Secondary accent (magenta)",
+        "default": "#e6299b"
+      },
+      {
+        "type": "color",
+        "id": "color_accent_micro",
+        "label": "Micro accent (champagne)",
+        "default": "#d9b98a"
+      },
+      {
+        "type": "header",
+        "content": "Text"
+      },
+      {
+        "type": "color",
+        "id": "color_text_primary",
+        "label": "Primary text",
+        "default": "#f7f3fb"
+      },
+      {
+        "type": "color",
+        "id": "color_text_secondary",
+        "label": "Secondary text",
+        "default": "#a89cb8"
+      },
+      {
+        "type": "color",
+        "id": "color_text_on_accent",
+        "label": "Text on accent",
+        "default": "#ffffff"
+      },
+      {
+        "type": "header",
+        "content": "System"
+      },
+      {
+        "type": "color",
+        "id": "color_success",
+        "label": "Success",
+        "default": "#3fbf8f"
+      },
+      {
+        "type": "color",
+        "id": "color_error",
+        "label": "Error",
+        "default": "#e8546b"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Headlines"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_heading",
+        "label": "Heading font",
+        "default": "cormorant_garamond_n6"
+      },
+      {
+        "type": "range",
+        "id": "font_heading_scale",
+        "label": "Heading size scale",
+        "min": 90,
+        "max": 130,
+        "step": 5,
+        "unit": "%",
+        "default": 100
+      },
+      {
+        "type": "header",
+        "content": "Body"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "Body font",
+        "default": "assistant_n4"
+      },
+      {
+        "type": "range",
+        "id": "font_body_scale",
+        "label": "Body size scale",
+        "min": 90,
+        "max": 120,
+        "step": 5,
+        "unit": "%",
+        "default": 100
+      },
+      {
+        "type": "header",
+        "content": "Letter spacing"
+      },
+      {
+        "type": "range",
+        "id": "letter_spacing_headings",
+        "label": "Heading letter spacing",
+        "min": 0,
+        "max": 6,
+        "step": 0.5,
+        "unit": "px",
+        "default": 0.5
+      },
+      {
+        "type": "range",
+        "id": "letter_spacing_nav",
+        "label": "Navigation letter spacing",
+        "min": 0,
+        "max": 6,
+        "step": 0.5,
+        "unit": "px",
+        "default": 1.5
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "label": "Page width",
+        "min": 1200,
+        "max": 1800,
+        "step": 20,
+        "unit": "px",
+        "default": 1440
+      },
+      {
+        "type": "range",
+        "id": "spacing_section",
+        "label": "Vertical section spacing",
+        "min": 40,
+        "max": 140,
+        "step": 4,
+        "unit": "px",
+        "default": 96
+      },
+      {
+        "type": "range",
+        "id": "grid_gap",
+        "label": "Grid gap",
+        "min": 8,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "default": 20
+      }
+    ]
+  },
+  {
+    "name": "Buttons & Inputs",
+    "settings": [
+      {
+        "type": "range",
+        "id": "radius_button",
+        "label": "Button corner radius",
+        "min": 0,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "default": 999
+      },
+      {
+        "type": "range",
+        "id": "radius_card",
+        "label": "Card corner radius",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "default": 18
+      },
+      {
+        "type": "range",
+        "id": "radius_input",
+        "label": "Input corner radius",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "default": 10
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_glow",
+        "label": "Enable accent glow effects",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "glow_intensity",
+        "label": "Glow intensity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "default": 45
+      }
+    ]
+  },
+  {
+    "name": "Product cards",
+    "settings": [
+      {
+        "type": "select",
+        "id": "product_image_ratio",
+        "label": "Image ratio",
+        "options": [
+          { "value": "portrait", "label": "Portrait (4:5)" },
+          { "value": "square", "label": "Square (1:1)" }
+        ],
+        "default": "portrait"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_vendor",
+        "label": "Show vendor on product cards",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_rating",
+        "label": "Show star rating on product cards",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_quick_add",
+        "label": "Enable quick add",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_quick_view",
+        "label": "Enable quick view",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "Cart behavior",
+        "options": [
+          { "value": "drawer", "label": "Slide-out drawer" },
+          { "value": "page", "label": "Cart page" }
+        ],
+        "default": "drawer"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_free_shipping_bar",
+        "label": "Enable free shipping progress bar",
+        "default": false
+      },
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Free shipping threshold (in shop currency, whole units)",
+        "default": 0
+      },
+      {
+        "type": "richtext",
+        "id": "cart_shipping_note",
+        "label": "Shipping note",
+        "default": "<p>Discreet packaging on every order.</p>"
+      }
+    ]
+  },
+  {
+    "name": "Age verification",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_age_gate",
+        "label": "Enable 18+ age verification gate",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "age_gate_headline",
+        "label": "Headline",
+        "default": "Welcome to ZAVYXO"
+      },
+      {
+        "type": "text",
+        "id": "age_gate_text",
+        "label": "Body text",
+        "default": "You must be 18 or older to enter this site."
+      },
+      {
+        "type": "url",
+        "id": "age_gate_exit_url",
+        "label": "Exit link (for under-18 visitors)",
+        "default": "https://www.google.com"
+      }
+    ]
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      { "type": "url", "id": "social_instagram", "label": "Instagram" },
+      { "type": "url", "id": "social_tiktok", "label": "TikTok" },
+      { "type": "url", "id": "social_twitter", "label": "X / Twitter" },
+      { "type": "url", "id": "social_youtube", "label": "YouTube" },
+      { "type": "url", "id": "social_pinterest", "label": "Pinterest" }
+    ]
+  },
+  {
+    "name": "Favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon image",
+        "info": "64 x 64px recommended"
+      }
+    ]
+  }
+]

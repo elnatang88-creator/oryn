@@ -1,0 +1,38 @@
+{%- comment -%}
+  Client-side wishlist page. Reads product handles from localStorage and fetches
+  each product's live data via the Storefront `/products/{handle}.js` endpoint,
+  so prices/availability/images are always current.
+{%- endcomment -%}
+<div class="container section-padding">
+  <h1 class="h2" style="margin-bottom:8px;">{{ section.settings.heading | default: 'Your Wishlist' }}</h1>
+  <p style="color:var(--color-text-secondary);margin-bottom:32px;">{{ section.settings.subtext }}</p>
+
+  <div class="product-grid" id="WishlistGrid" data-wishlist-grid></div>
+
+  <div class="empty-state" id="WishlistEmpty" data-wishlist-empty hidden>
+    {% render 'icon', name: 'heart' %}
+    <h3 class="h4" style="margin-top:12px;">Your wishlist is empty</h3>
+    <p>Tap the heart icon on any product to save it here.</p>
+    <a href="{{ routes.all_products_collection_url }}" class="btn btn--primary" style="margin-top:16px;">Start Shopping</a>
+  </div>
+
+  <div id="WishlistLoading" data-wishlist-loading>
+    <div class="product-grid">
+      {%- for i in (1..4) -%}
+        <div class="product-card"><div class="product-card__media shimmer" data-ratio="portrait"></div></div>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+<script src="{{ 'wishlist-page.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Wishlist page",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Your Wishlist" },
+    { "type": "text", "id": "subtext", "label": "Subtext", "default": "Products you've saved for later." }
+  ]
+}
+{% endschema %}

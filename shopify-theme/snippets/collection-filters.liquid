@@ -1,0 +1,65 @@
+{%- comment -%}
+  Renders Shopify's native collection filters (powered by Search & Discovery).
+  Usage: {% render 'collection-filters', collection: collection %}
+{%- endcomment -%}
+<form class="facets-form" data-facets-form action="{{ collection.url }}" method="get">
+  {%- for filter in collection.filters -%}
+    <details class="filter-group" open>
+      <summary>
+        {{ filter.label }}
+        {% render 'icon', name: 'chevron-down' %}
+      </summary>
+
+      {%- case filter.type -%}
+        {%- when 'list' -%}
+          {%- for value in filter.values -%}
+            <label class="filter-option" {% if value.count == 0 and value.active == false %}style="opacity:.4;"{% endif %}>
+              <input
+                type="checkbox"
+                name="{{ value.param_name }}"
+                value="{{ value.value }}"
+                {% if value.active %}checked{% endif %}
+                {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                data-facet-input
+              >
+              {{ value.label }} ({{ value.count }})
+            </label>
+          {%- endfor -%}
+
+        {%- when 'boolean' -%}
+          {%- for value in filter.values -%}
+            <label class="filter-option">
+              <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %} data-facet-input>
+              {{ value.label }} ({{ value.count }})
+            </label>
+          {%- endfor -%}
+
+        {%- when 'price_range' -%}
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input
+              class="input"
+              type="number"
+              name="{{ filter.min_value.param_name }}"
+              placeholder="{{ filter.range_min | money_without_currency }}"
+              value="{{ filter.min_value.value }}"
+              min="0"
+              style="min-height:40px;"
+              data-facet-input
+            >
+            <span>&ndash;</span>
+            <input
+              class="input"
+              type="number"
+              name="{{ filter.max_value.param_name }}"
+              placeholder="{{ filter.range_max | money_without_currency }}"
+              value="{{ filter.max_value.value }}"
+              min="0"
+              style="min-height:40px;"
+              data-facet-input
+            >
+          </div>
+      {%- endcase -%}
+    </details>
+  {%- endfor -%}
+  <button type="submit" class="btn btn--primary btn--block btn--sm" style="margin-top:16px;">{{ 'collections.general.apply_filters' | t }}</button>
+</form>

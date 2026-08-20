@@ -1,0 +1,129 @@
+{%- liquid
+  assign current_sort = sort_by | default: collection.default_sort_by
+-%}
+
+<div class="container section-padding" style="padding-block: clamp(24px, 4vw, 56px);">
+  <div class="collection-hero">
+    {%- if collection.image -%}
+      <img src="{{ collection.image | image_url: width: 1600 }}" alt="{{ collection.title | escape }}" loading="eager">
+    {%- elsif section.settings.fallback_image -%}
+      <img src="{{ section.settings.fallback_image | image_url: width: 1600 }}" alt="{{ collection.title | escape }}" loading="eager">
+    {%- endif -%}
+    <div class="collection-hero__content">
+      <h1 class="h2">{{ collection.title }}</h1>
+      {%- if collection.description != blank -%}
+        <div class="max-w-prose" style="margin-top:8px;">{{ collection.description }}</div>
+      {%- endif -%}
+      <p class="collection-hero__count">
+        {%- if collection.products_count == 1 -%}
+          {{ 'collections.general.items_count.one' | t: count: collection.products_count }}
+        {%- else -%}
+          {{ 'collections.general.items_count.other' | t: count: collection.products_count }}
+        {%- endif -%}
+      </p>
+    </div>
+  </div>
+
+  {%- paginate collection.products by 24 -%}
+    <div class="collection-layout">
+      {%- if collection.filters.size > 0 -%}
+        <aside class="filters-sidebar" aria-label="Filters">
+          {% render 'collection-filters', collection: collection, results: collection %}
+        </aside>
+      {%- endif -%}
+
+      <div>
+        <div class="collection-toolbar">
+          {%- if collection.filters.size > 0 -%}
+            <button type="button" class="btn btn--secondary btn--sm filter-drawer-toggle" data-filter-drawer-toggle>
+              {% render 'icon', name: 'filter' %} {{ 'collections.general.filters' | t }}
+            </button>
+          {%- else -%}
+            <span></span>
+          {%- endif -%}
+
+          <form action="{{ collection.url }}" method="get" class="sort-form">
+            <select name="sort_by" class="select" onchange="this.form.submit()" aria-label="{{ 'collections.general.sort_by' | t }}">
+              <option value="manual" {% if current_sort == 'manual' %}selected{% endif %}>Featured</option>
+              <option value="best-selling" {% if current_sort == 'best-selling' %}selected{% endif %}>Best Selling</option>
+              <option value="title-ascending" {% if current_sort == 'title-ascending' %}selected{% endif %}>Alphabetically, A-Z</option>
+              <option value="title-descending" {% if current_sort == 'title-descending' %}selected{% endif %}>Alphabetically, Z-A</option>
+              <option value="price-ascending" {% if current_sort == 'price-ascending' %}selected{% endif %}>Price, Low to High</option>
+              <option value="price-descending" {% if current_sort == 'price-descending' %}selected{% endif %}>Price, High to Low</option>
+              <option value="created-descending" {% if current_sort == 'created-descending' %}selected{% endif %}>Newest</option>
+            </select>
+          </form>
+        </div>
+
+        {%- assign active_filters = collection.filters | where: 'active_values' -%}
+        {%- if active_filters.size > 0 -%}
+          <div class="active-filters">
+            {%- for filter in collection.filters -%}
+              {%- for value in filter.active_values -%}
+                <a href="{{ value.url_to_remove }}" class="active-filter-pill">{{ value.label }} {% render 'icon', name: 'close' %}</a>
+              {%- endfor -%}
+            {%- endfor -%}
+            <a href="{{ collection.url }}" class="active-filter-pill">{{ 'collections.general.clear_all' | t }}</a>
+          </div>
+        {%- endif -%}
+
+        {%- if collection.products.size > 0 -%}
+          <div class="product-grid" data-reveal>
+            {%- for product in collection.products -%}
+              {% render 'product-card', product: product %}
+            {%- endfor -%}
+          </div>
+
+          {%- if paginate.pages > 1 -%}
+            <nav class="pagination" aria-label="Pagination" style="display:flex;justify-content:center;gap:8px;margin-top:48px;">
+              {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}" class="icon-btn">{% render 'icon', name: 'chevron-left' %}</a>{%- endif -%}
+              {%- for part in paginate.parts -%}
+                {%- if part.is_link -%}
+                  <a href="{{ part.url }}" class="icon-btn">{{ part.title }}</a>
+                {%- else -%}
+                  <span class="icon-btn" aria-current="page" style="background:var(--color-bg-elevated);">{{ part.title }}</span>
+                {%- endif -%}
+              {%- endfor -%}
+              {%- if paginate.next -%}<a href="{{ paginate.next.url }}" class="icon-btn">{% render 'icon', name: 'chevron-right' %}</a>{%- endif -%}
+            </nav>
+          {%- endif -%}
+        {%- else -%}
+          <div class="empty-state">
+            <h3>{{ 'collections.general.no_products' | t }}</h3>
+            <p>{{ 'collections.general.no_products_text' | t }}</p>
+            <a href="{{ collection.url }}" class="btn btn--secondary" style="margin-top:16px;">{{ 'collections.general.clear_all' | t }}</a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endpaginate -%}
+</div>
+
+{%- if collection.filters.size > 0 -%}
+  <div class="filter-drawer" data-filter-drawer id="FilterDrawer">
+    <div class="filter-drawer__backdrop" data-filter-drawer-close></div>
+    <div class="filter-drawer__panel">
+      <div class="filter-drawer__header">
+        <h3 class="h4">{{ 'collections.general.filters' | t }}</h3>
+        <button type="button" class="icon-btn" data-filter-drawer-close aria-label="{{ 'accessibility.close' | t }}">{% render 'icon', name: 'close' %}</button>
+      </div>
+      <div class="filter-drawer__body">
+        {% render 'collection-filters', collection: collection, results: collection %}
+      </div>
+      <div class="filter-drawer__footer">
+        <button type="button" class="btn btn--primary btn--block" data-filter-drawer-close>{{ 'collections.general.apply_filters' | t }}</button>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+<script src="{{ 'collection.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Collection page",
+  "settings": [
+    { "type": "image_picker", "id": "fallback_image", "label": "Fallback banner image", "info": "Used when a collection has no image set" }
+  ]
+}
+{% endschema %}

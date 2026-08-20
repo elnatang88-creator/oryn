@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ 'gift_cards.issued.title' | t }} - {{ shop.name }}</title>
+  <meta name="robots" content="noindex">
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
+  <style>
+    body { background: var(--color-bg-primary, #0a0710); color: var(--color-text-primary, #f7f3fb); font-family: sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .gift-card-panel { max-width: 480px; width: 100%; text-align: center; border: 1px solid #2c2438; border-radius: 24px; padding: 48px 32px; background: #130f1c; }
+    .gift-card-code { font-size: 22px; letter-spacing: .1em; border: 1px dashed #2c2438; border-radius: 12px; padding: 16px; margin: 24px 0; }
+    .gift-card-amount { font-size: 40px; font-weight: 700; margin: 12px 0; }
+    @media print { .no-print { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="gift-card-panel">
+    <div class="footer-brand__logo">{{ shop.name }}</div>
+    <h1 class="h3">{{ 'gift_cards.issued.title' | t }}</h1>
+    <p style="color:var(--color-text-secondary);">{{ 'gift_cards.issued.subtext' | t: shop: shop.name }}</p>
+    <div class="gift-card-amount">{{ gift_card.initial_value | money }}</div>
+    {%- if gift_card.image -%}
+      <img src="{{ gift_card.image | image_url: width: 400 }}" alt="{{ shop.name }}" style="border-radius:16px;margin:16px 0;">
+    {%- endif -%}
+    <div class="gift-card-code">{{ gift_card.code | format_code }}</div>
+    {%- if gift_card.pass_url -%}
+      <a href="{{ gift_card.pass_url }}" class="btn btn--secondary btn--block no-print">{{ 'gift_cards.issued.add_to_apple_wallet' | t }}</a>
+    {%- endif -%}
+    <div class="no-print" style="display:flex;gap:12px;margin-top:16px;">
+      <button onclick="window.print()" class="btn btn--secondary btn--block">{{ 'gift_cards.issued.print' | t }}</button>
+      <a href="{{ shop.url }}" class="btn btn--primary btn--block">{{ 'gift_cards.issued.shop_link' | t }}</a>
+    </div>
+  </div>
+</body>
+</html>

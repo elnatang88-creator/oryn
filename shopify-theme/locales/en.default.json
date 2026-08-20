@@ -1,0 +1,162 @@
+{
+  "general": {
+    "search": {
+      "placeholder": "Search for products…",
+      "submit": "Search",
+      "no_results": "No results for \"{{ terms }}\"",
+      "results_products": "Products",
+      "results_collections": "Collections",
+      "results_pages": "Pages",
+      "view_all": "View all results"
+    },
+    "currency": "Currency",
+    "language": "Language",
+    "close": "Close",
+    "loading": "Loading…"
+  },
+  "accessibility": {
+    "skip_to_content": "Skip to content",
+    "close": "Close",
+    "menu": "Menu",
+    "cart": "Cart",
+    "wishlist": "Wishlist",
+    "account": "Account",
+    "search": "Search",
+    "next_slide": "Next",
+    "previous_slide": "Previous",
+    "star_reviews_info": "{{ rating_value }} out of {{ rating_max }} stars, {{ count }} reviews"
+  },
+  "header": {
+    "announcement": {
+      "default_1": "Discreet Packaging",
+      "default_2": "Worldwide Shipping",
+      "default_3": "Secure Checkout",
+      "default_4": "24/7 Customer Support"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to Cart",
+      "buy_it_now": "Buy It Now",
+      "sold_out": "Sold Out",
+      "unavailable": "Unavailable",
+      "in_stock": "In Stock",
+      "low_stock": "Only {{ count }} left",
+      "quantity": "Quantity",
+      "sku": "SKU",
+      "wishlist_add": "Add to Wishlist",
+      "wishlist_remove": "Remove from Wishlist",
+      "description": "Description",
+      "features": "Features",
+      "shipping_returns": "Shipping & Returns",
+      "reviews": "Reviews",
+      "quick_view": "Quick View",
+      "quick_add": "Quick Add",
+      "choose_options": "Choose Options",
+      "you_may_also_like": "You May Also Like",
+      "frequently_bought_together": "Frequently Bought Together",
+      "add_all_to_cart": "Add All to Cart",
+      "total_price": "Total Price",
+      "you_save": "Save {{ amount }}",
+      "sale": "Sale",
+      "best_seller": "Best Seller",
+      "new": "New",
+      "write_a_review": "Write a Review",
+      "based_on_reviews": "Based on {{ count }} reviews",
+      "verified_purchase": "Verified Purchase",
+      "no_reviews_yet": "No reviews yet",
+      "breadcrumb_home": "Home"
+    }
+  },
+  "collections": {
+    "general": {
+      "items_count": {
+        "one": "{{ count }} product",
+        "other": "{{ count }} products"
+      },
+      "sort_by": "Sort by",
+      "filter": "Filter",
+      "filters": "Filters",
+      "clear_all": "Clear All",
+      "apply_filters": "Apply",
+      "no_products": "No products found",
+      "no_products_text": "Try removing some filters or browse another category."
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Your Bag",
+      "empty": "Your bag is empty",
+      "empty_text": "Looks like you haven't added anything yet.",
+      "continue_shopping": "Continue Shopping",
+      "subtotal": "Subtotal",
+      "checkout": "Checkout",
+      "remove": "Remove",
+      "quantity": "Qty",
+      "view_cart": "View Bag",
+      "you_may_also_like": "Add to Your Order",
+      "free_shipping_reached": "You've unlocked free shipping!",
+      "free_shipping_away": "Add {{ amount }} more for free shipping",
+      "shipping_at_checkout": "Shipping & taxes calculated at checkout"
+    }
+  },
+  "customer": {
+    "account": {
+      "title": "My Account",
+      "details": "Account Details",
+      "orders": "Order History",
+      "logout": "Log Out"
+    },
+    "login": {
+      "title": "Log In",
+      "email": "Email",
+      "password": "Password",
+      "sign_in": "Sign In",
+      "forgot_password": "Forgot your password?",
+      "create_account": "Create Account",
+      "no_account": "Don't have an account?"
+    },
+    "register": {
+      "title": "Create Account",
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create Account",
+      "has_account": "Already have an account?"
+    }
+  },
+  "newsletter": {
+    "email_placeholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "success": "You're on the list.",
+    "error": "Please enter a valid email address."
+  },
+  "age_gate": {
+    "confirm": "I Am 18 or Older",
+    "exit": "Exit"
+  },
+  "sections": {
+    "trust_strip": {
+      "discreet": "Discreet Packaging",
+      "worldwide": "Worldwide Delivery",
+      "secure": "Secure Payments",
+      "support": "24/7 Support"
+    }
+  },
+  "gift_cards": {
+    "issued": {
+      "title": "Here's your gift card!",
+      "subtext": "For use at {{ shop }}",
+      "gift_card_code": "Gift card code",
+      "shop_link": "Continue shopping",
+      "add_to_apple_wallet": "Add to Apple Wallet",
+      "print": "Print"
+    }
+  },
+  "404": {
+    "title": "Page Not Found",
+    "subtext": "The page you're looking for doesn't exist.",
+    "link": "Return to Homepage"
+  }
+}

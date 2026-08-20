@@ -1,0 +1,33 @@
+<section class="section-padding">
+  <div class="container">
+    <div class="newsletter-banner" data-reveal>
+      <h2 class="h2">{{ section.settings.heading }}</h2>
+      <p class="max-w-prose">{{ section.settings.subtext }}</p>
+      {%- form 'customer', id: 'NewsletterBannerForm' -%}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <div class="email-capture">
+          <input class="input" type="email" name="contact[email]" placeholder="{{ 'newsletter.email_placeholder' | t }}" required aria-label="{{ 'newsletter.email_placeholder' | t }}">
+          <button type="submit" class="btn btn--primary">{{ 'newsletter.subscribe' | t }}</button>
+        </div>
+        {%- if form.posted_successfully? -%}
+          <p style="color:var(--color-success);font-size:12px;">{{ 'newsletter.success' | t }}</p>
+        {%- elsif form.errors -%}
+          <p style="color:var(--color-error);font-size:12px;">{{ 'newsletter.error' | t }}</p>
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Stay in the Pleasure Loop" },
+    { "type": "textarea", "id": "subtext", "label": "Subtext", "default": "New arrivals, private offers and exclusive access." }
+  ],
+  "presets": [
+    { "name": "Newsletter", "settings": {} }
+  ]
+}
+{% endschema %}

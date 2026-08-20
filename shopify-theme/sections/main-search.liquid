@@ -1,0 +1,66 @@
+<div class="container section-padding" style="padding-block: clamp(24px, 4vw, 56px);">
+  <div class="search-page__header">
+    <h1 class="h2">
+      {%- if search.performed -%}
+        {%- if search.results_count > 0 -%}
+          {{ search.results_count }} results for "{{ search.terms }}"
+        {%- else -%}
+          {{ 'general.search.no_results' | t: terms: search.terms }}
+        {%- endif -%}
+      {%- else -%}
+        {{ section.settings.heading | default: 'Search' }}
+      {%- endif -%}
+    </h1>
+    <form action="{{ routes.search_url }}" method="get" role="search" style="max-width:480px;margin:24px auto 0;">
+      <div class="site-header__search-form" style="position:relative;">
+        <input class="input" type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ 'general.search.placeholder' | t }}" aria-label="{{ 'general.search.placeholder' | t }}">
+        <input type="hidden" name="type" value="product">
+        <button type="submit" class="icon-btn" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);" aria-label="{{ 'general.search.submit' | t }}">
+          {% render 'icon', name: 'search' %}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  {%- if search.performed -%}
+    {%- if search.results.size > 0 -%}
+      {%- paginate search.results by 24 -%}
+        <div class="product-grid" style="margin-top:40px;" data-reveal>
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' -%}
+              {% render 'product-card', product: item %}
+            {%- else -%}
+              <a href="{{ item.url }}" class="surface" style="padding:20px;display:flex;flex-direction:column;gap:8px;">
+                <span class="badge">{{ item.object_type | capitalize }}</span>
+                <h3 class="h4">{{ item.title }}</h3>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <nav class="pagination" aria-label="Pagination" style="display:flex;justify-content:center;gap:8px;margin-top:48px;">
+            {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}" class="icon-btn">{% render 'icon', name: 'chevron-left' %}</a>{%- endif -%}
+            {%- for part in paginate.parts -%}
+              {%- if part.is_link -%}<a href="{{ part.url }}" class="icon-btn">{{ part.title }}</a>{%- else -%}<span class="icon-btn">{{ part.title }}</span>{%- endif -%}
+            {%- endfor -%}
+            {%- if paginate.next -%}<a href="{{ paginate.next.url }}" class="icon-btn">{% render 'icon', name: 'chevron-right' %}</a>{%- endif -%}
+          </nav>
+        {%- endif -%}
+      {%- endpaginate -%}
+    {%- else -%}
+      <div class="empty-state">
+        <p>{{ 'collections.general.no_products_text' | t }}</p>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Search results",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Search" }
+  ]
+}
+{% endschema %}

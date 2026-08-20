@@ -1,0 +1,21 @@
+{%- if recommendations.performed and recommendations.products_count > 0 -%}
+  <div class="section-padding" style="padding-block: clamp(32px, 5vw, 64px);">
+    <div class="section-header">
+      <div class="section-header__title">
+        <h2 class="h3">{{ 'products.product.you_may_also_like' | t }}</h2>
+      </div>
+    </div>
+    <div class="product-grid">
+      {%- for product in recommendations.products -%}
+        {% render 'product-card', product: product %}
+      {%- endfor -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product recommendations",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,38 @@
+{%- comment -%}
+  Review architecture for the product page reviews tab. Reads Shopify's standard
+  `reviews.rating` / `reviews.rating_count` product metafields, which are populated
+  automatically by most review apps (Judge.me, Loox, Shopify Product Reviews, etc.).
+  Individual review text/author data is app-specific — this snippet exposes a
+  `data-reviews-app-slot` mount point so a review app's own embed block/snippet can be
+  dropped in without touching this file. No review content is fabricated here.
+  Usage: {% render 'product-reviews', product: product %}
+{%- endcomment -%}
+{%- liquid
+  assign rating = product.metafields.reviews.rating.value
+  assign count = product.metafields.reviews.rating_count.value | default: 0
+-%}
+<div id="ProductReviews" class="product-reviews">
+  {%- if rating and count > 0 -%}
+    <div class="reviews-summary">
+      <span class="reviews-summary__score">{{ rating.rating }}</span>
+      <div>
+        <span class="rating-stars">
+          {%- assign full_stars = rating.rating | floor -%}
+          {%- for i in (1..5) -%}
+            {%- if i <= full_stars -%}{% render 'icon', name: 'star', class: 'is-full' %}{%- else -%}{% render 'icon', name: 'star', class: 'is-empty' %}{%- endif -%}
+          {%- endfor -%}
+        </span>
+        <p style="font-size:13px;">{{ 'products.product.based_on_reviews' | t: count: count }}</p>
+      </div>
+    </div>
+  {%- else -%}
+    <p class="placeholder-note">{{ 'products.product.no_reviews_yet' | t }} — connect a reviews app to display verified customer feedback here.</p>
+  {%- endif -%}
+
+  {%- comment -%} Mount point for a review app's native widget (e.g. Judge.me / Loox app embed block). {%- endcomment -%}
+  <div data-reviews-app-slot data-product-id="{{ product.id }}"></div>
+
+  <button type="button" class="btn btn--secondary" style="margin-top:16px;" data-write-review>
+    {{ 'products.product.write_a_review' | t }}
+  </button>
+</div>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="canonical" href="{{ canonical_url }}">
+
+  {% if page_description %}
+    <meta name="description" content="{{ page_description | escape }}">
+  {% endif %}
+
+  <title>
+    {{ page_title }}
+    {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+    {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+    {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+  </title>
+
+  {% if settings.favicon %}
+    <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 64 }}">
+  {% endif %}
+
+  <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+
+  {%- style -%}
+    :root{
+      --color-bg-primary: {{ settings.color_bg_primary }};
+      --color-bg-secondary: {{ settings.color_bg_secondary }};
+      --color-bg-elevated: {{ settings.color_bg_elevated }};
+      --color-border: {{ settings.color_border }};
+      --color-accent-primary: {{ settings.color_accent_primary }};
+      --color-accent-secondary: {{ settings.color_accent_secondary }};
+      --color-accent-micro: {{ settings.color_accent_micro }};
+      --color-text-primary: {{ settings.color_text_primary }};
+      --color-text-secondary: {{ settings.color_text_secondary }};
+      --color-text-on-accent: {{ settings.color_text_on_accent }};
+      --color-success: {{ settings.color_success }};
+      --color-error: {{ settings.color_error }};
+
+      --font-heading: {{ settings.font_heading.family }}, serif;
+      --font-heading-weight: {{ settings.font_heading.weight }};
+      --font-heading-scale: {{ settings.font_heading_scale | default: 100 }}%;
+      --font-body: {{ settings.font_body.family }}, sans-serif;
+      --font-body-weight: {{ settings.font_body.weight }};
+      --font-body-scale: {{ settings.font_body_scale | default: 100 }}%;
+      --letter-spacing-headings: {{ settings.letter_spacing_headings | default: 0.5 }}px;
+      --letter-spacing-nav: {{ settings.letter_spacing_nav | default: 1.5 }}px;
+
+      --page-width: {{ settings.page_width | default: 1440 }}px;
+      --spacing-section: {{ settings.spacing_section | default: 96 }}px;
+      --grid-gap: {{ settings.grid_gap | default: 20 }}px;
+
+      --radius-button: {{ settings.radius_button | default: 999 }}px;
+      --radius-card: {{ settings.radius_card | default: 18 }}px;
+      --radius-input: {{ settings.radius_input | default: 10 }}px;
+
+      --glow-intensity: {{ settings.glow_intensity | default: 45 | times: 0.01 }};
+    }
+  {%- endstyle -%}
+
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
+  {{ settings.font_heading | font_face: font_display: 'swap' }}
+  {{ settings.font_body | font_face: font_display: 'swap' }}
+
+  {{ content_for_header }}
+
+  <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'predictive-search.js' | asset_url }}" defer="defer"></script>
+  <script>window.Zavyxo = window.Zavyxo || {}; window.Zavyxo.moneyFormat = {{ shop.money_format | json }}; window.Zavyxo.routes = { cartAddUrl: {{ routes.cart_add_url | json }}, cartUrl: {{ routes.cart_url | json }}, cartChangeUrl: {{ routes.cart_change_url | json }} };</script>
+</head>
+
+<body class="{% if settings.enable_age_gate %}age-gate-pending{% endif %}">
+  <a class="visually-hidden skip-to-content-link" href="#MainContent">
+    {{ 'accessibility.skip_to_content' | t }}
+  </a>
+
+  {%- if settings.enable_age_gate -%}
+    {%- render 'age-gate' -%}
+  {%- endif -%}
+
+  {% section 'announcement-bar' %}
+  {% section 'header' %}
+
+  <main id="MainContent" class="main-content" tabindex="-1">
+    {{ content_for_layout }}
+  </main>
+
+  {% section 'footer' %}
+
+  {% section 'cart-drawer' %}
+
+  <div id="QuickViewContainer" class="quick-view-overlay" hidden>
+    <div class="quick-view-overlay__backdrop" data-quick-view-close></div>
+    <div class="quick-view-overlay__panel" id="QuickViewPanel" role="dialog" aria-modal="true" aria-label="Quick view"></div>
+  </div>
+
+  <div class="sr-live-region visually-hidden" aria-live="polite" id="CartLiveRegion"></div>
+
+  {%- if settings.enable_free_shipping_bar -%}
+    <script>window.ZAVYXO_FREE_SHIPPING_THRESHOLD = {{ settings.free_shipping_threshold | default: 0 }} * 100;</script>
+  {%- endif -%}
+</body>
+</html>

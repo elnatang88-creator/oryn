@@ -1,0 +1,67 @@
+<section class="section-padding">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-header__title">
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+        <h2>{{ section.settings.heading }}</h2>
+      </div>
+      {%- if section.settings.view_all_link != blank -%}
+        <a href="{{ section.settings.view_all_link }}" class="section-header__link">{{ section.settings.view_all_text }}</a>
+      {%- endif -%}
+    </div>
+
+    <div class="category-rail" data-reveal>
+      {%- for block in section.blocks -%}
+        <a href="{{ block.settings.link }}" class="category-rail__item" {{ block.shopify_attributes }}>
+          <span class="category-rail__ring">
+            {%- if block.settings.image -%}
+              <img src="{{ block.settings.image | image_url: width: 200 }}" alt="{{ block.settings.label | escape }}" loading="lazy" width="92" height="92">
+            {%- endif -%}
+          </span>
+          <span>{{ block.settings.label }}</span>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Category carousel",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Explore" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by Category" },
+    { "type": "text", "id": "view_all_text", "label": "View all text", "default": "View All" },
+    { "type": "url", "id": "view_all_link", "label": "View all link" }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "label", "label": "Label", "default": "For Women" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Category carousel",
+      "blocks": [
+        { "type": "category", "settings": { "label": "For Women" } },
+        { "type": "category", "settings": { "label": "For Men" } },
+        { "type": "category", "settings": { "label": "Couples" } },
+        { "type": "category", "settings": { "label": "Vibrators" } },
+        { "type": "category", "settings": { "label": "Male Pleasure" } },
+        { "type": "category", "settings": { "label": "Bondage" } },
+        { "type": "category", "settings": { "label": "Lingerie" } },
+        { "type": "category", "settings": { "label": "Anal Play" } },
+        { "type": "category", "settings": { "label": "Lubricants" } },
+        { "type": "category", "settings": { "label": "Sale" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

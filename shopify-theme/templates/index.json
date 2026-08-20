@@ -1,0 +1,125 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "eyebrow": "Premium Adult-Wellness",
+        "heading_line_1": "EXPLORE YOUR",
+        "heading_line_2": "DESIRES",
+        "subtext": "Premium adult-wellness products for every desire. Discreet. Refined. Unforgettable.",
+        "primary_cta_text": "Shop Best Sellers",
+        "primary_cta_link": "shopify://collections/best-sellers",
+        "secondary_cta_text": "Explore Collection",
+        "secondary_cta_link": "shopify://collections/all"
+      }
+    },
+    "trust-strip": {
+      "type": "trust-strip",
+      "blocks": {
+        "t1": { "type": "item", "settings": { "icon": "package", "label": "Discreet Packaging" } },
+        "t2": { "type": "item", "settings": { "icon": "globe", "label": "Worldwide Delivery" } },
+        "t3": { "type": "item", "settings": { "icon": "lock", "label": "Secure Payments" } },
+        "t4": { "type": "item", "settings": { "icon": "headset", "label": "24/7 Support" } }
+      },
+      "block_order": ["t1", "t2", "t3", "t4"]
+    },
+    "category-carousel": {
+      "type": "category-carousel",
+      "settings": {
+        "eyebrow": "Explore",
+        "heading": "Shop by Category",
+        "view_all_text": "View All",
+        "view_all_link": "shopify://collections/all"
+      },
+      "blocks": {
+        "c1": { "type": "category", "settings": { "label": "For Women", "link": "shopify://collections/women" } },
+        "c2": { "type": "category", "settings": { "label": "For Men", "link": "shopify://collections/men" } },
+        "c3": { "type": "category", "settings": { "label": "Couples", "link": "shopify://collections/couples" } },
+        "c4": { "type": "category", "settings": { "label": "Vibrators", "link": "shopify://collections/vibrators" } },
+        "c5": { "type": "category", "settings": { "label": "Male Pleasure", "link": "shopify://collections/male-pleasure" } },
+        "c6": { "type": "category", "settings": { "label": "Bondage", "link": "shopify://collections/bondage" } },
+        "c7": { "type": "category", "settings": { "label": "Lingerie", "link": "shopify://collections/lingerie" } },
+        "c8": { "type": "category", "settings": { "label": "Anal Play", "link": "shopify://collections/anal-play" } },
+        "c9": { "type": "category", "settings": { "label": "Lubricants", "link": "shopify://collections/lubricants" } },
+        "c10": { "type": "category", "settings": { "label": "Sale", "link": "shopify://collections/sale" } }
+      },
+      "block_order": ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10"]
+    },
+    "best-sellers": {
+      "type": "product-carousel",
+      "settings": {
+        "eyebrow": "",
+        "heading": "Best Sellers",
+        "collection": "best-sellers",
+        "products_to_show": 8,
+        "view_all_text": "View All"
+      }
+    },
+    "product-finder": {
+      "type": "product-finder",
+      "settings": {
+        "eyebrow": "Not Sure What You Want?",
+        "heading": "Find Your Perfect Match",
+        "subtext": "Answer a few quick questions and we'll recommend three products tailored to you.",
+        "cta_text": "Take the Quiz"
+      }
+    },
+    "vip-banner": {
+      "type": "vip-banner",
+      "blocks": {
+        "v1": { "type": "benefit", "settings": { "icon": "sparkle", "label": "Exclusive Offers" } },
+        "v2": { "type": "benefit", "settings": { "icon": "zap", "label": "Early Access" } },
+        "v3": { "type": "benefit", "settings": { "icon": "gift", "label": "Birthday Gifts" } },
+        "v4": { "type": "benefit", "settings": { "icon": "headset", "label": "VIP Support" } }
+      },
+      "block_order": ["v1", "v2", "v3", "v4"]
+    },
+    "new-arrivals": {
+      "type": "product-carousel",
+      "settings": {
+        "eyebrow": "",
+        "heading": "New Arrivals",
+        "collection": "new-arrivals",
+        "products_to_show": 8,
+        "view_all_text": "View All"
+      }
+    },
+    "why-zavyxo": {
+      "type": "why-zavyxo",
+      "blocks": {
+        "w1": { "type": "pillar", "settings": { "icon": "lock", "label": "Private & Discreet" } },
+        "w2": { "type": "pillar", "settings": { "icon": "award", "label": "Trusted Quality" } },
+        "w3": { "type": "pillar", "settings": { "icon": "return", "label": "Easy Returns" } },
+        "w4": { "type": "pillar", "settings": { "icon": "shield", "label": "Secure Checkout" } },
+        "w5": { "type": "pillar", "settings": { "icon": "globe", "label": "Worldwide Shipping" } }
+      },
+      "block_order": ["w1", "w2", "w3", "w4", "w5"]
+    },
+    "reviews": {
+      "type": "reviews",
+      "settings": {
+        "eyebrow": "Social Proof",
+        "heading": "Loved by Our Community"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "heading": "Stay in the Pleasure Loop",
+        "subtext": "New arrivals, private offers and exclusive access."
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "trust-strip",
+    "category-carousel",
+    "best-sellers",
+    "product-finder",
+    "vip-banner",
+    "new-arrivals",
+    "why-zavyxo",
+    "reviews",
+    "newsletter"
+  ]
+}

@@ -1,0 +1,28 @@
+{%- if recommendations.performed and recommendations.products_count > 0 -%}
+  <h4>{{ 'cart.general.you_may_also_like' | t }}</h4>
+  {%- for product in recommendations.products limit: 2 -%}
+    <div class="cart-upsell-card">
+      <a href="{{ product.url }}">
+        {%- if product.featured_image -%}
+          <img src="{{ product.featured_image | image_url: width: 120 }}" alt="{{ product.title | escape }}" loading="lazy">
+        {%- endif -%}
+      </a>
+      <div class="cart-upsell-card__info">
+        <p><a href="{{ product.url }}">{{ product.title | truncate: 30 }}</a></p>
+        {% render 'price', product: product %}
+      </div>
+      {%- if product.available -%}
+        <button type="button" class="btn btn--secondary btn--sm" data-cart-upsell-add data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+          {% render 'icon', name: 'plus' %}
+        </button>
+      {%- endif -%}
+    </div>
+  {%- endfor -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cart upsell",
+  "settings": []
+}
+{% endschema %}

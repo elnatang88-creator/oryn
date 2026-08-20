@@ -1,0 +1,59 @@
+<section class="hero">
+  <div class="hero__media">
+    {%- if section.settings.image -%}
+      <img
+        src="{{ section.settings.image | image_url: width: 1800 }}"
+        srcset="{{ section.settings.image | image_url: width: 900 }} 900w, {{ section.settings.image | image_url: width: 1400 }} 1400w, {{ section.settings.image | image_url: width: 1800 }} 1800w"
+        sizes="100vw"
+        alt="{{ section.settings.image.alt | escape }}"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- endif -%}
+  </div>
+  <div class="hero__scrim"></div>
+
+  <div class="container">
+    <div class="hero__content" data-reveal>
+      {%- if section.settings.eyebrow -%}
+        <div class="eyebrow hero__eyebrow">{{ section.settings.eyebrow }}</div>
+      {%- endif -%}
+      <h1 class="hero__title">
+        {{ section.settings.heading_line_1 }}<br>
+        <span class="gradient-text">{{ section.settings.heading_line_2 }}</span>
+      </h1>
+      <p class="hero__subtext">{{ section.settings.subtext }}</p>
+      <div class="hero__ctas">
+        {%- if section.settings.primary_cta_text != blank -%}
+          <a href="{{ section.settings.primary_cta_link }}" class="btn btn--primary btn--lg">{{ section.settings.primary_cta_text }}</a>
+        {%- endif -%}
+        {%- if section.settings.secondary_cta_text != blank -%}
+          <a href="{{ section.settings.secondary_cta_link }}" class="btn btn--secondary btn--lg">{{ section.settings.secondary_cta_text }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Background image" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Premium Adult-Wellness" },
+    { "type": "text", "id": "heading_line_1", "label": "Headline line 1", "default": "EXPLORE YOUR" },
+    { "type": "text", "id": "heading_line_2", "label": "Headline line 2 (accent)", "default": "DESIRES" },
+    { "type": "textarea", "id": "subtext", "label": "Subtext", "default": "Premium adult-wellness products for every desire. Discreet. Refined. Unforgettable." },
+    { "type": "text", "id": "primary_cta_text", "label": "Primary button text", "default": "Shop Best Sellers" },
+    { "type": "url", "id": "primary_cta_link", "label": "Primary button link" },
+    { "type": "text", "id": "secondary_cta_text", "label": "Secondary button text", "default": "Explore Collection" },
+    { "type": "url", "id": "secondary_cta_link", "label": "Secondary button link" }
+  ],
+  "presets": [
+    {
+      "name": "Hero",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

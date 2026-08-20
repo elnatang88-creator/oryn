@@ -1,0 +1,33 @@
+{%- comment -%}
+  Product discovery / quiz teaser. Links out to a page or app where the
+  recommendation quiz can live (e.g. a /pages/quiz page or a quiz app embed).
+  Built so a future quiz experience can plug straight into finder_link.
+{%- endcomment -%}
+<section class="section-padding">
+  <div class="container">
+    <div class="finder-section" data-reveal>
+      <div>
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+        <h2 class="h2" style="margin-top:10px;">{{ section.settings.heading }}</h2>
+        <p class="max-w-prose" style="margin-top:14px;">{{ section.settings.subtext }}</p>
+      </div>
+      <a href="{{ section.settings.finder_link | default: '#' }}" class="btn btn--primary btn--lg">{{ section.settings.cta_text }}</a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product finder",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Not Sure What You Want?" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Find Your Perfect Match" },
+    { "type": "textarea", "id": "subtext", "label": "Subtext", "default": "Answer a few quick questions and we'll recommend three products tailored to you." },
+    { "type": "text", "id": "cta_text", "label": "Button text", "default": "Take the Quiz" },
+    { "type": "url", "id": "finder_link", "label": "Quiz link", "info": "Point this to your quiz page or app once it's built." }
+  ],
+  "presets": [
+    { "name": "Product finder", "settings": {} }
+  ]
+}
+{% endschema %}

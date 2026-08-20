@@ -1,0 +1,47 @@
+<div class="container section-padding" style="max-width:440px;">
+  <h1 class="h3" style="text-align:center;margin-bottom:28px;">{{ 'customer.login.title' | t }}</h1>
+
+  {%- form 'customer_login' -%}
+    {{ form.errors | default_errors }}
+    <div class="field" style="margin-bottom:16px;">
+      <label for="CustomerEmail">{{ 'customer.login.email' | t }}</label>
+      <input type="email" name="customer[email]" id="CustomerEmail" class="input" autocomplete="email" autofocus required>
+    </div>
+
+    {%- if form.password_needed -%}
+      <div class="field" style="margin-bottom:8px;">
+        <label for="CustomerPassword">{{ 'customer.login.password' | t }}</label>
+        <input type="password" name="customer[password]" id="CustomerPassword" class="input" autocomplete="current-password" required>
+      </div>
+      <a href="#recover" id="RecoverPasswordLink" style="font-size:12px;color:var(--color-text-secondary);">{{ 'customer.login.forgot_password' | t }}</a>
+    {%- endif -%}
+
+    <button type="submit" class="btn btn--primary btn--block btn--lg" style="margin-top:20px;">{{ 'customer.login.sign_in' | t }}</button>
+  {%- endform -%}
+
+  <div id="RecoverPassword" style="display:none;margin-top:24px;">
+    {%- form 'recover_customer_password' -%}
+      {{ form.errors | default_errors }}
+      {%- if form.posted_successfully? -%}
+        <p style="color:var(--color-success);font-size:13px;">If that email exists, a reset link is on its way.</p>
+      {%- endif -%}
+      <div class="field">
+        <label for="RecoverEmail">{{ 'customer.login.email' | t }}</label>
+        <input type="email" name="email" id="RecoverEmail" class="input" required>
+      </div>
+      <button type="submit" class="btn btn--secondary btn--block" style="margin-top:16px;">{{ 'customer.login.forgot_password' | t }}</button>
+    {%- endform -%}
+  </div>
+
+  <p style="text-align:center;margin-top:24px;font-size:13px;color:var(--color-text-secondary);">
+    {{ 'customer.login.no_account' | t }} <a href="{{ routes.account_register_url }}" style="color:var(--color-accent-secondary);">{{ 'customer.login.create_account' | t }}</a>
+  </p>
+</div>
+
+<script>
+  document.getElementById('RecoverPasswordLink')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('RecoverPassword').style.display = 'block';
+  });
+</script>
+

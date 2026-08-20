@@ -1,0 +1,38 @@
+<div class="container section-padding" style="max-width:760px;">
+  <a href="{{ routes.account_url }}" style="font-size:12px;color:var(--color-text-secondary);">&larr; {{ 'customer.account.title' | t }}</a>
+  <h1 class="h3" style="margin:16px 0 24px;">Order {{ order.name }}</h1>
+
+  <div class="surface" style="padding:24px;margin-bottom:24px;">
+    <p style="color:var(--color-text-secondary);">Placed on {{ order.created_at | date: '%B %d, %Y' }}</p>
+    <p style="color:var(--color-text-secondary);">Payment: {{ order.financial_status_label }} &middot; Fulfillment: {{ order.fulfillment_status_label }}</p>
+  </div>
+
+  <div class="surface" style="padding:0;overflow:hidden;margin-bottom:24px;">
+    {%- for line_item in order.line_items -%}
+      <div class="cart-line" style="padding:18px;{% unless forloop.last %}border-bottom:1px solid var(--color-border);{% endunless %}">
+        <a href="{{ line_item.product.url }}" class="cart-line__image">
+          {%- if line_item.image -%}
+            <img src="{{ line_item.image | image_url: width: 200 }}" alt="{{ line_item.title | escape }}" loading="lazy">
+          {%- endif -%}
+        </a>
+        <div class="cart-line__info">
+          <p class="cart-line__title">{{ line_item.title }}</p>
+          <p class="cart-line__variant">Qty {{ line_item.quantity }}</p>
+        </div>
+        <div class="cart-line__price">{{ line_item.final_line_price | money }}</div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <div class="surface" style="padding:24px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;color:var(--color-text-secondary);">
+      <span>Subtotal</span><span>{{ order.subtotal_price | money }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;color:var(--color-text-secondary);">
+      <span>Shipping</span><span>{{ order.shipping_price | money }}</span>
+    </div>
+    <div class="cart-drawer__subtotal" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--color-border);">
+      <span>Total</span><span>{{ order.total_price | money }}</span>
+    </div>
+  </div>
+</div>

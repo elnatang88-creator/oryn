@@ -1,0 +1,40 @@
+<div class="container section-padding" style="max-width:640px;">
+  <a href="{{ routes.account_url }}" style="font-size:12px;color:var(--color-text-secondary);">&larr; {{ 'customer.account.title' | t }}</a>
+  <h1 class="h3" style="margin:16px 0 28px;">Addresses</h1>
+
+  {%- form 'customer_address', customer.new_address -%}
+    <h2 class="h4" style="margin-bottom:16px;">Add a new address</h2>
+    {{ form.errors | default_errors }}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>First name</label><input type="text" name="address[first_name]" class="input" value="{{ form.first_name }}"></div>
+      <div class="field"><label>Last name</label><input type="text" name="address[last_name]" class="input" value="{{ form.last_name }}"></div>
+    </div>
+    <div class="field" style="margin-top:12px;"><label>Address</label><input type="text" name="address[address1]" class="input" value="{{ form.address1 }}"></div>
+    <div class="field" style="margin-top:12px;"><label>Apartment, suite, etc.</label><input type="text" name="address[address2]" class="input" value="{{ form.address2 }}"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+      <div class="field"><label>City</label><input type="text" name="address[city]" class="input" value="{{ form.city }}"></div>
+      <div class="field"><label>Postal/ZIP code</label><input type="text" name="address[zip]" class="input" value="{{ form.zip }}"></div>
+    </div>
+    <div class="field" style="margin-top:12px;">
+      <label>Country</label>
+      <select name="address[country]" class="select" data-address-country-select>
+        {{ country_option_tags }}
+      </select>
+    </div>
+    <div class="field" style="margin-top:12px;"><label>Phone</label><input type="tel" name="address[phone]" class="input" value="{{ form.phone }}"></div>
+    <button type="submit" class="btn btn--primary btn--block" style="margin-top:20px;">Save Address</button>
+  {%- endform -%}
+
+  {%- if customer.addresses.size > 0 -%}
+    <h2 class="h4" style="margin:40px 0 16px;">Saved addresses</h2>
+    {%- for address in customer.addresses -%}
+      <div class="surface" style="padding:20px;margin-bottom:12px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div style="color:var(--color-text-secondary);font-size:14px;">{{ address | format_address }}</div>
+        {%- form 'customer_address', address -%}
+          <input type="hidden" name="_method" value="delete">
+          <button type="submit" class="btn btn--secondary btn--sm">Remove</button>
+        {%- endform -%}
+      </div>
+    {%- endfor -%}
+  {%- endif -%}
+</div>

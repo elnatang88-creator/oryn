@@ -1,0 +1,75 @@
+<section class="section-padding">
+  <div class="container">
+    <div class="vip-banner" data-reveal>
+      <div>
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+        <h2 class="h2" style="margin-top:10px;">{{ section.settings.heading }}</h2>
+        <ul class="vip-benefits">
+          {%- for block in section.blocks -%}
+            <li {{ block.shopify_attributes }}>{% render 'icon', name: block.settings.icon %} {{ block.settings.label }}</li>
+          {%- endfor -%}
+        </ul>
+      </div>
+      <div class="vip-form-card">
+        {%- form 'customer', id: 'VipClubForm' -%}
+          <input type="hidden" name="contact[tags]" value="vip-club">
+          <div class="field" style="gap:12px;">
+            <label for="VipEmail">{{ 'newsletter.email_placeholder' | t }}</label>
+            <input class="input" id="VipEmail" type="email" name="contact[email]" placeholder="{{ 'newsletter.email_placeholder' | t }}" required>
+            <button type="submit" class="btn btn--primary btn--block">{{ section.settings.cta_text }}</button>
+          </div>
+          {%- if form.posted_successfully? -%}
+            <p style="color:var(--color-success);font-size:12px;margin-top:10px;">{{ 'newsletter.success' | t }}</p>
+          {%- elsif form.errors -%}
+            <p style="color:var(--color-error);font-size:12px;margin-top:10px;">{{ 'newsletter.error' | t }}</p>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "VIP banner",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Members Only" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Join the ZAVYXO VIP Club" },
+    { "type": "text", "id": "cta_text", "label": "Button text", "default": "Join Now" }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "sparkle", "label": "Sparkle" },
+            { "value": "zap", "label": "Lightning" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "headset", "label": "Headset" },
+            { "value": "award", "label": "Award" }
+          ],
+          "default": "sparkle"
+        },
+        { "type": "text", "id": "label", "label": "Label", "default": "Exclusive Offers" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "VIP banner",
+      "blocks": [
+        { "type": "benefit", "settings": { "icon": "sparkle", "label": "Exclusive Offers" } },
+        { "type": "benefit", "settings": { "icon": "zap", "label": "Early Access" } },
+        { "type": "benefit", "settings": { "icon": "gift", "label": "Birthday Gifts" } },
+        { "type": "benefit", "settings": { "icon": "headset", "label": "VIP Support" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

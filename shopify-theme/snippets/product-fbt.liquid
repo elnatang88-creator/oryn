@@ -1,0 +1,45 @@
+{%- comment -%}
+  Frequently Bought Together. Driven by a `custom.complete_the_set` product-list
+  metafield on the main product (merchant-curated, so recommendations stay relevant).
+  Usage: {% render 'product-fbt', product: product %}
+{%- endcomment -%}
+{%- liquid
+  assign companions = product.metafields.custom.complete_the_set.value
+-%}
+{%- if companions and companions.size > 0 -%}
+  <div class="fbt" data-fbt-widget>
+    <h3 class="h4">{{ 'products.product.frequently_bought_together' | t }}</h3>
+    <div class="fbt__items">
+      <div class="fbt__item">
+        {%- if product.featured_image -%}
+          <img src="{{ product.featured_image | image_url: width: 200 }}" alt="{{ product.title | escape }}" loading="lazy">
+        {%- endif -%}
+        <label>
+          <input type="checkbox" checked disabled data-fbt-checkbox data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-price="{{ product.selected_or_first_available_variant.price }}" data-compare-price="{{ product.selected_or_first_available_variant.compare_at_price }}">
+          {{ product.title | truncate: 22 }}
+        </label>
+        <span style="font-size:12px;">{{ product.selected_or_first_available_variant.price | money }}</span>
+      </div>
+      {%- for companion in companions limit: 2 -%}
+        <span class="fbt__plus">+</span>
+        <div class="fbt__item">
+          {%- if companion.featured_image -%}
+            <img src="{{ companion.featured_image | image_url: width: 200 }}" alt="{{ companion.title | escape }}" loading="lazy">
+          {%- endif -%}
+          <label>
+            <input type="checkbox" checked data-fbt-checkbox data-variant-id="{{ companion.selected_or_first_available_variant.id }}" data-price="{{ companion.selected_or_first_available_variant.price }}" data-compare-price="{{ companion.selected_or_first_available_variant.compare_at_price }}">
+            {{ companion.title | truncate: 22 }}
+          </label>
+          <span style="font-size:12px;">{{ companion.selected_or_first_available_variant.price | money }}</span>
+        </div>
+      {%- endfor -%}
+    </div>
+    <div class="fbt__summary">
+      <div class="fbt__total-price">
+        {{ 'products.product.total_price' | t }}: <strong data-fbt-total>{{ product.price | money }}</strong>
+        <span class="fbt__savings" data-fbt-savings hidden></span>
+      </div>
+      <button type="button" class="btn btn--primary" data-fbt-add-all>{{ 'products.product.add_all_to_cart' | t }}</button>
+    </div>
+  </div>
+{%- endif -%}

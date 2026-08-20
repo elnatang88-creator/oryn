@@ -1,0 +1,106 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand">
+        <div class="footer-brand__logo">{{ shop.name | default: 'ZAVYXO' }}</div>
+        <p class="footer-brand__text">{{ section.settings.brand_statement }}</p>
+        <div class="footer-social">
+          {%- if settings.social_instagram -%}<a href="{{ settings.social_instagram }}" class="icon-btn" aria-label="Instagram">{% render 'icon', name: 'instagram' %}</a>{%- endif -%}
+          {%- if settings.social_tiktok -%}<a href="{{ settings.social_tiktok }}" class="icon-btn" aria-label="TikTok">{% render 'icon', name: 'tiktok' %}</a>{%- endif -%}
+          {%- if settings.social_twitter -%}<a href="{{ settings.social_twitter }}" class="icon-btn" aria-label="X">{% render 'icon', name: 'twitter' %}</a>{%- endif -%}
+          {%- if settings.social_youtube -%}<a href="{{ settings.social_youtube }}" class="icon-btn" aria-label="YouTube">{% render 'icon', name: 'youtube' %}</a>{%- endif -%}
+          {%- if settings.social_pinterest -%}<a href="{{ settings.social_pinterest }}" class="icon-btn" aria-label="Pinterest">{% render 'icon', name: 'pinterest' %}</a>{%- endif -%}
+        </div>
+      </div>
+
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'menu_column' -%}
+          <div class="footer-col" {{ block.shopify_attributes }}>
+            <h5>{{ block.settings.heading }}</h5>
+            <ul>
+              {%- for link in block.settings.menu.links -%}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      <div class="footer-col footer-newsletter">
+        <h5>{{ section.settings.newsletter_heading | default: 'Newsletter' }}</h5>
+        <p style="font-size:13px;margin-bottom:14px;">{{ section.settings.newsletter_text }}</p>
+        {%- form 'customer', id: 'FooterNewsletterForm' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="field" style="gap:10px;">
+            <input class="input" type="email" name="contact[email]" placeholder="{{ 'newsletter.email_placeholder' | t }}" required aria-label="{{ 'newsletter.email_placeholder' | t }}">
+            <button type="submit" class="btn btn--primary btn--block">{{ 'newsletter.subscribe' | t }}</button>
+          </div>
+          {%- if form.posted_successfully? -%}
+            <p style="color:var(--color-success);font-size:12px;margin-top:8px;">{{ 'newsletter.success' | t }}</p>
+          {%- elsif form.errors -%}
+            <p style="color:var(--color-error);font-size:12px;margin-top:8px;">{{ 'newsletter.error' | t }}</p>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-bottom__trust">
+        <span class="footer-bottom__trust-item">{% render 'icon', name: 'globe' %} {{ section.settings.trust_shipping | default: 'Worldwide Shipping' }}</span>
+        <span class="footer-bottom__trust-item">{% render 'icon', name: 'package' %} {{ section.settings.trust_packaging | default: 'Discreet Packaging' }}</span>
+        <span class="footer-bottom__trust-item">{% render 'icon', name: 'lock' %} {{ section.settings.trust_checkout | default: 'Secure Checkout' }}</span>
+      </div>
+      <div class="footer-payments">
+        {%- for type in shop.enabled_payment_types -%}
+          {{ type | payment_type_svg_tag: class: 'payment-icon' }}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <div class="footer-legal">
+      <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ section.settings.legal_line | default: 'All rights reserved.' }}</span>
+      <span class="age-pill" title="18+ Only">18+</span>
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "brand_statement",
+      "label": "Brand statement",
+      "default": "<p>ZAVYXO is your destination for premium adult-wellness products. Explore. Indulge. Discreetly.</p>"
+    },
+    { "type": "text", "id": "newsletter_heading", "label": "Newsletter heading", "default": "Newsletter" },
+    { "type": "text", "id": "newsletter_text", "label": "Newsletter text", "default": "Get exclusive offers and updates." },
+    { "type": "text", "id": "trust_shipping", "label": "Trust item 1", "default": "Worldwide Shipping" },
+    { "type": "text", "id": "trust_packaging", "label": "Trust item 2", "default": "Discreet Packaging" },
+    { "type": "text", "id": "trust_checkout", "label": "Trust item 3", "default": "Secure Checkout" },
+    { "type": "text", "id": "legal_line", "label": "Legal line", "default": "All rights reserved." }
+  ],
+  "blocks": [
+    {
+      "type": "menu_column",
+      "name": "Menu column",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Shop" },
+        { "type": "link_list", "id": "menu", "label": "Menu" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Footer",
+      "blocks": [
+        { "type": "menu_column", "settings": { "heading": "Shop" } },
+        { "type": "menu_column", "settings": { "heading": "Help & Info" } },
+        { "type": "menu_column", "settings": { "heading": "Legal" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

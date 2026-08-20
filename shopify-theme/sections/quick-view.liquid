@@ -1,0 +1,36 @@
+{%- comment -%}
+  Compact quick-view panel, fetched via the Section Rendering API from a
+  product card's data-quick-view URL (?section_id=quick-view).
+{%- endcomment -%}
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+-%}
+<div class="quick-view" data-quick-view-content>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;">
+    <div style="border-radius:var(--radius-card);overflow:hidden;background:var(--color-bg-elevated);aspect-ratio:1/1;">
+      {%- if product.featured_image -%}
+        <img src="{{ product.featured_image | image_url: width: 700 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" style="width:100%;height:100%;object-fit:cover;">
+      {%- endif -%}
+    </div>
+    <div>
+      <h2 class="h4">{{ product.title }}</h2>
+      {% render 'rating-stars', product: product %}
+      <div style="margin:14px 0;">
+        {% render 'price', product: product %}
+      </div>
+      <p style="font-size:14px;color:var(--color-text-secondary);margin-bottom:16px;">{{ product.description | strip_html | truncate: 140 }}</p>
+
+      {%- form 'product', product -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+        <button type="submit" name="add" class="btn btn--primary btn--block btn--lg" {% unless current_variant.available %}disabled{% endunless %}>
+          {%- if current_variant.available -%}{{ 'products.product.add_to_cart' | t }}{%- else -%}{{ 'products.product.sold_out' | t }}{%- endif -%}
+        </button>
+      {%- endform -%}
+      <a href="{{ product.url }}" class="btn btn--secondary btn--block" style="margin-top:10px;">View Full Details</a>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{ "name": "Quick view", "settings": [] }
+{% endschema %}

@@ -1,0 +1,28 @@
+<div class="container section-padding">
+  <div class="section-header">
+    <div class="section-header__title">
+      <h1 class="h2">{{ section.settings.heading | default: 'All Collections' }}</h1>
+    </div>
+  </div>
+  <div class="category-rail" style="flex-wrap:wrap;overflow:visible;">
+    {%- for collection in collections -%}
+      <a href="{{ collection.url }}" class="category-rail__item" style="width:140px;">
+        <span class="category-rail__ring" style="width:120px;height:120px;">
+          {%- if collection.image -%}
+            <img src="{{ collection.image | image_url: width: 240 }}" alt="{{ collection.title | escape }}" loading="lazy">
+          {%- endif -%}
+        </span>
+        <span>{{ collection.title }}</span>
+      </a>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "All collections",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "All Collections" }
+  ]
+}
+{% endschema %}

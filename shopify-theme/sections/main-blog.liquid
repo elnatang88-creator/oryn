@@ -1,0 +1,31 @@
+<div class="container section-padding">
+  <h1 class="h2" style="margin-bottom:32px;">{{ blog.title }}</h1>
+  {%- paginate blog.articles by 12 -%}
+    <div class="product-grid">
+      {%- for article in blog.articles -%}
+        <a href="{{ article.url }}" class="surface" style="overflow:hidden;display:flex;flex-direction:column;">
+          {%- if article.image -%}
+            <img src="{{ article.image | image_url: width: 600 }}" alt="{{ article.title | escape }}" style="aspect-ratio:4/3;object-fit:cover;" loading="lazy">
+          {%- endif -%}
+          <div style="padding:18px;">
+            <p style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;">{{ article.published_at | date: '%b %d, %Y' }}</p>
+            <h3 class="h4" style="margin-top:8px;">{{ article.title }}</h3>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+    {%- if paginate.pages > 1 -%}
+      <nav class="pagination" aria-label="Pagination" style="display:flex;justify-content:center;gap:8px;margin-top:48px;">
+        {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}" class="icon-btn">{% render 'icon', name: 'chevron-left' %}</a>{%- endif -%}
+        {%- for part in paginate.parts -%}
+          {%- if part.is_link -%}<a href="{{ part.url }}" class="icon-btn">{{ part.title }}</a>{%- else -%}<span class="icon-btn">{{ part.title }}</span>{%- endif -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<a href="{{ paginate.next.url }}" class="icon-btn">{% render 'icon', name: 'chevron-right' %}</a>{%- endif -%}
+      </nav>
+    {%- endif -%}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{ "name": "Blog", "settings": [] }
+{% endschema %}

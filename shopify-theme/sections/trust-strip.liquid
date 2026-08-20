@@ -1,0 +1,55 @@
+<section class="section-padding" style="padding-block: clamp(28px, 4vw, 56px);">
+  <div class="container">
+    <div class="icon-rail" data-reveal>
+      {%- for block in section.blocks -%}
+        <div class="icon-rail__item" {{ block.shopify_attributes }}>
+          {% render 'icon', name: block.settings.icon %}
+          <span>{{ block.settings.label }}</span>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Trust strip",
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Trust item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "package", "label": "Package" },
+            { "value": "globe", "label": "Globe" },
+            { "value": "lock", "label": "Lock" },
+            { "value": "headset", "label": "Headset" },
+            { "value": "truck", "label": "Truck" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "return", "label": "Return" },
+            { "value": "award", "label": "Award" }
+          ],
+          "default": "package"
+        },
+        { "type": "text", "id": "label", "label": "Label", "default": "Discreet Packaging" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Trust strip",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "package", "label": "Discreet Packaging" } },
+        { "type": "item", "settings": { "icon": "globe", "label": "Worldwide Delivery" } },
+        { "type": "item", "settings": { "icon": "lock", "label": "Secure Payments" } },
+        { "type": "item", "settings": { "icon": "headset", "label": "24/7 Support" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
