@@ -117,6 +117,8 @@
                     <figure class="mega-menu__feature">
                       {%- if feature_block.settings.image -%}
                         <img src="{{ feature_block.settings.image | image_url: width: 500 }}" alt="{{ feature_block.settings.heading | escape }}" loading="lazy">
+                      {%- else -%}
+                        {% render 'media-placeholder', icon: 'sparkle', variant: forloop.index0 %}
                       {%- endif -%}
                       <figcaption>
                         <a href="{{ feature_block.settings.link }}">{{ feature_block.settings.heading }}</a>

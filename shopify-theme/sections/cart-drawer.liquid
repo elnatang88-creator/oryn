@@ -39,6 +39,9 @@
             <a href="{{ item.url }}" class="cart-line__image">
               {%- if item.image -%}
                 <img src="{{ item.image | image_url: width: 200 }}" alt="{{ item.image.alt | escape }}" loading="lazy">
+              {%- else -%}
+                {%- capture placeholder_icon -%}{% render 'product-icon', product: item.product %}{%- endcapture -%}
+                {% render 'media-placeholder', icon: placeholder_icon | strip, variant: item.product_id %}
               {%- endif -%}
             </a>
             <div class="cart-line__info">

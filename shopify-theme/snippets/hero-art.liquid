@@ -1,0 +1,47 @@
+{%- comment -%}
+  Cinematic atmospheric background art — dark charcoal ground with layered
+  purple/magenta/champagne light blooms and a soft vertical light shaft, used
+  as the hero's always-on base layer so it never reads as a flat empty
+  gradient before a campaign photo is uploaded. Usage: {% render 'hero-art' %}
+{%- endcomment -%}
+<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" class="hero-art__svg" aria-hidden="true">
+  <defs>
+    <radialGradient id="heroArtBase" cx="72%" cy="32%" r="85%">
+      <stop offset="0%" stop-color="#3a1a5c"/>
+      <stop offset="45%" stop-color="#1a0f2e"/>
+      <stop offset="100%" stop-color="#08050e"/>
+    </radialGradient>
+    <linearGradient id="heroArtBeam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e6299b" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#e6299b" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="heroArtMagenta" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e6299b" stop-opacity=".65"/>
+      <stop offset="100%" stop-color="#e6299b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="heroArtPurple" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8b2fe8" stop-opacity=".6"/>
+      <stop offset="100%" stop-color="#8b2fe8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="heroArtGold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#d9b98a" stop-opacity=".35"/>
+      <stop offset="100%" stop-color="#d9b98a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="heroArtBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="60"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#heroArtBase)"/>
+
+  <g transform="rotate(-8 1150 400)">
+    <rect x="1000" y="-100" width="320" height="1200" fill="url(#heroArtBeam)"/>
+  </g>
+
+  <ellipse cx="1180" cy="260" rx="420" ry="380" fill="url(#heroArtPurple)" filter="url(#heroArtBlur)"/>
+  <ellipse cx="1300" cy="620" rx="360" ry="320" fill="url(#heroArtMagenta)" filter="url(#heroArtBlur)"/>
+  <ellipse cx="820" cy="120" rx="260" ry="200" fill="url(#heroArtGold)" filter="url(#heroArtBlur)"/>
+  <ellipse cx="260" cy="820" rx="380" ry="260" fill="url(#heroArtPurple)" filter="url(#heroArtBlur)" opacity=".5"/>
+
+  <rect width="1600" height="1000" fill="#08050e" opacity="0"/>
+</svg>

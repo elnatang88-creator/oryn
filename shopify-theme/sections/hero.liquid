@@ -1,7 +1,9 @@
 <section class="hero">
   <div class="hero__media">
+    {%- render 'hero-art' -%}
     {%- if section.settings.image -%}
       <img
+        class="hero__photo"
         src="{{ section.settings.image | image_url: width: 1800 }}"
         srcset="{{ section.settings.image | image_url: width: 900 }} 900w, {{ section.settings.image | image_url: width: 1400 }} 1400w, {{ section.settings.image | image_url: width: 1800 }} 1800w"
         sizes="100vw"

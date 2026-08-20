@@ -1,0 +1,14 @@
+{%- comment -%}
+  Premium generative placeholder — a purple/magenta gradient with a centered
+  line-art icon, used anywhere real Shopify media is missing so the storefront
+  never shows an empty box, blank circle, or flat gradient before a merchant
+  uploads photography.
+  Usage: {% render 'media-placeholder', icon: 'wand', variant: forloop.index0 %}
+{%- endcomment -%}
+{%- liquid
+  assign v = variant | default: 0 | modulo: 4
+-%}
+<div class="media-placeholder media-placeholder--{{ v }}" aria-hidden="true">
+  <span class="media-placeholder__glow"></span>
+  <span class="media-placeholder__icon">{% render 'icon', name: icon | default: 'sparkle' %}</span>
+</div>

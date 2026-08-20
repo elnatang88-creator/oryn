@@ -27,7 +27,8 @@
           loading="{% if lazy == false %}eager{% else %}lazy{% endif %}"
         >
       {%- else -%}
-        <div class="shimmer" style="width:100%;height:100%;"></div>
+        {%- capture placeholder_icon -%}{% render 'product-icon', product: product %}{%- endcapture -%}
+        {% render 'media-placeholder', icon: placeholder_icon | strip, variant: product.id %}
       {%- endif -%}
       {%- if secondary_image -%}
         <img

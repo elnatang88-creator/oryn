@@ -8,6 +8,8 @@
       <img src="{{ collection.image | image_url: width: 1600 }}" alt="{{ collection.title | escape }}" loading="eager">
     {%- elsif section.settings.fallback_image -%}
       <img src="{{ section.settings.fallback_image | image_url: width: 1600 }}" alt="{{ collection.title | escape }}" loading="eager">
+    {%- else -%}
+      <div class="collection-hero__art">{% render 'hero-art' %}</div>
     {%- endif -%}
     <div class="collection-hero__content">
       <h1 class="h2">{{ collection.title }}</h1>

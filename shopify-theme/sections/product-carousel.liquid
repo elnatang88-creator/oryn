@@ -1,3 +1,10 @@
+{%- liquid
+  assign has_products = false
+  if section.settings.collection != blank and section.settings.collection.products.size > 0
+    assign has_products = true
+  endif
+-%}
+{%- if has_products or request.design_mode -%}
 <section class="section-padding" {{ section.shopify_attributes }}>
   <div class="container">
     <div class="section-header">
@@ -10,26 +17,30 @@
       {%- endif -%}
     </div>
 
-    {%- if section.settings.collection != blank and section.settings.collection.products.size > 0 -%}
+    {%- if has_products -%}
       <div class="product-rail" data-reveal>
         {%- for product in section.settings.collection.products limit: section.settings.products_to_show -%}
           {% render 'product-card', product: product %}
         {%- endfor -%}
       </div>
     {%- else -%}
-      <div class="product-rail">
-        {%- for i in (1..4) -%}
-          <div class="product-card">
-            <div class="product-card__media shimmer" data-ratio="portrait"></div>
-            <div class="product-card__body">
-              <p style="font-size:12px;color:var(--color-text-secondary);">Select a collection to display products</p>
-            </div>
-          </div>
-        {%- endfor -%}
+      <div class="empty-state-panel">
+        {% render 'icon', name: 'sparkle' %}
+        <h3 class="h4">
+          {%- if section.settings.collection == blank -%}No collection selected{%- else -%}This collection is empty{%- endif -%}
+        </h3>
+        <p>
+          {%- if section.settings.collection == blank -%}
+            Pick a collection in the theme editor to populate this carousel with live products.
+          {%- else -%}
+            Add products to &ldquo;{{ section.settings.collection.title }}&rdquo; and they'll appear here automatically.
+          {%- endif -%}
+        </p>
       </div>
     {%- endif -%}
   </div>
 </section>
+{%- endif -%}
 
 {% schema %}
 {

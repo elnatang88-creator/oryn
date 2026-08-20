@@ -15,7 +15,9 @@
         <a href="{{ block.settings.link }}" class="category-rail__item" {{ block.shopify_attributes }}>
           <span class="category-rail__ring">
             {%- if block.settings.image -%}
-              <img src="{{ block.settings.image | image_url: width: 200 }}" alt="{{ block.settings.label | escape }}" loading="lazy" width="92" height="92">
+              <img src="{{ block.settings.image | image_url: width: 200 }}" alt="{{ block.settings.label | escape }}" loading="lazy" width="104" height="104">
+            {%- else -%}
+              {% render 'media-placeholder', icon: block.settings.icon, variant: forloop.index0 %}
             {%- endif -%}
           </span>
           <span>{{ block.settings.label }}</span>
@@ -39,7 +41,24 @@
       "type": "category",
       "name": "Category",
       "settings": [
-        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "Overrides the icon placeholder below once uploaded" },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Placeholder icon (used until an image is set)",
+          "options": [
+            { "value": "wand", "label": "Vibrator" },
+            { "value": "ring", "label": "Ring" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "rope", "label": "Rope" },
+            { "value": "fabric", "label": "Fabric" },
+            { "value": "bottle", "label": "Bottle" },
+            { "value": "feather", "label": "Feather" },
+            { "value": "sparkle", "label": "Sparkle" },
+            { "value": "gift", "label": "Gift" }
+          ],
+          "default": "sparkle"
+        },
         { "type": "text", "id": "label", "label": "Label", "default": "For Women" },
         { "type": "url", "id": "link", "label": "Link" }
       ]
@@ -50,16 +69,16 @@
     {
       "name": "Category carousel",
       "blocks": [
-        { "type": "category", "settings": { "label": "For Women" } },
-        { "type": "category", "settings": { "label": "For Men" } },
-        { "type": "category", "settings": { "label": "Couples" } },
-        { "type": "category", "settings": { "label": "Vibrators" } },
-        { "type": "category", "settings": { "label": "Male Pleasure" } },
-        { "type": "category", "settings": { "label": "Bondage" } },
-        { "type": "category", "settings": { "label": "Lingerie" } },
-        { "type": "category", "settings": { "label": "Anal Play" } },
-        { "type": "category", "settings": { "label": "Lubricants" } },
-        { "type": "category", "settings": { "label": "Sale" } }
+        { "type": "category", "settings": { "label": "For Women", "icon": "wand" } },
+        { "type": "category", "settings": { "label": "For Men", "icon": "ring" } },
+        { "type": "category", "settings": { "label": "Couples", "icon": "heart" } },
+        { "type": "category", "settings": { "label": "Vibrators", "icon": "wand" } },
+        { "type": "category", "settings": { "label": "Male Pleasure", "icon": "ring" } },
+        { "type": "category", "settings": { "label": "Bondage", "icon": "rope" } },
+        { "type": "category", "settings": { "label": "Lingerie", "icon": "fabric" } },
+        { "type": "category", "settings": { "label": "Anal Play", "icon": "ring" } },
+        { "type": "category", "settings": { "label": "Lubricants", "icon": "bottle" } },
+        { "type": "category", "settings": { "label": "Sale", "icon": "sparkle" } }
       ]
     }
   ]

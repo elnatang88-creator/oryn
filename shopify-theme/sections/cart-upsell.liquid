@@ -5,6 +5,9 @@
       <a href="{{ product.url }}">
         {%- if product.featured_image -%}
           <img src="{{ product.featured_image | image_url: width: 120 }}" alt="{{ product.title | escape }}" loading="lazy">
+        {%- else -%}
+          {%- capture placeholder_icon -%}{% render 'product-icon', product: product %}{%- endcapture -%}
+          <div class="cart-upsell-card__media">{% render 'media-placeholder', icon: placeholder_icon | strip, variant: product.id %}</div>
         {%- endif -%}
       </a>
       <div class="cart-upsell-card__info">

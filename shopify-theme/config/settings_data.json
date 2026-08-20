@@ -27,7 +27,7 @@
       "radius_card": 18,
       "radius_input": 10,
       "enable_glow": true,
-      "glow_intensity": 45,
+      "glow_intensity": 55,
       "product_image_ratio": "portrait",
       "show_vendor": false,
       "show_rating": true,

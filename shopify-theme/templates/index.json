@@ -32,16 +32,16 @@
         "view_all_link": "shopify://collections/all"
       },
       "blocks": {
-        "c1": { "type": "category", "settings": { "label": "For Women", "link": "shopify://collections/women" } },
-        "c2": { "type": "category", "settings": { "label": "For Men", "link": "shopify://collections/men" } },
-        "c3": { "type": "category", "settings": { "label": "Couples", "link": "shopify://collections/couples" } },
-        "c4": { "type": "category", "settings": { "label": "Vibrators", "link": "shopify://collections/vibrators" } },
-        "c5": { "type": "category", "settings": { "label": "Male Pleasure", "link": "shopify://collections/male-pleasure" } },
-        "c6": { "type": "category", "settings": { "label": "Bondage", "link": "shopify://collections/bondage" } },
-        "c7": { "type": "category", "settings": { "label": "Lingerie", "link": "shopify://collections/lingerie" } },
-        "c8": { "type": "category", "settings": { "label": "Anal Play", "link": "shopify://collections/anal-play" } },
-        "c9": { "type": "category", "settings": { "label": "Lubricants", "link": "shopify://collections/lubricants" } },
-        "c10": { "type": "category", "settings": { "label": "Sale", "link": "shopify://collections/sale" } }
+        "c1": { "type": "category", "settings": { "label": "For Women", "icon": "wand", "link": "shopify://collections/women" } },
+        "c2": { "type": "category", "settings": { "label": "For Men", "icon": "ring", "link": "shopify://collections/men" } },
+        "c3": { "type": "category", "settings": { "label": "Couples", "icon": "heart", "link": "shopify://collections/couples" } },
+        "c4": { "type": "category", "settings": { "label": "Vibrators", "icon": "wand", "link": "shopify://collections/vibrators" } },
+        "c5": { "type": "category", "settings": { "label": "Male Pleasure", "icon": "ring", "link": "shopify://collections/male-pleasure" } },
+        "c6": { "type": "category", "settings": { "label": "Bondage", "icon": "rope", "link": "shopify://collections/bondage" } },
+        "c7": { "type": "category", "settings": { "label": "Lingerie", "icon": "fabric", "link": "shopify://collections/lingerie" } },
+        "c8": { "type": "category", "settings": { "label": "Anal Play", "icon": "ring", "link": "shopify://collections/anal-play" } },
+        "c9": { "type": "category", "settings": { "label": "Lubricants", "icon": "bottle", "link": "shopify://collections/lubricants" } },
+        "c10": { "type": "category", "settings": { "label": "Sale", "icon": "sparkle", "link": "shopify://collections/sale" } }
       },
       "block_order": ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10"]
     },

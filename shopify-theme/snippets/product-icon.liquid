@@ -1,0 +1,34 @@
+{%- comment -%}
+  Maps a product's real Shopify `type`/tags to a placeholder icon name, used only
+  when the product has no photography yet. Outputs a bare icon-name string —
+  capture it. Usage: {% capture placeholder_icon %}{% render 'product-icon', product: product %}{% endcapture %}
+{%- endcomment -%}
+{%- liquid
+  assign t = product.type | downcase
+  assign icon = 'sparkle'
+  if t contains 'vibrator' or t contains 'wand' or t contains 'massager'
+    assign icon = 'wand'
+  elsif t contains 'lubricant' or t contains 'oil' or t contains 'spray' or t contains 'cleaner'
+    assign icon = 'bottle'
+  elsif t contains 'lingerie' or t contains 'robe' or t contains 'apparel'
+    assign icon = 'fabric'
+  elsif t contains 'bondage' or t contains 'restraint' or t contains 'rope'
+    assign icon = 'rope'
+  elsif t contains 'ring'
+    assign icon = 'ring'
+  elsif t contains 'feather' or t contains 'tickler'
+    assign icon = 'feather'
+  elsif product.tags contains 'icon:wand'
+    assign icon = 'wand'
+  elsif product.tags contains 'icon:bottle'
+    assign icon = 'bottle'
+  elsif product.tags contains 'icon:fabric'
+    assign icon = 'fabric'
+  elsif product.tags contains 'icon:rope'
+    assign icon = 'rope'
+  elsif product.tags contains 'icon:ring'
+    assign icon = 'ring'
+  elsif product.tags contains 'icon:feather'
+    assign icon = 'feather'
+  endif
+-%}{{ icon }}
