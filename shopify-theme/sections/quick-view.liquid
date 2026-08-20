@@ -49,9 +49,9 @@
 
         <div class="quick-view__row">
           <div class="quantity-selector">
-            <button type="button" data-quantity-change="decrease" aria-label="Decrease quantity">{% render 'icon', name: 'minus' %}</button>
+            <button type="button" data-quantity-change="decrease" aria-label="{{ 'accessibility.decrease_quantity' | t }}">{% render 'icon', name: 'minus' %}</button>
             <input type="number" name="quantity" value="1" min="1" step="1" aria-label="{{ 'products.product.quantity' | t }}">
-            <button type="button" data-quantity-change="increase" aria-label="Increase quantity">{% render 'icon', name: 'plus' %}</button>
+            <button type="button" data-quantity-change="increase" aria-label="{{ 'accessibility.increase_quantity' | t }}">{% render 'icon', name: 'plus' %}</button>
           </div>
           <button
             type="submit"
@@ -66,7 +66,7 @@
           </button>
         </div>
       </form>
-      <a href="{{ product.url }}" class="btn btn--secondary btn--block" style="margin-top:10px;">View Full Details</a>
+      <a href="{{ product.url }}" class="btn btn--secondary btn--block" style="margin-top:10px;">{{ 'products.product.view_full_details' | t }}</a>
     </div>
   </div>
 </div>

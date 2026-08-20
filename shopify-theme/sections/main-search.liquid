@@ -3,7 +3,7 @@
     <h1 class="h2">
       {%- if search.performed -%}
         {%- if search.results_count > 0 -%}
-          {{ search.results_count }} results for "{{ search.terms }}"
+          {{ 'general.search.results_for' | t: count: search.results_count, terms: search.terms }}
         {%- else -%}
           {{ 'general.search.no_results' | t: terms: search.terms }}
         {%- endif -%}

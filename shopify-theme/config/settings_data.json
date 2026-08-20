@@ -40,7 +40,8 @@
       "enable_age_gate": true,
       "age_gate_headline": "Welcome to ZAVYXO",
       "age_gate_text": "You must be 18 or older to enter this site.",
-      "age_gate_exit_url": "https://www.google.com"
+      "age_gate_exit_url": "https://www.google.com",
+      "age_gate_legal_text": "<p>This store sells adult-wellness products intended for adults only. By entering, you confirm you meet the legal age requirement in your jurisdiction.</p>"
     }
   }
 }

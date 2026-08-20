@@ -46,13 +46,13 @@
 
           <form action="{{ collection.url }}" method="get" class="sort-form">
             <select name="sort_by" class="select" onchange="this.form.submit()" aria-label="{{ 'collections.general.sort_by' | t }}">
-              <option value="manual" {% if current_sort == 'manual' %}selected{% endif %}>Featured</option>
-              <option value="best-selling" {% if current_sort == 'best-selling' %}selected{% endif %}>Best Selling</option>
-              <option value="title-ascending" {% if current_sort == 'title-ascending' %}selected{% endif %}>Alphabetically, A-Z</option>
-              <option value="title-descending" {% if current_sort == 'title-descending' %}selected{% endif %}>Alphabetically, Z-A</option>
-              <option value="price-ascending" {% if current_sort == 'price-ascending' %}selected{% endif %}>Price, Low to High</option>
-              <option value="price-descending" {% if current_sort == 'price-descending' %}selected{% endif %}>Price, High to Low</option>
-              <option value="created-descending" {% if current_sort == 'created-descending' %}selected{% endif %}>Newest</option>
+              <option value="manual" {% if current_sort == 'manual' %}selected{% endif %}>{{ 'collections.sorting.featured' | t }}</option>
+              <option value="best-selling" {% if current_sort == 'best-selling' %}selected{% endif %}>{{ 'collections.sorting.best_selling' | t }}</option>
+              <option value="title-ascending" {% if current_sort == 'title-ascending' %}selected{% endif %}>{{ 'collections.sorting.az' | t }}</option>
+              <option value="title-descending" {% if current_sort == 'title-descending' %}selected{% endif %}>{{ 'collections.sorting.za' | t }}</option>
+              <option value="price-ascending" {% if current_sort == 'price-ascending' %}selected{% endif %}>{{ 'collections.sorting.price_ascending' | t }}</option>
+              <option value="price-descending" {% if current_sort == 'price-descending' %}selected{% endif %}>{{ 'collections.sorting.price_descending' | t }}</option>
+              <option value="created-descending" {% if current_sort == 'created-descending' %}selected{% endif %}>{{ 'collections.sorting.date_descending' | t }}</option>
             </select>
           </form>
         </div>

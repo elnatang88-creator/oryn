@@ -8,7 +8,7 @@
       <button type="button" class="btn btn--primary btn--lg" id="AgeGateConfirm">{{ 'age_gate.confirm' | t }}</button>
       <a href="{{ settings.age_gate_exit_url | default: 'https://www.google.com' }}" class="btn btn--secondary" id="AgeGateExit">{{ 'age_gate.exit' | t }}</a>
     </div>
-    <p class="age-gate__legal" id="AgeGateLegal">{{ shop.name }} sells adult-wellness products intended for adults only. By entering, you confirm you meet the legal age requirement in your jurisdiction.</p>
+    <div class="age-gate__legal" id="AgeGateLegal">{{ settings.age_gate_legal_text }}</div>
   </div>
 </div>
 <script src="{{ 'age-gate.js' | asset_url }}" defer="defer"></script>

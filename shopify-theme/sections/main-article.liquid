@@ -11,7 +11,13 @@
 
   {%- if blog.comments_enabled? -%}
     <div style="margin-top:48px;border-top:1px solid var(--color-border);padding-top:32px;">
-      <h3 class="h4" style="margin-bottom:16px;">{{ article.comments_count }} Comments</h3>
+      <h3 class="h4" style="margin-bottom:16px;">
+        {%- if article.comments_count == 1 -%}
+          {{ 'blog.comments.count.one' | t: count: article.comments_count }}
+        {%- else -%}
+          {{ 'blog.comments.count.other' | t: count: article.comments_count }}
+        {%- endif -%}
+      </h3>
       {%- for comment in article.comments -%}
         <div class="surface" style="padding:16px;margin-bottom:12px;">
           <p style="font-weight:600;font-size:13px;">{{ comment.author }}</p>
@@ -21,18 +27,18 @@
       {%- form 'new_comment', article -%}
         {{ form.errors | default_errors }}
         <div class="field" style="margin-bottom:12px;">
-          <label>Name</label>
+          <label>{{ 'blog.comments.name' | t }}</label>
           <input type="text" name="comment[author]" class="input" required>
         </div>
         <div class="field" style="margin-bottom:12px;">
-          <label>Email</label>
+          <label>{{ 'blog.comments.email' | t }}</label>
           <input type="email" name="comment[email]" class="input" required>
         </div>
         <div class="field" style="margin-bottom:12px;">
-          <label>Comment</label>
+          <label>{{ 'blog.comments.message' | t }}</label>
           <textarea name="comment[body]" class="input" rows="4" required></textarea>
         </div>
-        <button type="submit" class="btn btn--primary">Post Comment</button>
+        <button type="submit" class="btn btn--primary">{{ 'blog.comments.post' | t }}</button>
       {%- endform -%}
     </div>
   {%- endif -%}

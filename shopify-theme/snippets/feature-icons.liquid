@@ -6,32 +6,31 @@
   Usage: {% render 'feature-icons', product: product %}
 {%- endcomment -%}
 {%- liquid
-  assign features = ''
   assign m = product.metafields.custom
 -%}
 <ul class="product-benefits">
   {%- if m.waterproof -%}
-    <li>{% render 'icon', name: 'droplet' %} Waterproof</li>
+    <li>{% render 'icon', name: 'droplet' %} {{ 'products.product.feature.waterproof' | t }}</li>
   {%- endif -%}
   {%- if m.usb_rechargeable -%}
-    <li>{% render 'icon', name: 'battery' %} USB Rechargeable</li>
+    <li>{% render 'icon', name: 'battery' %} {{ 'products.product.feature.usb_rechargeable' | t }}</li>
   {%- endif -%}
   {%- if m.body_safe -%}
-    <li>{% render 'icon', name: 'shield' %} Body-Safe Silicone</li>
+    <li>{% render 'icon', name: 'shield' %} {{ 'products.product.feature.body_safe' | t }}</li>
   {%- endif -%}
   {%- if m.whisper_quiet -%}
-    <li>{% render 'icon', name: 'volume-mute' %} Whisper Quiet</li>
+    <li>{% render 'icon', name: 'volume-mute' %} {{ 'products.product.feature.whisper_quiet' | t }}</li>
   {%- endif -%}
   {%- if m.travel_lock -%}
-    <li>{% render 'icon', name: 'lock' %} Travel Lock</li>
+    <li>{% render 'icon', name: 'lock' %} {{ 'products.product.feature.travel_lock' | t }}</li>
   {%- endif -%}
   {%- if m.remote_control -%}
-    <li>{% render 'icon', name: 'zap' %} Remote Control</li>
+    <li>{% render 'icon', name: 'zap' %} {{ 'products.product.feature.remote_control' | t }}</li>
   {%- endif -%}
   {%- if m.app_control -%}
-    <li>{% render 'icon', name: 'wifi' %} App Control</li>
+    <li>{% render 'icon', name: 'wifi' %} {{ 'products.product.feature.app_control' | t }}</li>
   {%- endif -%}
   {%- if m.multiple_modes -%}
-    <li>{% render 'icon', name: 'sparkle' %} Multiple Modes</li>
+    <li>{% render 'icon', name: 'sparkle' %} {{ 'products.product.feature.multiple_modes' | t }}</li>
   {%- endif -%}
 </ul>

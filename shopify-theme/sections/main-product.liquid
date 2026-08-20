@@ -38,7 +38,7 @@
           <button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="{{ 'accessibility.previous_slide' | t }}">{% render 'icon', name: 'chevron-left' %}</button>
           <button type="button" class="product-gallery__nav product-gallery__nav--next" data-gallery-next aria-label="{{ 'accessibility.next_slide' | t }}">{% render 'icon', name: 'chevron-right' %}</button>
         {%- endif -%}
-        <button type="button" class="icon-btn product-gallery__zoom" data-gallery-zoom aria-label="Zoom image">{% render 'icon', name: 'search' %}</button>
+        <button type="button" class="icon-btn product-gallery__zoom" data-gallery-zoom aria-label="{{ 'accessibility.zoom_image' | t }}">{% render 'icon', name: 'search' %}</button>
       </div>
 
       <div class="product-gallery__body">
@@ -49,7 +49,7 @@
               class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}{% if media.media_type == 'video' or media.media_type == 'external_video' %} product-gallery__thumb--video{% endif %}"
               data-gallery-thumb
               data-media-id="{{ media.id }}"
-              aria-label="View image {{ forloop.index }}"
+              aria-label="{{ 'accessibility.view_image' | t: index: forloop.index }}"
             >
               <img src="{{ media.preview_image | image_url: width: 150 }}" alt="" loading="lazy">
             </button>
@@ -157,9 +157,9 @@
         <div class="buy-box">
           <div class="buy-box__row">
             <div class="quantity-selector">
-              <button type="button" data-quantity-change="decrease" aria-label="Decrease quantity">{% render 'icon', name: 'minus' %}</button>
+              <button type="button" data-quantity-change="decrease" aria-label="{{ 'accessibility.decrease_quantity' | t }}">{% render 'icon', name: 'minus' %}</button>
               <input type="number" name="quantity" value="1" min="1" step="1" aria-label="{{ 'products.product.quantity' | t }}">
-              <button type="button" data-quantity-change="increase" aria-label="Increase quantity">{% render 'icon', name: 'plus' %}</button>
+              <button type="button" data-quantity-change="increase" aria-label="{{ 'accessibility.increase_quantity' | t }}">{% render 'icon', name: 'plus' %}</button>
             </div>
             <button
               type="submit"
@@ -185,9 +185,9 @@
 
       <div class="product-trust-bar">
         <div class="product-trust-bar__item">{% render 'icon', name: 'package' %} {{ 'sections.trust_strip.discreet' | t }}</div>
-        <div class="product-trust-bar__item">{% render 'icon', name: 'truck' %} Tracked Shipping</div>
-        <div class="product-trust-bar__item">{% render 'icon', name: 'return' %} Easy Returns</div>
-        <div class="product-trust-bar__item">{% render 'icon', name: 'lock' %} Secure Checkout</div>
+        <div class="product-trust-bar__item">{% render 'icon', name: 'truck' %} {{ 'sections.trust_strip.tracked_shipping' | t }}</div>
+        <div class="product-trust-bar__item">{% render 'icon', name: 'return' %} {{ 'sections.trust_strip.easy_returns' | t }}</div>
+        <div class="product-trust-bar__item">{% render 'icon', name: 'lock' %} {{ 'sections.trust_strip.secure_checkout' | t }}</div>
       </div>
 
       {%- comment -%} ---------- TABS ---------- {%- endcomment -%}

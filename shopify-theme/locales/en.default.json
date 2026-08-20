@@ -7,12 +7,17 @@
       "results_products": "Products",
       "results_collections": "Collections",
       "results_pages": "Pages",
+      "results_for": "{{ count }} results for \"{{ terms }}\"",
       "view_all": "View all results"
     },
     "currency": "Currency",
     "language": "Language",
     "close": "Close",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "password_page": {
+      "password_placeholder": "Enter store password",
+      "submit": "Enter"
+    }
   },
   "accessibility": {
     "skip_to_content": "Skip to content",
@@ -24,7 +29,11 @@
     "search": "Search",
     "next_slide": "Next",
     "previous_slide": "Previous",
-    "star_reviews_info": "{{ rating_value }} out of {{ rating_max }} stars, {{ count }} reviews"
+    "star_reviews_info": "{{ rating_value }} out of {{ rating_max }} stars, {{ count }} reviews",
+    "zoom_image": "Zoom image",
+    "view_image": "View image {{ index }}",
+    "decrease_quantity": "Decrease quantity",
+    "increase_quantity": "Increase quantity"
   },
   "header": {
     "announcement": {
@@ -65,7 +74,19 @@
       "based_on_reviews": "Based on {{ count }} reviews",
       "verified_purchase": "Verified Purchase",
       "no_reviews_yet": "No reviews yet",
-      "breadcrumb_home": "Home"
+      "no_reviews_app_note": "No reviews yet — connect a reviews app to display verified customer feedback here.",
+      "breadcrumb_home": "Home",
+      "view_full_details": "View Full Details",
+      "feature": {
+        "waterproof": "Waterproof",
+        "usb_rechargeable": "USB Rechargeable",
+        "body_safe": "Body-Safe Silicone",
+        "whisper_quiet": "Whisper Quiet",
+        "travel_lock": "Travel Lock",
+        "remote_control": "Remote Control",
+        "app_control": "App Control",
+        "multiple_modes": "Multiple Modes"
+      }
     }
   },
   "collections": {
@@ -81,6 +102,15 @@
       "apply_filters": "Apply",
       "no_products": "No products found",
       "no_products_text": "Try removing some filters or browse another category."
+    },
+    "sorting": {
+      "featured": "Featured",
+      "best_selling": "Best Selling",
+      "az": "Alphabetically, A-Z",
+      "za": "Alphabetically, Z-A",
+      "price_ascending": "Price, Low to High",
+      "price_descending": "Price, High to Low",
+      "date_descending": "Newest"
     }
   },
   "cart": {
@@ -141,7 +171,22 @@
       "discreet": "Discreet Packaging",
       "worldwide": "Worldwide Delivery",
       "secure": "Secure Payments",
-      "support": "24/7 Support"
+      "support": "24/7 Support",
+      "tracked_shipping": "Tracked Shipping",
+      "easy_returns": "Easy Returns",
+      "secure_checkout": "Secure Checkout"
+    }
+  },
+  "blog": {
+    "comments": {
+      "count": {
+        "one": "{{ count }} Comment",
+        "other": "{{ count }} Comments"
+      },
+      "name": "Name",
+      "email": "Email",
+      "message": "Comment",
+      "post": "Post Comment"
     }
   },
   "gift_cards": {

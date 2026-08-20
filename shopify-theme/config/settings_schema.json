@@ -353,6 +353,13 @@
         "id": "age_gate_exit_url",
         "label": "Exit link (for under-18 visitors)",
         "default": "https://www.google.com"
+      },
+      {
+        "type": "richtext",
+        "id": "age_gate_legal_text",
+        "label": "Legal disclaimer",
+        "info": "Shown in small print below the age gate buttons. Review with legal counsel for your markets.",
+        "default": "<p>This store sells adult-wellness products intended for adults only. By entering, you confirm you meet the legal age requirement in your jurisdiction.</p>"
       }
     ]
   },

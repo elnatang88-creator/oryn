@@ -60,7 +60,7 @@
         {%- endfor -%}
       </div>
     {%- else -%}
-      <p class="placeholder-note">No reviews added yet — add customer review blocks in the theme editor, or connect a reviews app to populate this section automatically.</p>
+      <p class="placeholder-note">{{ section.settings.empty_state_text }}</p>
     {%- endif -%}
   </div>
 </section>
@@ -70,7 +70,13 @@
   "name": "Customer reviews",
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Social Proof" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Loved by Our Community" }
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Loved by Our Community" },
+    {
+      "type": "text",
+      "id": "empty_state_text",
+      "label": "Text shown when no reviews are added yet",
+      "default": "No reviews added yet — add customer review blocks in the theme editor, or connect a reviews app to populate this section automatically."
+    }
   ],
   "blocks": [
     {
