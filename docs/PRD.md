@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | Owners | Elnatan, Orian, Shoval (founders) |
-| Status | Draft for founder review |
+| Status | **Awaiting founder approval** — see [MVP_SCOPE](MVP_SCOPE.md) for what ships first |
 | Last updated | 2026-09-30 |
-| Related | [02 Information architecture](02-information-architecture.md) · [06 Analytics](06-analytics.md) · [07 Research plan](07-research-plan.md) · [08 Invention record](08-invention-record.md) · [09 Founder decisions](09-founder-decisions.md) |
+| Related | [Information architecture](INFORMATION_ARCHITECTURE.md) · [Data model](DATA_MODEL.md) · [Security model](SECURITY_MODEL.md) · [MVP scope](MVP_SCOPE.md) · [Product decisions](PRODUCT_DECISIONS.md) · [Analytics](ANALYTICS.md) · [Research plan](RESEARCH_PLAN.md) · [Invention record](INVENTION_RECORD.md) |
 
 ---
 
@@ -54,6 +54,15 @@ People meet in places where exchanging information is awkward, slow, or all-or-n
 5. **Always reversible.** Every share can be edited, narrowed, or revoked, and the change applies immediately.
 6. **Say what is visible.** Every screen that shows identity data says who can see it.
 7. **Relationships over records.** Features serve follow-up and mutual consent, not list-building.
+
+### 4a. An independent product
+
+ORYN is a fully independent product. Its interaction model (Identity Capsule → Share Session → the recipient decides), visual language, wording, screen structure, data model and business model are ORYN's own.
+
+- **Allowed:** standard platform capabilities that any product may use — QR codes, NFC tags, Wallet passes, the Web Share API, deep links, vCard, home-screen shortcuts.
+- **Not allowed:** copying the design, wording, screen structure or business model of Blinq, Popl, HiHello, Linq, Mobilo, LinkedIn or NameDrop. The team may study the category only to understand user expectations and weaknesses. Nothing is to be taken from those products' interfaces or copy.
+- A "LinkedIn" label may appear only as the name a *user* gives to their own profile link. It is never ORYN branding or a feature.
+- The team does not claim that ORYN is patented or that no competitor has related functionality. Novel mechanisms are recorded with dates in the [Invention record](INVENTION_RECORD.md) for counsel.
 
 ## 5. The Identity Capsule
 
@@ -171,7 +180,9 @@ The recipient always sees the **live** capsule filtered by the session policy, s
 - Stations and QR destinations managed by admins.
 - Aggregate analytics, data export, audit logs, org-level privacy defaults.
 
-## 13. v1 scope — 20 screens
+## 13. Full v1 screen set (20 screens)
+
+> The first milestone is narrower: the 8-step vertical slice in [MVP_SCOPE](MVP_SCOPE.md). The screens below are the full v1 target; several are already built but sit outside the MVP.
 
 | # | Screen | Route |
 |---|---|---|
@@ -219,7 +230,7 @@ Plans are defined as **sets of capabilities**, not prices. **Prices are intentio
 
 ## 16. Success metrics
 
-See [06-analytics.md](06-analytics.md) for definitions and formulas. Leading indicators for v1:
+See [ANALYTICS.md](ANALYTICS.md) for definitions and formulas. Leading indicators for v1:
 
 - Time to first share
 - Recipient view rate and expanded view rate
@@ -230,7 +241,7 @@ See [06-analytics.md](06-analytics.md) for definitions and formulas. Leading ind
 
 ## 17. Open decisions for founders
 
-Full detail in [09-founder-decisions.md](09-founder-decisions.md).
+Full detail in [PRODUCT_DECISIONS.md](PRODUCT_DECISIONS.md).
 
 1. Does Personal (romantic/social) mode ship at launch, and with which safety features?
 2. Default visibility duration for new capsules (proposal: 24 hours).

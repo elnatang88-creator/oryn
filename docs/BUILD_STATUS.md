@@ -60,7 +60,7 @@ Also built: Teams (workspace, members, roles, teams, org audit log), Insights, F
 
 ## What requires credentials (company-owned)
 
-`DATABASE_URL` (production Postgres), `ORYN_SECRET`, `NEXT_PUBLIC_APP_URL` + domain, `CRON_SECRET`, payment provider keys, email provider keys, Apple/Google wallet certificates, error-monitoring DSN. See `docs/05-operations.md`.
+`DATABASE_URL` (production Postgres), `ORYN_SECRET`, `NEXT_PUBLIC_APP_URL` + domain, `CRON_SECRET`, payment provider keys, email provider keys, Apple/Google wallet certificates, error-monitoring DSN. See `docs/OPERATIONS.md`.
 
 ## What must be tested on real devices
 

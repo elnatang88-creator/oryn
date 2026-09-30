@@ -5,7 +5,7 @@ const shot = (page: Page, name: string) => page.screenshot({ path: `docs/screens
 async function signInDemo(page: Page) {
   await page.goto('/signin')
   await page.getByLabel('Email').fill('demo@oryn.local')
-  await page.getByLabel('Password').fill('oryn-demo-2026')
+  await page.getByLabel('Password').fill(process.env.E2E_DEMO_PASSWORD ?? 'e2e-only-demo-password')
   await page.getByRole('button', { name: 'Sign in' }).click()
   await expect(page).toHaveURL(/\/today/)
 }
@@ -125,6 +125,7 @@ test('founder demo: create → share → recipient → workspace → revoke', as
 test('seeded demo account: Today, station code, event rules', async ({ page, browser }) => {
   await signInDemo(page)
   await expect(page.getByTestId('pending-request').filter({ hasText: 'Dana Cole' })).toBeVisible()
+  await expect(page.getByTestId('demo-banner')).toBeVisible() // fictional data is always labelled
 
   await page.goto('/stations')
   const link = page.getByTestId('station').first().locator('a[href^="/q/"]')

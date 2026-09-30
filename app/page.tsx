@@ -35,7 +35,7 @@ export default function Landing() {
               </div>
               <p className="mt-4 text-sm text-soft-300">The person you share with never needs an account or an app.</p>
             </div>
-            <div className="mx-auto w-full max-w-sm"><CapsuleView view={SAMPLE} preview /></div>
+            <figure className="mx-auto w-full max-w-sm"><CapsuleView view={SAMPLE} preview /><figcaption className="mt-3 text-center text-sm text-soft-300">Example capsule — a fictional person</figcaption></figure>
           </div>
         </section>
 

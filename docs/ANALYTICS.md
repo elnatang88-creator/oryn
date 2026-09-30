@@ -4,7 +4,7 @@
 |---|---|
 | Status | Draft for founder review |
 | Last updated | 2026-09-30 |
-| Related | [01 PRD](01-product-requirements.md) · [07 Research plan](07-research-plan.md) |
+| Related | [01 PRD](PRD.md) · [07 Research plan](RESEARCH_PLAN.md) |
 
 We measure whether ORYN is **useful**, not whether it is busy. Every metric below should answer: did someone share with less friction, did the recipient get to decide, and did something meaningful happen afterwards?
 

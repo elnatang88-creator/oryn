@@ -13,7 +13,7 @@ npm install
 npm run dev        # http://localhost:3000 — embedded Postgres, demo data seeded
 ```
 
-Demo sign-in: `demo@oryn.local` / `oryn-demo-2026` · Admin: `admin@oryn.local` / `oryn-admin-2026` (local only).
+Local demo accounts (fictional data, local only): `demo@oryn.local` and `admin@oryn.local`. No password is stored in the repo — set `ORYN_DEMO_PASSWORD` before first start, or use the one printed in the server console.
 
 ```bash
 npm run typecheck && npm test && npm run build && npm run test:e2e
@@ -21,18 +21,26 @@ npm run typecheck && npm test && npm run build && npm run test:e2e
 
 ## Documents
 
+**For founder approval before more UI is built:**
+
 | | |
 |---|---|
-| [01 Product requirements](docs/01-product-requirements.md) | Vision, Identity Capsule, layers, Consent Ladder, scope, plans |
-| [02 Information architecture](docs/02-information-architecture.md) | Sitemap, navigation, screens, UX and voice rules |
-| [03 Data model](docs/03-data-model.md) | Entities, tenant boundaries, share lifecycle |
-| [04 Security & privacy model](docs/04-security-model.md) | Threat model, what's implemented, what's required before launch |
-| [05 Architecture, setup & deployment](docs/05-operations.md) | Local, staging, production, jobs, monitoring |
-| [06 Analytics](docs/06-analytics.md) | Value metrics and event definitions |
-| [07 Research plan](docs/07-research-plan.md) | Interviews, test questions, safety research |
-| [08 Invention record](docs/08-invention-record.md) | Dated record of novel mechanisms for counsel |
-| [09 Founder decisions](docs/09-founder-decisions.md) | Open decisions with recommendations |
-| [10 Build status](docs/10-status.md) | Complete / simulated / needs credentials / needs real devices |
+| [PRD](docs/PRD.md) | Vision, independence, the Identity Capsule, layers, Consent Ladder, plans |
+| [INFORMATION_ARCHITECTURE](docs/INFORMATION_ARCHITECTURE.md) | Sitemap, navigation, screens, UX and voice rules |
+| [DATA_MODEL](docs/DATA_MODEL.md) | Entities, tenant boundaries, share lifecycle |
+| [SECURITY_MODEL](docs/SECURITY_MODEL.md) | Threat model, what's implemented, what's required before launch |
+| [MVP_SCOPE](docs/MVP_SCOPE.md) | The 8-step vertical slice, acceptance criteria, known gaps |
+| [PRODUCT_DECISIONS](docs/PRODUCT_DECISIONS.md) | Decisions built in (approve/change) and open founder decisions |
+
+**Also:** [LEGACY_AUDIT](docs/LEGACY_AUDIT.md) · [BUILD_STATUS](docs/BUILD_STATUS.md) · [OPERATIONS](docs/OPERATIONS.md) · [ANALYTICS](docs/ANALYTICS.md) · [RESEARCH_PLAN](docs/RESEARCH_PLAN.md) · [INVENTION_RECORD](docs/INVENTION_RECORD.md)
+
+## Branches
+
+| Branch | Purpose |
+|---|---|
+| `oryn-v1` | ORYN v1 development |
+| `backup/pre-oryn-v1-2026-09-30` | Untouched snapshot of the original code (commit `6ae925a`) — do not modify |
+| `main` | Unchanged; nothing is merged without review |
 
 ## Code map
 
@@ -46,5 +54,5 @@ lib/server/services/ All business rules
 db/migrations/       PostgreSQL schema
 tests/unit/          Service tests on a real in-memory Postgres
 tests/e2e/           Playwright: the founder demo on phone + desktop, slow network, no-JS
-legacy/              The earlier business-card prototype, preserved unchanged for reference (not built)
+legacy/              The earlier prototype, preserved unchanged (not built). See docs/LEGACY_AUDIT.md
 ```

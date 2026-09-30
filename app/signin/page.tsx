@@ -22,7 +22,7 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<{
         <Submit pendingText="Signing in…">Sign in</Submit>
       </ActionForm>
       <p className="mt-6 text-center text-[15px]">New to ORYN? <Link href={`/signup${next ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-semibold text-electric-600">Create an account</Link></p>
-      {demo && <p className="mt-8 rounded-2xl bg-soft-100 px-4 py-3 text-sm text-navy-900" data-testid="demo-credentials">Demo: <code>demo@oryn.local</code> / <code>oryn-demo-2026</code></p>}
+      {demo && <p className="mt-8 rounded-2xl bg-soft-100 px-4 py-3 text-sm text-navy-900" data-testid="demo-credentials">Local demo (fictional data): <code>demo@oryn.local</code>. The password is <code>ORYN_DEMO_PASSWORD</code>, or the one printed in the server console on first start.</p>}
     </main>
   )
 }

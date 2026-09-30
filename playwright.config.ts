@@ -25,6 +25,8 @@ export default defineConfig({
       ORYN_SECRET: 'e2e-secret-e2e-secret-e2e-secret-0000',
       ORYN_INSECURE_COOKIES: 'true',
       ORYN_JOBS_INLINE: 'true',
+      // Test-only value for the fictional local demo account. Not a real credential.
+      ORYN_DEMO_PASSWORD: process.env.E2E_DEMO_PASSWORD ?? 'e2e-only-demo-password',
     },
   },
 })

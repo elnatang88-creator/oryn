@@ -1,5 +1,7 @@
 # ORYN — Security & privacy model
 
+> Status: **awaiting founder approval** (2026-09-30).
+
 > Status: prototype. This document describes what is **implemented** and what is **still required**. ORYN has not had an independent security review, a penetration test, or a legal/regulatory review. Do not describe it as "fully secure" or compliant with any specific regulation until those are done.
 
 ## 1. What we protect
@@ -54,7 +56,7 @@ Safety and privacy controls (stop a share, stop all shares, expiry, one-time, ex
 | Encryption in transit | HSTS header in production; secure cookies | TLS 1.2+ at the edge (hosting provider); HSTS preload after domain is final |
 | Encryption at rest | Relies on the database/storage provider | Managed Postgres with encryption at rest; encrypted backups; company-owned KMS where available |
 | Row-Level Security | Service-layer scoping (tested) | Add RLS policies keyed on a per-request `app.user_id` setting as defense in depth |
-| Backups | — | Daily automated backups + point-in-time recovery; **quarterly restore drill** documented in `docs/05-operations.md` |
+| Backups | — | Daily automated backups + point-in-time recovery; **quarterly restore drill** documented in `docs/OPERATIONS.md` |
 | Secrets | `ORYN_SECRET`, `DATABASE_URL`, `CRON_SECRET` from environment only; `.env*` git-ignored | Company-owned secret manager; rotation runbook |
 | File uploads | Not implemented (photos are https links) | When added: size/type allow-list, re-encode images, strip EXIF, private bucket + signed URLs, malware scan |
 | Data export | JSON export of everything tied to the account (`/settings/privacy`) | Org-level export for Business |

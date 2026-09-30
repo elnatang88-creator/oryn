@@ -16,7 +16,8 @@ const NAV = [
 ]
 
 /** Calm workspace frame. Desktop: left rail. Phone: bottom bar with Share in the thumb zone. */
-export function AppShell({ user, children }: { user: { display_name: string; plan_key: string }; children: React.ReactNode }) {
+export function AppShell({ user, children }: { user: { display_name: string; plan_key: string; email: string }; children: React.ReactNode }) {
+  const demo = user.email.endsWith('@oryn.local')
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[248px_1fr]">
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-soft-200 bg-white px-4 py-6 lg:flex">
@@ -43,6 +44,7 @@ export function AppShell({ user, children }: { user: { display_name: string; pla
           <Link href="/today"><Logo /></Link>
           <Link href="/settings" className="btn-quiet" aria-label="Settings"><Settings className="h-5 w-5" /></Link>
         </header>
+        {demo && <p className="bg-navy-900 px-4 py-2 text-center text-xs font-semibold text-soft-200" role="note" data-testid="demo-banner">Demo account · all people, requests and numbers here are fictional sample data</p>}
         <main id="main" className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:py-10">{children}</main>
       </div>
 

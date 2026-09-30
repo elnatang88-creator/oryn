@@ -1,15 +1,38 @@
-# ORYN — Founder Decisions
+# ORYN — Product decisions
 
 | | |
 |---|---|
 | Decision owners | Elnatan, Orian, Shoval |
-| Status | Open |
+| Status | **Part A: awaiting approval. Part B: open.** |
 | Last updated | 2026-09-30 |
-| Related | [01 PRD](01-product-requirements.md) · [07 Research plan](07-research-plan.md) · [08 Invention record](08-invention-record.md) |
+| Related | [PRD](PRD.md) · [MVP scope](MVP_SCOPE.md) · [Security model](SECURITY_MODEL.md) · [Research plan](RESEARCH_PLAN.md) · [Invention record](INVENTION_RECORD.md) |
 
-Each item lists context, options, and a recommendation. Record the final decision, the date, and who decided in the table in §13.
+**Part A** lists decisions already built into the product. Each needs your approval, or a change request. **Part B** lists decisions only you can make. Record every outcome in the log at the end.
 
 ---
+
+# Part A — Decisions built into v1 (approve or change)
+
+| # | Decision | Why | Main alternative | Cost to reverse |
+|---|---|---|---|---|
+| A1 | **Web first.** The recipient experience is a web page. No app is needed to view, save or ask to connect. | The recipient must never be forced to download anything; the web works on every phone today. | Native app first | Low. Native apps can be added on top of `/api/v1`. |
+| A2 | **The sender sees counts, never who.** Opening, "Learn more", saving and keeping are counted anonymously. A recipient becomes identifiable only by sending a connect request. | This is the core promise: the other person decides. It also avoids tracking people who never agreed. | Show senders who viewed (a common category pattern) | Medium. It would break the privacy promise and need a consent flow. |
+| A3 | **Declining is silent.** "Not now" on a request is never communicated; closing the capsule is never reported. | No pressure, no awkwardness; especially important in personal moments. | Notify on decline | Low |
+| A4 | **Recipients see the live capsule.** Edits and revocation apply to links already shared. | "Always reversible" requires it. | A snapshot at share time | Medium |
+| A5 | **One-time capsules open only on a deliberate tap.** Link previews and prefetch can never use up the single view. | Chat apps pre-open links; without this, "opens once" would silently fail. | Open on first page load | Low |
+| A6 | **Safety and privacy are never paywalled.** Stopping shares, expiry, "opens once", export and deletion are on every plan. | Trust. Safety cannot depend on payment. | Gate expiry and one-time behind Pro | Low, but not recommended |
+| A7 | **Plans are capability sets. Prices stay unset until research.** Limits and price labels are data editable in `/admin`. Billing is simulated until a provider is chosen. | You asked not to lock prices before user research. | Hard-coded tiers | — |
+| A8 | **"Double press" is not promised.** Activation is one tap on Share, a home-screen shortcut, a QR, an NFC tag or a station. OS-level triggers are validated per device before being claimed. | Honesty about what the operating systems allow. | Market "double press" now | — |
+| A9 | **Portable infrastructure.** Standard Node.js + standard PostgreSQL. Our own sessions and authorization. No vendor-specific auth or queue. | Full company ownership of code, data and infrastructure, and freedom to move hosts. | A backend-as-a-service (like the legacy Supabase setup) | High once real users exist |
+| A10 | **No IP addresses stored.** Rate limiting uses a keyed hash. | Privacy by default; the legacy code stored raw IPs. | Store IPs for fraud analysis | Low |
+| A11 | **Personal/romantic capsules default to "open for 1 day"** and show a gentle tip to share little. | Safety in the store scenario. | Same defaults as professional | Low |
+| A12 | **Legacy code preserved, not deleted.** It lives in `legacy/` plus the backup branch `backup/pre-oryn-v1-2026-09-30`. See [LEGACY_AUDIT](LEGACY_AUDIT.md). | Nothing destructive without approval. | Delete it | — |
+| A13 | **Demo data is fictional, local only, and always labelled.** It lives on the `.local` domain, shows a "Demo account" banner, is never seeded in production, and has no password in the repo. | Never present invented data as real product data. | — | — |
+| A14 | **Proposed, not yet applied: MVP = the 8-step vertical slice** in [MVP_SCOPE](MVP_SCOPE.md). On approval, the already-built events, stations, teams and insights screens will be hidden behind one feature flag. Their code stays. | Ship a polished core first. | Launch everything built | Low |
+
+---
+
+# Part B — Open decisions (only the founders can make these)
 
 ## 1. Final logo asset
 
@@ -58,7 +81,7 @@ Each item lists context, options, and a recommendation. Record the final decisio
 
 **Options.** Per-user monthly for Pro; per-seat or per-event for Business; custom for Enterprise.
 
-**Recommendation.** Decide after week 6 of research. Start with a small number of prices, set within the acceptable range found, and revisit after 90 days of conversion data (see [06-analytics.md](06-analytics.md)).
+**Recommendation.** Decide after week 6 of research. Start with a small number of prices, set within the acceptable range found, and revisit after 90 days of conversion data (see [ANALYTICS.md](ANALYTICS.md)).
 
 ## 6. Wallet pass certificates
 
@@ -86,7 +109,7 @@ Each item lists context, options, and a recommendation. Record the final decisio
 
 **Context.** ORYN handles personal data of users and, when they choose, of recipients.
 
-**Recommendation.** Have **qualified counsel** draft the privacy policy, terms of service, acceptable use policy (including harassment rules), and data processing terms for Business/Enterprise. Do not publish self-written legal text or make compliance claims until counsel approves. Share the analytics privacy rules ([06-analytics.md](06-analytics.md) §1) with counsel as input.
+**Recommendation.** Have **qualified counsel** draft the privacy policy, terms of service, acceptable use policy (including harassment rules), and data processing terms for Business/Enterprise. Do not publish self-written legal text or make compliance claims until counsel approves. Share the analytics privacy rules ([ANALYTICS.md](ANALYTICS.md) §1) with counsel as input.
 
 ## 10. Data retention defaults
 
@@ -131,12 +154,13 @@ Everything that runs ORYN must belong to the company, not to individuals.
 - [ ] Apple Developer and Google Wallet issuer accounts under the company.
 - [ ] At least two founders with admin access to every critical account; recovery codes stored securely.
 - [ ] Contractor agreements with IP assignment for any designer or engineer.
-- [ ] Invention record ([08](08-invention-record.md)) kept in the company repo and reviewed with counsel.
+- [ ] Invention record ([08](INVENTION_RECORD.md)) kept in the company repo and reviewed with counsel.
 
 ## 13. Decision log
 
 | # | Decision | Chosen option | Date | Decided by |
 |---|---|---|---|---|
+| A1–A14 | Part A decisions (approve / change each) | | | |
 | 1 | Logo | | | |
 | 2 | Hosting & database | | | |
 | 3 | Email provider | | | |

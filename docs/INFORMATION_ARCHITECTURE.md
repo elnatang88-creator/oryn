@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Status | Draft for founder review |
+| Status | **Awaiting founder approval** |
 | Last updated | 2026-09-30 |
-| Related | [01 PRD](01-product-requirements.md) · [06 Analytics](06-analytics.md) |
+| Related | [PRD](PRD.md) · [MVP scope](MVP_SCOPE.md) · [Analytics](ANALYTICS.md) |
 
 ORYN has two surfaces:
 

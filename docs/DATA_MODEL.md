@@ -1,5 +1,7 @@
 # ORYN — Data model
 
+> Status: **awaiting founder approval** (2026-09-30).
+
 Source of truth: [`db/migrations/0001_init.sql`](../db/migrations/0001_init.sql). Plain PostgreSQL. The same file runs on managed Postgres in production and on embedded PGlite (Postgres compiled to WASM) for local development and tests, so no developer needs a personal cloud database.
 
 ## Tenant boundaries

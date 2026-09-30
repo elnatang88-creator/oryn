@@ -6,7 +6,7 @@
 | Duration | 6 weeks |
 | Status | Draft |
 | Last updated | 2026-09-30 |
-| Related | [01 PRD](01-product-requirements.md) · [06 Analytics](06-analytics.md) · [09 Founder decisions](09-founder-decisions.md) |
+| Related | [01 PRD](PRD.md) · [06 Analytics](ANALYTICS.md) · [09 Founder decisions](PRODUCT_DECISIONS.md) |
 
 ---
 
@@ -69,7 +69,7 @@ Participants complete tasks on the live v1 demo:
 5. Revoke the share and confirm it no longer opens.
 6. Find and add a follow-up for the new connection.
 
-Measure: task success, time on task, errors, and think-aloud comments. Compare against analytics definitions in [06-analytics.md](06-analytics.md).
+Measure: task success, time on task, errors, and think-aloud comments. Compare against analytics definitions in [ANALYTICS.md](ANALYTICS.md).
 
 ### 4.4 Pricing probe (no prices committed)
 Use Van Westendorp price sensitivity questions (too cheap / cheap / expensive / too expensive) for Pro (individual) and Business (per team or per event). Follow with a capability ranking: "Which three of these would you pay for?" Results inform the plan catalog; **no price is announced or promised to participants.**
@@ -135,7 +135,7 @@ This scenario can help someone start a conversation without interrupting, but it
 Participants may stop at any time; no pressure to share personal experiences; signpost to support resources; the note-taker records no identifying details about third parties.
 
 ### Decision output
-A written go/no-go on Personal mode at launch, with the minimum safety feature set (feeds [09-founder-decisions.md](09-founder-decisions.md)).
+A written go/no-go on Personal mode at launch, with the minimum safety feature set (feeds [PRODUCT_DECISIONS.md](PRODUCT_DECISIONS.md)).
 
 ## 7. Synthesis plan
 

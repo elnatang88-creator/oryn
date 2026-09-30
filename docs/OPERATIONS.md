@@ -35,7 +35,7 @@ npm run dev            # http://localhost:3000
 ```
 
 - Data is stored in `.data/pglite` (git-ignored). `npm run db:reset` wipes it.
-- Demo data is seeded on first start (development only): sign in with `demo@oryn.local` / `oryn-demo-2026` (Business plan, sample event, station, requests), or `admin@oryn.local` / `oryn-admin-2026` for `/admin`.
+- Demo data is seeded on first start (development only): `demo@oryn.local` (Business plan, sample event, station, requests) and `admin@oryn.local` (for `/admin`). All of it is fictional and the workspace shows a "Demo account" banner. The password comes from `ORYN_DEMO_PASSWORD`, or a random one is printed to the server console once.
 - Background jobs run inline in development.
 - To use a real Postgres locally instead: `DATABASE_URL=postgres://… DATABASE_SSL=disable npm run dev`.
 
@@ -62,6 +62,7 @@ E2E starts a production build on port 3100 with a throwaway embedded database. S
 | `CRON_SECRET` | If using `/api/jobs` | Bearer secret for the scheduler. |
 | `BILLING_PROVIDER` | Later | When set, simulated plan switching is disabled. |
 | `ORYN_SEED_DEMO` | No | `true` seeds demo accounts. Never set in production. |
+| `ORYN_DEMO_PASSWORD` | No | Password for the fictional demo accounts. If unset, a random one is printed once. |
 | `ORYN_JOBS_INLINE` | No | Run jobs right after they're queued (default on outside production). |
 | `ORYN_ALLOW_EMBEDDED_DB` | No | Allows the embedded DB with `NODE_ENV=production` — throwaway demos and E2E only. |
 | `ORYN_INSECURE_COOKIES` | No | Allow non-Secure cookies over plain http in a production build — local E2E only. |

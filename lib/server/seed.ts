@@ -1,13 +1,20 @@
 import 'server-only'
 import type { Db } from './db'
 import { newCode, newId } from './ids'
+import crypto from 'node:crypto'
 import { hashPassword } from './services/auth'
 
-export const DEMO = {
-  email: 'demo@oryn.local',
-  password: 'oryn-demo-2026',
-  adminEmail: 'admin@oryn.local',
-  adminPassword: 'oryn-admin-2026',
+/**
+ * Demo accounts exist only in local/staging demos. They are fictional, live on the reserved `.local`
+ * domain, and are labelled "Demo data" in the UI. No password is stored in the repository: set
+ * ORYN_DEMO_PASSWORD, or a random one is generated and printed to the server console once.
+ */
+export const DEMO_EMAIL = 'demo@oryn.local'
+export const DEMO_ADMIN_EMAIL = 'admin@oryn.local'
+export const isDemoEmail = (email: string) => email.endsWith('@oryn.local')
+
+function demoPassword() {
+  return process.env.ORYN_DEMO_PASSWORD || crypto.randomBytes(12).toString('base64url')
 }
 
 /** Local/demo data only. Never enabled in production unless ORYN_SEED_DEMO=true is set on purpose. */
@@ -16,8 +23,10 @@ export async function ensureDemoData(db: Db) {
   if (any) return
   const demoId = 'usr_demo'
   const adminId = 'usr_admin'
-  await db.query(`INSERT INTO users (id, email, password_hash, display_name, plan_key, onboarded_at, created_at) VALUES ($1,$2,$3,'Noa Adler','business',now(), now() - interval '20 days')`, [demoId, DEMO.email, await hashPassword(DEMO.password)])
-  await db.query(`INSERT INTO users (id, email, password_hash, display_name, plan_key, is_platform_admin) VALUES ($1,$2,$3,'ORYN Admin','free',true)`, [adminId, DEMO.adminEmail, await hashPassword(DEMO.adminPassword)])
+  const password = demoPassword()
+  await db.query(`INSERT INTO users (id, email, password_hash, display_name, plan_key, onboarded_at, created_at) VALUES ($1,$2,$3,'Noa Adler','business',now(), now() - interval '20 days')`, [demoId, DEMO_EMAIL, await hashPassword(password)])
+  await db.query(`INSERT INTO users (id, email, password_hash, display_name, plan_key, is_platform_admin) VALUES ($1,$2,$3,'ORYN Admin','free',true)`, [adminId, DEMO_ADMIN_EMAIL, await hashPassword(password)])
+  if (!process.env.ORYN_DEMO_PASSWORD) console.log(`[seed] Demo accounts created (fictional data). Password for ${DEMO_EMAIL} and ${DEMO_ADMIN_EMAIL}: ${password}`)
 
   const fields = (list: [string, string, string, string][]) => JSON.stringify(list.map(([kind, label, value, layer]) => ({ id: newId('f', 6), kind, label, value, layer })))
   await db.query(
@@ -35,7 +44,7 @@ export async function ensureDemoData(db: Db) {
   await db.query(`INSERT INTO organizations (id, name, slug, plan_key, created_by) VALUES ('org_demo', 'Harbor Labs', 'harbor-labs', 'business', $1)`, [demoId])
   await db.query(`INSERT INTO memberships (org_id, user_id, role) VALUES ('org_demo', $1, 'owner')`, [demoId])
   await db.query(`INSERT INTO events (id, org_id, name, venue, starts_on, ends_on, rules, status, created_by) VALUES ('evt_demo', 'org_demo', 'Harbor Summit 2026', 'Pier 9 Hall', current_date, current_date + 1, '{"allowPhone":false,"allowedKinds":null,"note":"Please share work details only."}', 'live', $1)`, [demoId])
-  await db.query(`INSERT INTO event_participants (id, event_id, org_id, user_id, email, display_name, role, status) VALUES ('par_demo', 'evt_demo', 'org_demo', $1, $2, 'Noa Adler', 'exhibitor', 'active'), ('par_demo2', 'evt_demo', 'org_demo', NULL, 'lee@guest.example', 'Lee Park', 'speaker', 'invited')`, [demoId, DEMO.email])
+  await db.query(`INSERT INTO event_participants (id, event_id, org_id, user_id, email, display_name, role, status) VALUES ('par_demo', 'evt_demo', 'org_demo', $1, $2, 'Noa Adler', 'exhibitor', 'active'), ('par_demo2', 'evt_demo', 'org_demo', NULL, 'lee@guest.example', 'Lee Park', 'speaker', 'invited')`, [demoId, DEMO_EMAIL])
 
   // A station at the booth, with a printed code that stays the same while the capsule behind it can change.
   await db.query(`INSERT INTO stations (id, org_id, event_id, name, kind, capsule_id) VALUES ('stn_demo', 'org_demo', 'evt_demo', 'Booth 14', 'booth', 'cap_demo_conf')`)

@@ -7,7 +7,7 @@
 | Record date | **2026-09-30** |
 | Authors | Founders **Elnatan, Orian, Shoval** (with engineering assistance) |
 | Product | ORYN v1 (web application, Next.js) |
-| Related | [01 PRD](01-product-requirements.md) · [09 Founder decisions](09-founder-decisions.md) |
+| Related | [01 PRD](PRD.md) · [09 Founder decisions](PRODUCT_DECISIONS.md) |
 
 **Why dates matter.** Priority and inventorship questions often depend on when an idea was conceived and first reduced to practice, and by whom. Keep this file under version control, append entries to the log (§8) with dates and names, and do not rewrite past entries — add corrections as new entries.
 
@@ -126,7 +126,7 @@ The sender may accept or decline; **decline is silent** to the recipient. The re
 
 ## 7. General evidence practices
 
-- Keep all work in company-owned repositories (see [09-founder-decisions.md](09-founder-decisions.md)).
+- Keep all work in company-owned repositories (see [PRODUCT_DECISIONS.md](PRODUCT_DECISIONS.md)).
 - Record commit hashes next to each mechanism in the log when first implemented.
 - Keep dated screenshots in a company-owned drive folder; note filename in the log.
 - Keep dated notes of who contributed which idea; inventorship is a legal question for counsel.
