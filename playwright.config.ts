@@ -32,6 +32,8 @@ export default defineConfig({
     timeout: 120_000,
     reuseExistingServer: false,
     env: {
+      // E2E_DATABASE_URL runs the suite against a real PostgreSQL (fresh, empty database) instead of the embedded one.
+      ...(process.env.E2E_DATABASE_URL ? { DATABASE_URL: process.env.E2E_DATABASE_URL, DATABASE_SSL: process.env.DATABASE_SSL ?? 'disable' } : {}),
       ORYN_ALLOW_EMBEDDED_DB: 'true',
       ORYN_SEED_DEMO: 'true',
       ORYN_PGLITE_DIR: '.data/e2e',

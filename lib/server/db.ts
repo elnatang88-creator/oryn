@@ -17,7 +17,7 @@ const g = globalThis as Global
 
 const DATE_OID = 1082
 
-async function createPgDb(url: string): Promise<Db> {
+export async function createPgDb(url: string): Promise<Db> {
   const pg = await import('pg')
   pg.default.types.setTypeParser(DATE_OID, (v: string) => v)
   const pool = new pg.default.Pool({
@@ -73,19 +73,28 @@ export async function createPgliteDb(dataDir?: string): Promise<Db> {
   return wrap(pglite as unknown as Runner, false)
 }
 
-export async function migrate(db: Db): Promise<void> {
-  await db.query(`CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())`)
+const MIGRATION_LOCK = 727_274 // arbitrary constant shared by every ORYN instance
+
+/**
+ * Applies pending migrations. Serverless hosts start several instances at once, so the whole run
+ * happens in one transaction holding a Postgres advisory lock: one instance migrates, the others wait
+ * and then find nothing left to do.
+ */
+export async function migrate(db: Db, after?: (t: Db) => Promise<void>): Promise<void> {
   const dir = path.join(process.cwd(), 'db', 'migrations')
   const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()
-  const applied = new Set((await db.query<{ name: string }>('SELECT name FROM schema_migrations')).map((r) => r.name))
-  for (const file of files) {
-    if (applied.has(file)) continue
-    const sql = fs.readFileSync(path.join(dir, file), 'utf8')
-    await db.tx(async (t) => {
+  await db.tx(async (t) => {
+    await t.query('SELECT pg_advisory_xact_lock($1)', [MIGRATION_LOCK])
+    await t.query(`CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())`)
+    const applied = new Set((await t.query<{ name: string }>('SELECT name FROM schema_migrations')).map((r) => r.name))
+    for (const file of files) {
+      if (applied.has(file)) continue
+      const sql = fs.readFileSync(path.join(dir, file), 'utf8')
       for (const stmt of splitSql(sql)) await t.query(stmt)
       await t.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file])
-    })
-  }
+    }
+    if (after) await after(t)
+  })
 }
 
 /** Splits a migration file into statements (no dollar-quoted bodies are used in migrations). */
@@ -110,11 +119,9 @@ async function init(): Promise<Db> {
     }
     db = await createPgliteDb(process.env.ORYN_PGLITE_DIR ?? path.join(process.cwd(), '.data', 'pglite'))
   }
-  await migrate(db)
-  if ((process.env.ORYN_SEED_DEMO ?? (process.env.NODE_ENV === 'production' ? 'false' : 'true')) === 'true') {
-    const { ensureDemoData } = await import('./seed')
-    await ensureDemoData(db)
-  }
+  const seed = (process.env.ORYN_SEED_DEMO ?? (process.env.NODE_ENV === 'production' ? 'false' : 'true')) === 'true'
+  // Demo data is created under the same lock, so parallel cold starts can't seed twice.
+  await migrate(db, seed ? async (t) => (await import('./seed')).ensureDemoData(t) : undefined)
   return db
 }
 
