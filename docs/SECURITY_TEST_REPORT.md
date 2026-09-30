@@ -84,7 +84,7 @@ Security-relevant scenarios, run at iPhone size (390×844), plus Android-phone a
 | Item | Why it matters | Needed |
 |---|---|---|
 | **Independent penetration test** | Our own tests only find what we think to look for. | An external tester before real users or business data. |
-| **Production PostgreSQL under concurrency** | Tests run on embedded Postgres (same SQL). Locking (`FOR UPDATE`, `SKIP LOCKED`) under a real connection pool with several app instances was not exercised. | A staging run on the company's managed Postgres, with parallel job workers. |
+| **Managed production Postgres** | *Update:* all 29 unit tests and all 19 E2E tests also pass on a real PostgreSQL 16 server (production mode), and 8 simultaneous cold starts migrate and seed exactly once (advisory lock). Not yet run: the company's managed provider (TLS, pooler), parallel job workers. | A staging run on the chosen provider. |
 | **Client-IP trust behind the host's proxy** | Rate limits read the first `X-Forwarded-For` value. If the host doesn't overwrite that header, a client can rotate it to evade per-IP limits. Per-account and per-browser limits still apply. | Confirm the header behaviour on the chosen host; read the platform's trusted header. |
 | **Row-level security in the database** | Isolation is enforced (and tested) in the service layer. There is no second line of defence in Postgres yet. | Add RLS policies keyed on a per-request user setting. |
 | Two-step sign-in, email verification, login alerts | Account takeover would expose private notes. | Needs an email provider (founder decision). |
