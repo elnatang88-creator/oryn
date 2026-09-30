@@ -17,9 +17,9 @@ export default async function RequestsPage() {
         <ul className="space-y-3">
           {requests.map((r) => (
             <li key={r.id} className="card p-5" data-testid="request-card">
-              <p className="text-lg font-bold text-navy-900">{r.from_name}</p>
+              <p dir="auto" className="text-lg font-bold text-navy-900">{r.from_name}</p>
               <p className="text-sm text-ink-muted">Via “{r.capsule_name}”{r.event_name ? ` at ${r.event_name}` : r.context_label ? ` · ${r.context_label}` : ''} · {relTime(r.created_at)}</p>
-              {r.message && <p className="mt-3 rounded-xl bg-soft-50 px-4 py-3">“{r.message}”</p>}
+              {r.message && <p dir="auto" className="mt-3 rounded-xl bg-soft-50 px-4 py-3">“{r.message}”</p>}
               <p className="mt-3 text-sm"><span className="text-ink-muted">They shared:</span> <span className="font-medium">{r.from_contact}</span></p>
 <RespondButtons id={r.id} />
             </li>

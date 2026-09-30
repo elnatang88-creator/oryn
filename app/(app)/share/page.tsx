@@ -37,7 +37,7 @@ export default async function SharePage({ searchParams }: { searchParams: Promis
         <input type="hidden" name="one_time_field" value="1" />
         <div>
           <label className="label" htmlFor="context">Where are you? <span className="font-normal text-ink-muted">— only you see this</span></label>
-          <input id="context" name="context" className="input" placeholder="e.g. Harbor Summit, Hall B" maxLength={80} />
+          <input dir="auto" id="context" name="context" className="input" placeholder="e.g. Harbor Summit, Hall B" maxLength={80} />
         </div>
         {events.length > 0 && (
           <div>

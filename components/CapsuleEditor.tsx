@@ -51,7 +51,7 @@ export function CapsuleEditor({
       fields: (previewLayer === 'expanded' ? [...instant, ...expanded] : instant).map(({ id, kind, label, value }) => ({ id, kind, label, value })),
       primaryFieldId: v.primaryFieldId && instant.some((f) => f.id === v.primaryFieldId) ? v.primaryFieldId : null,
       hasMore: previewLayer === 'instant' && expanded.length > 0, canSave: true, canConnect: true,
-      expiresAt: null, oneTime: false, contextLabel: null, eventName: null,
+      expiresAt: null, oneTime: false, contextLabel: null, eventName: null, isDemo: false,
     }
   }, [v, previewLayer, canExpand])
 
@@ -69,7 +69,7 @@ export function CapsuleEditor({
           <legend className="sr-only">About this capsule</legend>
           <div>
             <label className="label" htmlFor="name">Capsule name <span className="font-normal text-ink-muted">— only you see this</span></label>
-            <input id="name" name="name" className="input" value={v.name} onChange={(e) => set('name', e.target.value)} placeholder="e.g. Conference" maxLength={40} required />
+            <input dir="auto" id="name" name="name" className="input" value={v.name} onChange={(e) => set('name', e.target.value)} placeholder="e.g. Conference" maxLength={40} required />
           </div>
           <div>
             <span className="label">Mode</span>
@@ -92,19 +92,19 @@ export function CapsuleEditor({
           <legend className="flex w-full items-center justify-between px-0 text-base font-bold text-navy-900">What they see first</legend>
           <div>
             <label className="label" htmlFor="display_name">Name they see</label>
-            <input id="display_name" name="display_name" className="input" value={v.display_name} onChange={(e) => set('display_name', e.target.value)} maxLength={60} autoComplete="name" />
+            <input dir="auto" id="display_name" name="display_name" className="input" value={v.display_name} onChange={(e) => set('display_name', e.target.value)} maxLength={60} autoComplete="name" />
           </div>
           <div>
             <label className="label" htmlFor="headline">One line about you <span className="font-normal text-ink-muted">(optional)</span></label>
-            <input id="headline" name="headline" className="input" value={v.headline} onChange={(e) => set('headline', e.target.value)} maxLength={90} placeholder="Product lead · Harbor Labs" />
+            <input dir="auto" id="headline" name="headline" className="input" value={v.headline} onChange={(e) => set('headline', e.target.value)} maxLength={90} placeholder="Product lead · Harbor Labs" />
           </div>
           <div>
             <label className="label" htmlFor="message">A short message <span className="font-normal text-ink-muted">(optional)</span></label>
-            <textarea id="message" name="message" className="input min-h-[80px] py-3" value={v.message} onChange={(e) => set('message', e.target.value)} maxLength={160} placeholder="Didn’t want to interrupt — here’s how to reach me." />
+            <textarea dir="auto" id="message" name="message" className="input min-h-[80px] py-3" value={v.message} onChange={(e) => set('message', e.target.value)} maxLength={160} placeholder="Didn’t want to interrupt — here’s how to reach me." />
           </div>
           <div>
             <label className="label" htmlFor="avatar_url">Photo link <span className="font-normal text-ink-muted">(optional, https)</span></label>
-            <input id="avatar_url" name="avatar_url" className="input" value={v.avatar_url ?? ''} onChange={(e) => set('avatar_url', e.target.value || null)} placeholder="https://…" inputMode="url" />
+            <input dir="auto" id="avatar_url" name="avatar_url" className="input" value={v.avatar_url ?? ''} onChange={(e) => set('avatar_url', e.target.value || null)} placeholder="https://…" inputMode="url" />
           </div>
         </fieldset>
 
@@ -116,7 +116,7 @@ export function CapsuleEditor({
               <li key={f.id} className="rounded-2xl border border-soft-200 p-3" data-testid="field-row">
                 <div className="flex items-center gap-2">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-soft-100 text-electric-600"><FieldIcon kind={f.kind} /></span>
-                  <input aria-label="Label" className="input mt-0 min-h-[44px] flex-1 font-semibold" value={f.label} onChange={(e) => setField(f.id, { label: e.target.value })} maxLength={40} />
+                  <input dir="auto" aria-label="Label" className="input mt-0 min-h-[44px] flex-1 font-semibold" value={f.label} onChange={(e) => setField(f.id, { label: e.target.value })} maxLength={40} />
                   <button type="button" onClick={() => set('primaryFieldId', v.primaryFieldId === f.id ? null : f.id)} className={`grid h-11 w-11 place-items-center rounded-xl ${v.primaryFieldId === f.id ? 'bg-electric text-white' : 'text-ink-faint hover:bg-soft-100'}`} aria-pressed={v.primaryFieldId === f.id} aria-label="Make this the main button">
                     <Star className="h-5 w-5" />
                   </button>
@@ -124,7 +124,7 @@ export function CapsuleEditor({
                     <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
-                <input aria-label={`${f.label} value`} className="input" value={f.value} onChange={(e) => setField(f.id, { value: e.target.value })} placeholder={placeholder(f.kind)} inputMode={f.kind === 'email' ? 'email' : f.kind === 'phone' ? 'tel' : ['website', 'social', 'booking', 'link'].includes(f.kind) ? 'url' : 'text'} data-testid={`field-value-${f.kind}`} />
+                <input dir="auto" aria-label={`${f.label} value`} className="input" value={f.value} onChange={(e) => setField(f.id, { value: e.target.value })} placeholder={placeholder(f.kind)} inputMode={f.kind === 'email' ? 'email' : f.kind === 'phone' ? 'tel' : ['website', 'social', 'booking', 'link'].includes(f.kind) ? 'url' : 'text'} data-testid={`field-value-${f.kind}`} />
                 <div className="mt-2 grid grid-cols-3 gap-1 rounded-xl bg-soft-100 p-1" role="radiogroup" aria-label={`Where “${f.label}” appears`}>
                   {LAYERS.map((l) => {
                     const disabled = l === 'expanded' && !canExpand
@@ -151,7 +151,7 @@ export function CapsuleEditor({
             <span className="chip bg-white/15 text-white">Only you</span>
           </div>
           <p className="text-sm text-soft-200">Never shown to anyone you share with.</p>
-          <textarea id="private_note" name="private_note" disabled={!canNotes} className="input min-h-[80px] border-white/20 bg-navy-800 py-3 text-white placeholder:text-soft-300/60" value={v.private_note} onChange={(e) => set('private_note', e.target.value)} maxLength={2000} placeholder={canNotes ? 'When to use this capsule, what to keep hidden…' : 'Private notes are part of Pro.'} />
+          <textarea dir="auto" id="private_note" name="private_note" disabled={!canNotes} className="input min-h-[80px] border-white/20 bg-navy-800 py-3 text-white placeholder:text-soft-300/60" value={v.private_note} onChange={(e) => set('private_note', e.target.value)} maxLength={2000} placeholder={canNotes ? 'When to use this capsule, what to keep hidden…' : 'Private notes are part of Pro.'} />
         </fieldset>
 
         <div className="sticky bottom-24 z-10 rounded-2xl bg-soft-50/90 py-2 backdrop-blur lg:bottom-4">

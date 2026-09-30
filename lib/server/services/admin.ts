@@ -11,10 +11,11 @@ export async function adminOverview(adminId: string) {
   await requirePlatformAdmin(db, adminId)
   await audit(db, { actor: adminId, action: 'admin.console_viewed', targetType: 'platform' })
   const [stats] = await db.query<Record<string, number>>(
-    `SELECT (SELECT count(*)::int FROM users WHERE deleted_at IS NULL) AS users,
-            (SELECT count(*)::int FROM organizations) AS orgs,
-            (SELECT count(*)::int FROM capsules WHERE status='active') AS capsules,
-            (SELECT count(*)::int FROM share_sessions WHERE created_at > now() - interval '7 days') AS shares_7d,
+    // Counts exclude fictional demo accounts (.local domain).
+    `SELECT (SELECT count(*)::int FROM users WHERE deleted_at IS NULL AND email NOT LIKE '%@oryn.local') AS users,
+            (SELECT count(*)::int FROM organizations WHERE id <> 'org_demo') AS orgs,
+            (SELECT count(*)::int FROM capsules c JOIN users u ON u.id = c.owner_user_id WHERE c.status='active' AND u.email NOT LIKE '%@oryn.local') AS capsules,
+            (SELECT count(*)::int FROM share_sessions s JOIN users u ON u.id = s.owner_user_id WHERE s.created_at > now() - interval '7 days' AND u.email NOT LIKE '%@oryn.local') AS shares_7d,
             (SELECT count(*)::int FROM jobs WHERE status = 'failed') AS failed_jobs,
             (SELECT count(*)::int FROM interactions WHERE kind = 'reported' AND created_at > now() - interval '30 days') AS reports_30d`)
   const users = await db.query<{ id: string; email: string; display_name: string; plan_key: string; created_at: Date; is_platform_admin: boolean }>(

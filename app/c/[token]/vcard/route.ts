@@ -11,7 +11,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
   return new NextResponse(r.vcard, {
     headers: {
       'Content-Type': 'text/vcard; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(r.filename)}"`,
+      // ASCII fallback + RFC 5987 UTF-8 name, so Hebrew (and any script) names survive the download.
+      'Content-Disposition': `attachment; filename="contact.vcf"; filename*=UTF-8''${encodeURIComponent(r.filename)}`,
       'Cache-Control': 'private, no-store',
     },
   })

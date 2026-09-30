@@ -36,7 +36,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
       <ActionForm action={eventRulesAction} className="card space-y-4 p-5">
         <input type="hidden" name="id" value={e.id} />
         <label className="flex min-h-[48px] items-center gap-3"><input type="checkbox" name="allowPhone" defaultChecked={e.rules.allowPhone} className="h-5 w-5 accent-electric" /> Allow phone numbers in event shares</label>
-        <div><label className="label" htmlFor="note">Note for participants</label><input id="note" name="note" defaultValue={e.rules.note} className="input" maxLength={200} /></div>
+        <div><label className="label" htmlFor="note">Note for participants</label><input dir="auto" id="note" name="note" defaultValue={e.rules.note} className="input" maxLength={200} /></div>
         <p className="hint">Rules apply instantly to every share at this event, including ones already open. ORYN does not collect attendee lists from shares — people connect one by one, by choice.</p>
         <Submit>Save rules</Submit>
       </ActionForm>

@@ -36,9 +36,9 @@ export default async function AdminPage() {
             <ActionForm key={p.key} action={adminPlanAction} className="grid items-end gap-2 rounded-xl bg-soft-50 p-3 sm:grid-cols-[110px_1fr_110px_110px_auto]">
               <input type="hidden" name="key" value={p.key} />
               <p className="font-bold">{p.name}</p>
-              <div><label className="text-xs text-ink-muted" htmlFor={`pl-${p.key}`}>Price label</label><input id={`pl-${p.key}`} name="priceLabel" defaultValue={p.price_label ?? ''} className="input mt-0 min-h-[40px]" /></div>
-              <div><label className="text-xs text-ink-muted" htmlFor={`cl-${p.key}`}>Capsules</label><input id={`cl-${p.key}`} name="capsules" type="number" defaultValue={p.limits.capsules} className="input mt-0 min-h-[40px]" /></div>
-              <div><label className="text-xs text-ink-muted" htmlFor={`hd-${p.key}`}>History days</label><input id={`hd-${p.key}`} name="historyDays" type="number" defaultValue={p.limits.historyDays} className="input mt-0 min-h-[40px]" /></div>
+              <div><label className="text-xs text-ink-muted" htmlFor={`pl-${p.key}`}>Price label</label><input dir="auto" id={`pl-${p.key}`} name="priceLabel" defaultValue={p.price_label ?? ''} className="input mt-0 min-h-[40px]" /></div>
+              <div><label className="text-xs text-ink-muted" htmlFor={`cl-${p.key}`}>Capsules</label><input dir="auto" id={`cl-${p.key}`} name="capsules" type="number" defaultValue={p.limits.capsules} className="input mt-0 min-h-[40px]" /></div>
+              <div><label className="text-xs text-ink-muted" htmlFor={`hd-${p.key}`}>History days</label><input dir="auto" id={`hd-${p.key}`} name="historyDays" type="number" defaultValue={p.limits.historyDays} className="input mt-0 min-h-[40px]" /></div>
               <Submit className="btn-more min-h-[40px] text-sm">Save</Submit>
             </ActionForm>
           ))}
@@ -60,7 +60,7 @@ export default async function AdminPage() {
         <ul className="mt-3 divide-y divide-soft-100 text-sm">
           {data.users.map((u) => (
             <li key={u.id} className="flex flex-wrap items-center gap-2 py-2">
-              <span className="flex-1">{u.display_name} <span className="text-ink-muted">· {u.email} · joined {relTime(u.created_at)}</span></span>
+              <span className="flex-1">{u.display_name} {u.email.endsWith('@oryn.local') && <span className="chip bg-amber-100 text-amber-900">demo</span>} <span className="text-ink-muted">· {u.email} · joined {relTime(u.created_at)}</span></span>
               <form action={adminUserPlanAction} className="flex gap-1"><input type="hidden" name="userId" value={u.id} />
                 <select name="plan" defaultValue={u.plan_key} aria-label={`Plan for ${u.email}`} className="input mt-0 min-h-[36px] w-auto py-0 text-sm">{data.plans.map((p) => <option key={p.key} value={p.key}>{p.name}</option>)}</select>
                 <button className="btn-quiet min-h-[36px] text-sm">Set</button></form>

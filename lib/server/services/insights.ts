@@ -35,15 +35,17 @@ export async function personalInsights(userId: string) {
 export async function productMetrics() {
   const db = await getDb()
   const [m] = await db.query<Record<string, number | null>>(
-    `WITH ev AS (SELECT name, count(*)::float AS n FROM analytics_events WHERE created_at > now() - interval '30 days' GROUP BY name)
+    // Demo accounts (fictional data on the .local domain) are excluded from every product metric.
+    `WITH demo AS (SELECT id FROM users WHERE email LIKE '%@oryn.local'),
+          ev AS (SELECT name, count(*)::float AS n FROM analytics_events WHERE created_at > now() - interval '30 days' AND (user_id IS NULL OR user_id NOT IN (SELECT id FROM demo)) GROUP BY name)
      SELECT
-      (SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'msSinceSignup')::float) / 1000 FROM analytics_events WHERE name = 'capsule_created' AND props->>'first' = 'true') AS median_sec_to_first_capsule,
-      (SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'msSinceSignup')::float) / 1000 FROM analytics_events WHERE name = 'share_started' AND props->>'first' = 'true') AS median_sec_to_first_share,
-      (SELECT count(*) FILTER (WHERE view_count > 0)::float / nullif(count(*),0) FROM share_sessions WHERE created_at > now() - interval '30 days' AND station_id IS NULL) AS recipient_view_rate,
+      (SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'msSinceSignup')::float) / 1000 FROM analytics_events WHERE name = 'capsule_created' AND props->>'first' = 'true' AND user_id NOT IN (SELECT id FROM demo)) AS median_sec_to_first_capsule,
+      (SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY (props->>'msSinceSignup')::float) / 1000 FROM analytics_events WHERE name = 'share_started' AND props->>'first' = 'true' AND user_id NOT IN (SELECT id FROM demo)) AS median_sec_to_first_share,
+      (SELECT count(*) FILTER (WHERE view_count > 0)::float / nullif(count(*),0) FROM share_sessions WHERE created_at > now() - interval '30 days' AND station_id IS NULL AND owner_user_id NOT IN (SELECT id FROM demo)) AS recipient_view_rate,
       (SELECT n FROM ev WHERE name = 'share_expanded') / nullif((SELECT n FROM ev WHERE name = 'share_viewed'),0) AS expanded_view_rate,
       (SELECT n FROM ev WHERE name = 'connect_requested') / nullif((SELECT n FROM ev WHERE name = 'share_viewed'),0) AS connect_request_rate,
       (SELECT n FROM ev WHERE name = 'followup_completed') / nullif((SELECT n FROM ev WHERE name = 'followup_created'),0) AS followup_completion_rate,
-      (SELECT count(*) FILTER (WHERE revoked_at IS NOT NULL)::float / nullif(count(*),0) FROM share_sessions WHERE created_at > now() - interval '30 days') AS revoked_share_rate,
+      (SELECT count(*) FILTER (WHERE revoked_at IS NOT NULL)::float / nullif(count(*),0) FROM share_sessions WHERE created_at > now() - interval '30 days' AND owner_user_id NOT IN (SELECT id FROM demo)) AS revoked_share_rate,
       (SELECT n FROM ev WHERE name = 'plan_gate_hit') AS plan_gate_hits`,
   )
   return m

@@ -33,6 +33,7 @@ export function CapsuleView({ view, preview = false, now }: { view: PublicCapsul
   const left = timeLeft(view.expiresAt, now)
   return (
     <article className="overflow-hidden rounded-capsule bg-white shadow-capsule" aria-label={`${view.displayName}’s ORYN capsule`}>
+      {view.isDemo && <p className="bg-amber-100 px-4 py-2 text-center text-[13px] font-semibold text-amber-900" role="note" data-testid="demo-capsule">Demo capsule — this is a fictional person, not a real user</p>}
       <header className="relative bg-navy-900 px-6 pb-7 pt-5 text-white">
         <div className="flex flex-wrap items-center gap-2 text-[12px] font-semibold text-soft-200" data-testid="viewing-indicator">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
@@ -55,11 +56,11 @@ export function CapsuleView({ view, preview = false, now }: { view: PublicCapsul
             <div className="grid h-16 w-16 place-items-center rounded-2xl bg-electric text-xl font-bold" aria-hidden="true">{initials(view.displayName)}</div>
           )}
           <div className="min-w-0">
-            <h1 className="truncate text-[24px] font-bold leading-tight" data-testid="capsule-name">{view.displayName}</h1>
-            {view.headline && <p className="mt-0.5 text-[15px] text-soft-200">{view.headline}</p>}
+            <h1 dir="auto" className="truncate text-[24px] font-bold leading-tight" data-testid="capsule-name">{view.displayName}</h1>
+            {view.headline && <p dir="auto" className="mt-0.5 text-[15px] text-soft-200">{view.headline}</p>}
           </div>
         </div>
-        {view.message && <p className="mt-5 rounded-2xl bg-white/[0.07] px-4 py-3 text-[15px] leading-relaxed text-white/95">“{view.message}”</p>}
+        {view.message && <p dir="auto" className="mt-5 rounded-2xl bg-white/[0.07] px-4 py-3 text-[15px] leading-relaxed text-white/95">{view.message}</p>}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/oryn-mark.svg" alt="" aria-hidden="true" className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 opacity-[0.12]" />
       </header>
@@ -86,16 +87,17 @@ function FieldRow({ f, primary = false, preview }: { f: PublicCapsuleView['field
         <FieldIcon kind={f.kind} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className={`block text-[12px] font-semibold ${primary ? 'text-soft-200' : 'text-ink-muted'}`}>{f.label}</span>
-        <span className={`block truncate text-[15px] font-semibold ${primary ? 'text-white' : 'text-ink'}`}>{prettyValue(f.kind, f.value)}</span>
+        <span dir="auto" className={`block text-[12px] font-semibold ${primary ? 'text-soft-200' : 'text-ink-muted'}`}>{f.label}</span>
+        <span dir="auto" className={`block truncate text-[15px] font-semibold ${primary ? 'text-white' : 'text-ink'}`}>{prettyValue(f.kind, f.value)}</span>
       </span>
       {href && <ArrowUpRight className={`h-5 w-5 shrink-0 ${primary ? 'text-white' : 'text-ink-faint'}`} aria-hidden="true" />}
     </>
   )
   const cls = `flex min-h-[60px] items-center gap-3 rounded-2xl px-3 py-2.5 ${primary ? 'bg-electric text-white' : 'bg-soft-50 hover:bg-soft-100'}`
-  if (!href || preview) return <div className={cls}>{body}</div>
+  const test = { 'data-testid': 'capsule-field', 'data-kind': f.kind }
+  if (!href || preview) return <div className={cls} {...test}>{body}</div>
   return (
-    <a href={href} className={cls} {...(external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}>
+    <a href={href} className={cls} {...test} {...(external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}>
       {body}
     </a>
   )

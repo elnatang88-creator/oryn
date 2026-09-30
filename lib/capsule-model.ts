@@ -51,7 +51,7 @@ export const DURATION_PRESETS: { minutes: number | null; label: string }[] = [
 export const MODE_TEMPLATES: Record<Mode, { kind: FieldKind; label: string; layer: Layer }[]> = {
   professional: [
     { kind: 'role', label: 'Role', layer: 'instant' }, { kind: 'company', label: 'Company', layer: 'instant' },
-    { kind: 'social', label: 'LinkedIn', layer: 'instant' }, { kind: 'email', label: 'Work email', layer: 'instant' },
+    { kind: 'social', label: 'Profile link', layer: 'instant' }, { kind: 'email', label: 'Work email', layer: 'instant' },
     { kind: 'website', label: 'Website', layer: 'expanded' }, { kind: 'phone', label: 'Phone', layer: 'hidden' },
   ],
   business: [
@@ -106,5 +106,7 @@ export interface PublicCapsuleView {
   oneTime: boolean
   contextLabel: string | null
   eventName: string | null
+  /** True when the capsule belongs to a fictional demo account; recipients are told plainly. */
+  isDemo: boolean
 }
 

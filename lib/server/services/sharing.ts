@@ -168,8 +168,8 @@ export async function revokeAllShares(userId: string) {
 // ─── Recipient side ───────────────────────────────────────────────────────────
 
 async function loadForRecipient(db: Db, sessionId: string) {
-  const [row] = await db.query<ShareSession & { capsule: Capsule; event_name: string | null; event_rules: Record<string, unknown> | null; event_status: string | null; owner_deleted: boolean }>(
-    `SELECT s.*, to_jsonb(c.*) AS capsule, e.name AS event_name, e.rules AS event_rules, e.status AS event_status, (u.deleted_at IS NOT NULL) AS owner_deleted
+  const [row] = await db.query<ShareSession & { capsule: Capsule; event_name: string | null; event_rules: Record<string, unknown> | null; event_status: string | null; owner_deleted: boolean; owner_demo: boolean }>(
+    `SELECT s.*, to_jsonb(c.*) AS capsule, e.name AS event_name, e.rules AS event_rules, e.status AS event_status, (u.deleted_at IS NOT NULL) AS owner_deleted, (u.email LIKE '%@oryn.local') AS owner_demo
        FROM share_sessions s JOIN capsules c ON c.id = s.capsule_id JOIN users u ON u.id = s.owner_user_id
        LEFT JOIN events e ON e.id = s.event_id
       WHERE s.id = $1`,
@@ -183,7 +183,7 @@ export function project(
   capsule: Pick<Capsule, 'mode' | 'display_name' | 'headline' | 'message' | 'avatar_url' | 'accent' | 'fields' | 'primary_action'>,
   s: Pick<ShareSession, 'allow_expanded' | 'interaction_level' | 'expires_at' | 'one_time' | 'context_label'>,
   layer: 'instant' | 'expanded',
-  ctx: { eventName?: string | null; eventRules?: Record<string, unknown> | null } = {},
+  ctx: { eventName?: string | null; eventRules?: Record<string, unknown> | null; isDemo?: boolean } = {},
 ): PublicCapsuleView {
   const rules = ctx.eventRules ?? {}
   const allowedKinds = Array.isArray(rules.allowedKinds) ? (rules.allowedKinds as string[]) : null
@@ -211,6 +211,7 @@ export function project(
     oneTime: s.one_time,
     contextLabel: null, // the owner's context label is private to the owner
     eventName: ctx.eventName ?? null,
+    isDemo: !!ctx.isDemo,
   }
 }
 
@@ -233,7 +234,7 @@ export async function resolveShare(
   const db = await getDb()
   const row = await loadForRecipient(db, check.sessionId)
   if (!row || row.owner_deleted || row.capsule.status !== 'active') return { status: 'not_found' }
-  const { capsule, event_name, event_rules, event_status, owner_deleted: _deleted, ...session } = row
+  const { capsule, event_name, event_rules, event_status, owner_deleted: _deleted, owner_demo, ...session } = row
   const s = session as ShareSession
   const layer = opts.layer ?? 'instant'
 
@@ -266,8 +267,8 @@ export async function resolveShare(
     }
   }
 
-  if (layer === 'expanded' && !s.allow_expanded) return { status: 'ok', view: project(capsule, s, 'instant', { eventName: event_name, eventRules: event_rules }), session: s, setClaim }
-  const view = project(capsule, s, layer, { eventName: event_name, eventRules: event_rules })
+  if (layer === 'expanded' && !s.allow_expanded) return { status: 'ok', view: project(capsule, s, 'instant', { eventName: event_name, eventRules: event_rules, isDemo: owner_demo }), session: s, setClaim }
+  const view = project(capsule, s, layer, { eventName: event_name, eventRules: event_rules, isDemo: owner_demo })
 
   if (opts.record) {
     const col = layer === 'instant' ? 'view_count' : 'expanded_count'
@@ -303,7 +304,7 @@ export async function recipientVcard(token: string, claimToken: string | null) {
     else if (['website', 'social', 'booking', 'link'].includes(f.kind)) lines.push(`URL:${vcardEscape(f.value)}`)
   }
   lines.push(`NOTE:${vcardEscape(`Shared with ORYN${v.eventName ? ` at ${v.eventName}` : ''}`)}`, 'END:VCARD')
-  return { status: 'ok' as const, vcard: lines.join('\r\n') + '\r\n', filename: `${v.displayName.replace(/[^\w -]/g, '').trim() || 'contact'}.vcf` }
+  return { status: 'ok' as const, vcard: lines.join('\r\n') + '\r\n', filename: `${v.displayName.replace(/[^\p{L}\p{N} .-]/gu, '').trim().slice(0, 60) || 'contact'}.vcf` }
 }
 
 const connectInput = z.object({
@@ -320,8 +321,10 @@ export async function requestConnection(token: string, input: z.input<typeof con
   if (res.status !== 'ok') throw new AppError('not_found', 'This capsule is no longer available.')
   if (!res.view.canConnect) throw new AppError('forbidden', 'This capsule doesn’t accept requests.')
   const db = await getDb()
-  await rateLimit(db, `connect:${ctx.ipKey}`, 10, 3600)
-  await rateLimit(db, `connect-share:${res.session.id}:${ctx.ipKey}`, 2, 86400)
+  // Venues share one public IP across hundreds of phones, so the per-IP cap is generous; the tight
+  // limit is per browser per link (claim cookie; falls back to IP when a browser has none).
+  await rateLimit(db, `connect:${ctx.ipKey}`, 300, 3600)
+  await rateLimit(db, `connect-share:${res.session.id}:${ctx.claimToken ? claimHash(res.session.id, ctx.claimToken).slice(0, 16) : ctx.ipKey}`, 2, 86400)
   const recipientId = newId('rcp')
   const requestId = newId('req')
   await db.tx(async (t) => {

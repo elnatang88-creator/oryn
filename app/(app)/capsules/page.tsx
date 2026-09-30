@@ -29,8 +29,8 @@ export default async function CapsulesPage() {
                     <span className="text-xs font-semibold uppercase tracking-wider text-soft-300">{MODE_COPY[c.mode].label}</span>
                     {c.is_default && <span className="chip bg-white/15 text-white"><Star className="h-3 w-3" aria-hidden="true" /> Default</span>}
                   </div>
-                  <p className="mt-2 text-lg font-bold">{c.name}</p>
-                  <p className="text-sm text-soft-200">{c.display_name}{c.headline ? ` · ${c.headline}` : ''}</p>
+                  <p dir="auto" className="mt-2 text-lg font-bold">{c.name}</p>
+                  <p dir="auto" className="text-sm text-soft-200">{c.display_name}{c.headline ? ` · ${c.headline}` : ''}</p>
                 </Link>
                 <div className="flex-1 px-5 py-3 text-sm text-ink-muted">
                   {shown} shown first · {more} on “Learn more” · {hidden} not shared

@@ -60,7 +60,7 @@ export default async function InstantView({ params }: { params: Promise<{ token:
         <ActionForm action={reportAction} className="mt-3 text-left">
           <input type="hidden" name="token" value={token} />
           <label htmlFor="reason" className="label">What happened?</label>
-          <textarea id="reason" name="reason" className="input min-h-[80px] py-3" maxLength={300} />
+          <textarea dir="auto" id="reason" name="reason" className="input min-h-[80px] py-3" maxLength={300} />
           <div className="mt-2"><Submit className="btn-more w-full">Send report</Submit></div>
         </ActionForm>
       </details>

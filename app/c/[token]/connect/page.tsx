@@ -42,15 +42,15 @@ export default async function ConnectPage({ params, searchParams }: { params: Pr
         <input type="hidden" name="token" value={token} />
         <div>
           <label className="label" htmlFor="name">Your name</label>
-          <input id="name" name="name" className="input" autoComplete="name" defaultValue={me?.display_name ?? ''} maxLength={80} required />
+          <input dir="auto" id="name" name="name" className="input" autoComplete="name" defaultValue={me?.display_name ?? ''} maxLength={80} required />
         </div>
         <div>
           <label className="label" htmlFor="contact">One way to reach you</label>
-          <input id="contact" name="contact" className="input" placeholder="Email, phone or a social handle" defaultValue={me?.email ?? ''} maxLength={160} required />
+          <input dir="auto" id="contact" name="contact" className="input" placeholder="Email, phone or a social handle" defaultValue={me?.email ?? ''} maxLength={160} required />
         </div>
         <div>
           <label className="label" htmlFor="message">A short note <span className="font-normal text-ink-muted">(optional)</span></label>
-          <textarea id="message" name="message" className="input min-h-[90px] py-3" maxLength={300} placeholder="Where you met, or why you’d like to talk" />
+          <textarea dir="auto" id="message" name="message" className="input min-h-[90px] py-3" maxLength={300} placeholder="Where you met, or why you’d like to talk" />
         </div>
         <Submit pendingText="Sending…" className="btn-connect w-full">Send to {first}</Submit>
       </ActionForm>

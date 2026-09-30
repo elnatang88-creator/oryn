@@ -22,8 +22,8 @@ export default async function ParticipantsPage({ params }: { params: Promise<{ i
       <PageHeader title="Participants" sub="People with an ORYN account can share at this event right away." />
       <ActionForm action={addParticipantAction} className="card mb-6 grid gap-3 p-4 sm:grid-cols-2" resetOnSuccess>
         <input type="hidden" name="eventId" value={id} />
-        <div><label className="label" htmlFor="displayName">Name</label><input id="displayName" name="displayName" className="input" maxLength={80} /></div>
-        <div><label className="label" htmlFor="email">Email</label><input id="email" name="email" type="email" className="input" /></div>
+        <div><label className="label" htmlFor="displayName">Name</label><input dir="auto" id="displayName" name="displayName" className="input" maxLength={80} /></div>
+        <div><label className="label" htmlFor="email">Email</label><input dir="auto" id="email" name="email" type="email" className="input" /></div>
         <div><label className="label" htmlFor="role">Role</label><select id="role" name="role" className="input"><option value="attendee">Attendee</option><option value="exhibitor">Exhibitor</option><option value="speaker">Speaker</option><option value="staff">Staff</option></select></div>
         <div className="flex items-end"><Submit className="btn-share w-full">Add participant</Submit></div>
       </ActionForm>

@@ -24,7 +24,7 @@ export default async function FollowUpsPage() {
               <form action={toggleFollowUpAction}><input type="hidden" name="id" value={f.id} /><input type="hidden" name="done" value="true" />
                 <button className="grid h-11 w-11 place-items-center rounded-xl text-ink-faint hover:text-signal-ok" aria-label={`Mark “${f.title}” done`}><Circle className="h-6 w-6" /></button></form>
               <Link href={`/connections/${f.connection_id}`} className="min-w-0 flex-1 py-1">
-                <span className="block truncate font-medium">{f.title}</span>
+                <span dir="auto" className="block truncate font-medium">{f.title}</span>
                 <span className={`block text-sm ${f.due_on < today ? 'text-signal-warn' : 'text-ink-muted'}`}>{f.name} · {fmtDate(f.due_on)}</span>
               </Link>
             </li>

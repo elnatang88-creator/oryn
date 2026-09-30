@@ -32,6 +32,8 @@ npm run typecheck && npm test && npm run build && npm run test:e2e
 | [MVP_SCOPE](docs/MVP_SCOPE.md) | The 8-step vertical slice, acceptance criteria, known gaps |
 | [PRODUCT_DECISIONS](docs/PRODUCT_DECISIONS.md) | Decisions built in (approve/change) and open founder decisions |
 
+**QA:** [MVP_QA_REPORT](docs/MVP_QA_REPORT.md) · [SECURITY_TEST_REPORT](docs/SECURITY_TEST_REPORT.md)
+
 **Also:** [LEGACY_AUDIT](docs/LEGACY_AUDIT.md) · [BUILD_STATUS](docs/BUILD_STATUS.md) · [OPERATIONS](docs/OPERATIONS.md) · [ANALYTICS](docs/ANALYTICS.md) · [RESEARCH_PLAN](docs/RESEARCH_PLAN.md) · [INVENTION_RECORD](docs/INVENTION_RECORD.md)
 
 ## Branches

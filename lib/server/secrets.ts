@@ -1,5 +1,7 @@
 import 'server-only'
 import crypto from 'node:crypto'
+import fs from 'node:fs'
+import path from 'node:path'
 
 type G = typeof globalThis & { __orynDevSecret?: string }
 
@@ -14,8 +16,24 @@ export function signingSecret(): string {
     throw new Error('ORYN_SECRET (32+ chars) must be set in production.')
   }
   const g = globalThis as G
-  g.__orynDevSecret ??= process.env.ORYN_DEV_SECRET ?? crypto.randomBytes(32).toString('hex')
+  g.__orynDevSecret ??= process.env.ORYN_DEV_SECRET ?? devSecretFile()
   return g.__orynDevSecret
+}
+
+/** Local development keeps one random secret in .data/ (git-ignored) so share links survive restarts. */
+function devSecretFile(): string {
+  const dir = path.join(process.cwd(), '.data')
+  const file = path.join(dir, 'dev-secret')
+  try {
+    return fs.readFileSync(file, 'utf8').trim()
+  } catch {
+    const secret = crypto.randomBytes(32).toString('hex')
+    try {
+      fs.mkdirSync(dir, { recursive: true })
+      fs.writeFileSync(file, secret, { mode: 0o600 })
+    } catch { /* read-only file system: fall back to a per-process secret */ }
+    return secret
+  }
 }
 
 export function hmac(input: string): string {

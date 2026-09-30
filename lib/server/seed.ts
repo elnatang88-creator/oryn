@@ -1,6 +1,6 @@
 import 'server-only'
 import type { Db } from './db'
-import { newCode, newId } from './ids'
+import { newId } from './ids'
 import crypto from 'node:crypto'
 import { hashPassword } from './services/auth'
 
@@ -11,6 +11,8 @@ import { hashPassword } from './services/auth'
  */
 export const DEMO_EMAIL = 'demo@oryn.local'
 export const DEMO_ADMIN_EMAIL = 'admin@oryn.local'
+/** Fixed, memorable code for the demo booth: /q/harbordemo. Demo only; real codes are random. */
+export const DEMO_STATION_CODE = 'harbordemo'
 export const isDemoEmail = (email: string) => email.endsWith('@oryn.local')
 
 function demoPassword() {
@@ -49,7 +51,7 @@ export async function ensureDemoData(db: Db) {
   // A station at the booth, with a printed code that stays the same while the capsule behind it can change.
   await db.query(`INSERT INTO stations (id, org_id, event_id, name, kind, capsule_id) VALUES ('stn_demo', 'org_demo', 'evt_demo', 'Booth 14', 'booth', 'cap_demo_conf')`)
   await db.query(`INSERT INTO share_sessions (id, capsule_id, owner_user_id, org_id, event_id, station_id, channel, scope, context_label, last_capsule_version) VALUES ('s_demostationxxxxxxxxxx', 'cap_demo_conf', $1, 'org_demo', 'evt_demo', 'stn_demo', 'station', 'event', 'Booth 14', 1)`, [demoId])
-  await db.query(`INSERT INTO qr_destinations (code, org_id, owner_user_id, station_id, share_session_id) VALUES ($1, 'org_demo', $2, 'stn_demo', 's_demostationxxxxxxxxxx')`, [newCode(), demoId])
+  await db.query(`INSERT INTO qr_destinations (code, org_id, owner_user_id, station_id, share_session_id) VALUES ($1, 'org_demo', $2, 'stn_demo', 's_demostationxxxxxxxxxx')`, [DEMO_STATION_CODE, demoId])
 
   // Yesterday's conference: one share, one request, one connection with a note and a follow-up.
   await db.query(`INSERT INTO share_sessions (id, capsule_id, owner_user_id, channel, context_label, view_count, expanded_count, saved_count, created_at, last_capsule_version) VALUES ('s_demopastsharexxxxxxxx', 'cap_demo_conf', $1, 'qr', 'Harbor Summit — day 1', 4, 2, 1, now() - interval '1 day', 1)`, [demoId])

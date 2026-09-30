@@ -22,7 +22,7 @@ const config: Config = {
       },
       keyframes: {
         rise: { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'none' } },
-        pulseRing: { '0%': { transform: 'scale(0.9)', opacity: '0.7' }, '100%': { transform: 'scale(1.5)', opacity: '0' } },
+        pulseRing: { '0%': { transform: 'scale(0.98)', opacity: '0.7' }, '100%': { transform: 'scale(1.12)', opacity: '0' } },
       },
       animation: { rise: 'rise 280ms ease-out both', 'pulse-ring': 'pulseRing 1.8s ease-out infinite' },
     },

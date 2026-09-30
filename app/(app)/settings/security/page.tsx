@@ -31,9 +31,9 @@ export default async function SecurityPage() {
       <section className="card mb-6 p-5">
         <h2 className="h2">Change password</h2>
         <ActionForm action={changePasswordAction} className="mt-3 space-y-3" resetOnSuccess>
-          <div><label className="label" htmlFor="current">Current password</label><input id="current" name="current" type="password" autoComplete="current-password" className="input" /></div>
-          <div><label className="label" htmlFor="next">New password</label><input id="next" name="next" type="password" autoComplete="new-password" minLength={10} className="input" /></div>
-          <div><label className="label" htmlFor="confirmpw">Repeat new password</label><input id="confirmpw" name="confirm" type="password" autoComplete="new-password" className="input" /></div>
+          <div><label className="label" htmlFor="current">Current password</label><input dir="auto" id="current" name="current" type="password" autoComplete="current-password" className="input" /></div>
+          <div><label className="label" htmlFor="next">New password</label><input dir="auto" id="next" name="next" type="password" autoComplete="new-password" minLength={10} className="input" /></div>
+          <div><label className="label" htmlFor="confirmpw">Repeat new password</label><input dir="auto" id="confirmpw" name="confirm" type="password" autoComplete="new-password" className="input" /></div>
           <Submit className="btn-save w-full">Change password</Submit>
         </ActionForm>
       </section>

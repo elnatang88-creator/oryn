@@ -190,3 +190,21 @@ describe('audit trail', () => {
     expect(sessions).not.toContain(u.token)
   })
 })
+
+describe('abuse limits fit a crowded venue', () => {
+  it('many different people on one conference Wi-Fi can each ask to connect; one browser can’t spam a link', async () => {
+    const { createCapsule: cc } = await import('@/lib/server/services/capsules')
+    const { startShare: ss, requestConnection } = await import('@/lib/server/services/sharing')
+    const u = await makeUser('pro', 'Speaker')
+    const capsuleId = await cc(u.id, { name: 'Talk', mode: 'event', display_name: 'Speaker', fields: fields() })
+    const share = await ss(u.id, { capsuleId })
+    // 30 attendees, 30 phones, one shared public IP.
+    for (let i = 0; i < 30; i++) {
+      await requestConnection(share.token, { name: `Attendee ${i}`, contact: `a${i}@example.com` }, { claimToken: `phone-${i}`, ipKey: 'venue-wifi' })
+    }
+    // One browser sending again and again to the same link is stopped.
+    await requestConnection(share.token, { name: 'Spam', contact: 's@example.com' }, { claimToken: 'spammer', ipKey: 'venue-wifi' })
+    await requestConnection(share.token, { name: 'Spam', contact: 's@example.com' }, { claimToken: 'spammer', ipKey: 'venue-wifi' })
+    expect(await code(requestConnection(share.token, { name: 'Spam', contact: 's@example.com' }, { claimToken: 'spammer', ipKey: 'venue-wifi' }))).toBe('rate_limited')
+  })
+})

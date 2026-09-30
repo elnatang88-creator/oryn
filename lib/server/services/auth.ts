@@ -71,7 +71,8 @@ export async function signUp(input: { email: string; password: string; displayNa
   const parsed = signUpSchema.safeParse(input)
   if (!parsed.success) throw invalid(parsed.error.issues[0].message)
   const db = await getDb()
-  await rateLimit(db, `signup:${ctx.ipKey}`, 10, 3600)
+  // Generous per IP: a conference hall is one IP. Per-account and per-device limits do the fine-grained work.
+  await rateLimit(db, `signup:${ctx.ipKey}`, 100, 3600)
   const { email, password, displayName } = parsed.data
   const [exists] = await db.query(`SELECT 1 FROM users WHERE email = $1`, [email])
   if (exists) throw new AppError('conflict', 'An account with this email already exists. Try signing in.')
@@ -88,7 +89,7 @@ const failKey = (email: string) => `signin-fail:${hmac(`email:${email}`).slice(0
 export async function signIn(input: { email: string; password: string }, ctx: { userAgent: string; deviceId: string | null; ipKey: string }) {
   const email = String(input.email ?? '').trim().toLowerCase()
   const db = await getDb()
-  await rateLimit(db, `signin:${ctx.ipKey}`, 30, 900)
+  await rateLimit(db, `signin:${ctx.ipKey}`, 200, 900)
   // Per-account lockout counts failed attempts only, so a real user signing in often is never blocked.
   if (await isLimited(db, failKey(email), 8, 900)) throw new AppError('rate_limited', 'Too many attempts. Please wait a moment and try again.')
   const [u] = await db.query<{ id: string; password_hash: string }>(`SELECT id, password_hash FROM users WHERE email = $1 AND deleted_at IS NULL`, [email])

@@ -8,7 +8,7 @@ const SAMPLE: PublicCapsuleView = {
   layer: 'instant', mode: 'personal', modeLabel: 'Personal', displayName: 'Noa', headline: '',
   message: 'Didn’t want to hold up the line. If you’d like to talk, here’s how.', avatarUrl: null, accent: 'blue',
   fields: [{ id: 'f1', kind: 'social', label: 'Instagram', value: 'https://instagram.com/example' }],
-  primaryFieldId: 'f1', hasMore: false, canSave: true, canConnect: true, expiresAt: null, oneTime: true, contextLabel: null, eventName: null,
+  primaryFieldId: 'f1', hasMore: false, canSave: true, canConnect: true, expiresAt: null, oneTime: true, contextLabel: null, eventName: null, isDemo: false,
 }
 
 export default function Landing() {

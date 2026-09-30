@@ -59,7 +59,7 @@ export default async function StationsPage({ searchParams }: { searchParams: Pro
           {capsules.length === 0 ? <p className="text-ink-muted">Create a capsule first — it’s what the station shows.</p> : (
             <ActionForm action={createStationAction} className="card grid gap-3 p-4 sm:grid-cols-2">
               <input type="hidden" name="orgId" value={org.id} />
-              <div><label className="label" htmlFor="sname">Name</label><input id="sname" name="name" className="input" placeholder="Booth 14" maxLength={60} /></div>
+              <div><label className="label" htmlFor="sname">Name</label><input dir="auto" id="sname" name="name" className="input" placeholder="Booth 14" maxLength={60} /></div>
               <div><label className="label" htmlFor="kind">Kind</label><select id="kind" name="kind" className="input">{['booth', 'table', 'desk', 'room', 'counter', 'person'].map((k) => <option key={k} value={k} className="capitalize">{k}</option>)}</select></div>
               <div><label className="label" htmlFor="capsuleId">Shows</label><select id="capsuleId" name="capsuleId" className="input">{capsules.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
               <div><label className="label" htmlFor="eventId">Event</label><select id="eventId" name="eventId" className="input"><option value="">None</option>{events.filter((e) => e.org_id === org.id).map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</select></div>

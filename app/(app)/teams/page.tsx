@@ -56,7 +56,7 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
               <ActionForm action={addMemberAction} className="card space-y-3 p-4" resetOnSuccess>
                 <h3 className="font-bold text-navy-900">Add a member</h3>
                 <input type="hidden" name="orgId" value={org.org.id} />
-                <div><label className="label" htmlFor="memail">Email</label><input id="memail" name="email" type="email" className="input" /></div>
+                <div><label className="label" htmlFor="memail">Email</label><input dir="auto" id="memail" name="email" type="email" className="input" /></div>
                 <div><label className="label" htmlFor="mrole">Role</label><select id="mrole" name="role" className="input"><option value="member">Member — shares with the team brand</option><option value="manager">Manager — runs events and stations</option>{org.role === 'owner' && <option value="admin">Admin — manages people</option>}</select></div>
                 <Submit className="btn-more w-full">Add</Submit>
               </ActionForm>
@@ -64,7 +64,7 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
                 <h3 className="font-bold text-navy-900">Teams</h3>
                 <p className="text-sm text-ink-muted">{org.teams.map((t) => t.name).join(', ') || 'No teams yet.'}</p>
                 <input type="hidden" name="orgId" value={org.org.id} />
-                <div><label className="label" htmlFor="tname">New team</label><input id="tname" name="name" className="input" placeholder="Sales" /></div>
+                <div><label className="label" htmlFor="tname">New team</label><input dir="auto" id="tname" name="name" className="input" placeholder="Sales" /></div>
                 <Submit className="btn-more w-full">Create team</Submit>
               </ActionForm>
             </div>
@@ -83,7 +83,7 @@ export default async function TeamsPage({ searchParams }: { searchParams: Promis
       {has(plan, 'org.workspace') ? (
         <ActionForm action={createOrgAction} className="card flex gap-2 p-4">
           <label htmlFor="oname" className="sr-only">Workspace name</label>
-          <input id="oname" name="name" className="input mt-0 flex-1" placeholder="Company or event team" />
+          <input dir="auto" id="oname" name="name" className="input mt-0 flex-1" placeholder="Company or event team" />
           <Submit className="btn-share">Create</Submit>
         </ActionForm>
       ) : <PlanGate message="Team workspaces — shared brand, roles, events and stations — are part of Business." />}

@@ -59,9 +59,9 @@ export default async function TodayPage() {
                 <div className="flex items-start gap-3">
                   <span className="grid h-10 w-10 place-items-center rounded-xl bg-soft-100 text-electric-600"><UserPlus className="h-5 w-5" aria-hidden="true" /></span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold">{r.from_name} would like to connect</p>
+                    <p className="font-semibold"><bdi>{r.from_name}</bdi> would like to connect</p>
                     <p className="text-sm text-ink-muted">{r.context_label || 'From a share'} · {relTime(r.created_at)}</p>
-                    {r.message && <p className="mt-2 rounded-xl bg-soft-50 px-3 py-2 text-[15px]">“{r.message}”</p>}
+                    {r.message && <p dir="auto" className="mt-2 rounded-xl bg-soft-50 px-3 py-2 text-[15px]">“{r.message}”</p>}
                   </div>
                 </div>
 <RespondButtons id={r.id} />
@@ -84,7 +84,7 @@ export default async function TodayPage() {
                   <button className="grid h-11 w-11 place-items-center rounded-xl text-ink-faint hover:text-signal-ok" aria-label={`Mark “${f.title}” done`}><Circle className="h-6 w-6" /></button>
                 </form>
                 <Link href={`/connections/${f.connection_id}`} className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{f.title}</p>
+                  <p dir="auto" className="truncate font-medium">{f.title}</p>
                   <p className={`text-sm ${f.overdue ? 'text-signal-warn' : 'text-ink-muted'}`}>{f.name} · {f.overdue ? 'was due ' : ''}{fmtDate(f.due_on)}</p>
                 </Link>
               </li>
@@ -101,7 +101,7 @@ export default async function TodayPage() {
             {t.newConnections.map((c) => (
               <li key={c.id}>
                 <Link href={`/connections/${c.id}`} className="flex min-h-[60px] items-center justify-between gap-3 px-4 py-3 hover:bg-soft-50">
-                  <span className="min-w-0"><span className="block truncate font-semibold">{c.name}</span><span className="block truncate text-sm text-ink-muted">{c.met_where || 'Met recently'} · {relTime(c.met_at)}</span></span>
+                  <span className="min-w-0"><span dir="auto" className="block truncate font-semibold">{c.name}</span><span className="block truncate text-sm text-ink-muted">{c.met_where || 'Met recently'} · {relTime(c.met_at)}</span></span>
                   <ArrowRight className="h-5 w-5 text-ink-faint" aria-hidden="true" />
                 </Link>
               </li>

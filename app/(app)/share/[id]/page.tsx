@@ -32,7 +32,7 @@ export default async function ActiveSharePage({ params }: { params: Promise<{ id
   const left = timeLeft(share.expires_at ? new Date(share.expires_at).toISOString() : null)
 
   return (
-    <div className="-mx-4 -my-6 min-h-[calc(100dvh-3.5rem)] bg-navy-900 px-4 py-6 text-white sm:-mx-6 sm:px-6 lg:-my-10 lg:rounded-3xl lg:py-10">
+    <div className="-mx-4 -my-6 min-h-[calc(100dvh-3.5rem)] overflow-x-hidden bg-navy-900 px-4 py-6 text-white sm:-mx-6 sm:px-6 lg:-my-10 lg:rounded-3xl lg:py-10">
       <div className="mx-auto max-w-sm">
         <div className="flex items-center justify-between">
           <div>
@@ -61,7 +61,7 @@ export default async function ActiveSharePage({ params }: { params: Promise<{ id
               <input type="hidden" name="id" value={share.id} />
               <label htmlFor="context" className="text-sm font-semibold">Where are you? <span className="font-normal text-soft-300">Only you see this.</span></label>
               <div className="mt-2 flex gap-2">
-                <input id="context" name="context" defaultValue={share.context_label} maxLength={80} placeholder="Coffee line, Hall B…" className="input mt-0 flex-1 border-white/15 bg-navy-800 text-white placeholder:text-soft-300/60" />
+                <input dir="auto" id="context" name="context" defaultValue={share.context_label} maxLength={80} placeholder="Coffee line, Hall B…" className="input mt-0 flex-1 border-white/15 bg-navy-800 text-white placeholder:text-soft-300/60" />
                 <Submit className="btn min-h-[48px] rounded-xl bg-white/15 px-4 text-sm text-white">Save</Submit>
               </div>
             </ActionForm>

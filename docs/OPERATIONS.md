@@ -43,7 +43,7 @@ npm run dev            # http://localhost:3000
 
 ```bash
 npm run typecheck
-npm test               # unit/integration: real schema on in-memory Postgres (21 tests)
+npm test               # unit/integration: real schema on in-memory Postgres (29 tests)
 npm run build
 npm run test:e2e       # Playwright: phone + desktop, slow network, no-JS, one-time links, auth/headers
 ```
@@ -62,6 +62,7 @@ E2E starts a production build on port 3100 with a throwaway embedded database. S
 | `CRON_SECRET` | If using `/api/jobs` | Bearer secret for the scheduler. |
 | `BILLING_PROVIDER` | Later | When set, simulated plan switching is disabled. |
 | `ORYN_SEED_DEMO` | No | `true` seeds demo accounts. Never set in production. |
+| `ORYN_DELETION_GRACE_DAYS` | No | Days between a deletion request and erasure (default 7). Tests use 0. |
 | `ORYN_DEMO_PASSWORD` | No | Password for the fictional demo accounts. If unset, a random one is printed once. |
 | `ORYN_JOBS_INLINE` | No | Run jobs right after they're queued (default on outside production). |
 | `ORYN_ALLOW_EMBEDDED_DB` | No | Allows the embedded DB with `NODE_ENV=production` — throwaway demos and E2E only. |

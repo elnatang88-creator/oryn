@@ -17,8 +17,8 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<{
       <h1 className="h1">Welcome back</h1>
       <ActionForm action={signInAction} className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next} />
-        <div><label className="label" htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="email" className="input" required /></div>
-        <div><label className="label" htmlFor="password">Password</label><input id="password" name="password" type="password" autoComplete="current-password" className="input" required /></div>
+        <div><label className="label" htmlFor="email">Email</label><input dir="auto" id="email" name="email" type="email" autoComplete="email" className="input" required /></div>
+        <div><label className="label" htmlFor="password">Password</label><input dir="auto" id="password" name="password" type="password" autoComplete="current-password" className="input" required /></div>
         <Submit pendingText="Signing in…">Sign in</Submit>
       </ActionForm>
       <p className="mt-6 text-center text-[15px]">New to ORYN? <Link href={`/signup${next ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-semibold text-electric-600">Create an account</Link></p>
