@@ -32,9 +32,9 @@ export async function ensureDemoData(db: Db) {
 
   const fields = (list: [string, string, string, string][]) => JSON.stringify(list.map(([kind, label, value, layer]) => ({ id: newId('f', 6), kind, label, value, layer })))
   await db.query(
-    `INSERT INTO capsules (id, owner_user_id, name, mode, display_name, headline, message, fields, private_note, is_default) VALUES
-     ('cap_demo_conf', $1, 'Conference', 'professional', 'Noa Adler', 'Product lead · Harbor Labs', 'Good to meet you. I’m around all day — say hi.', $2::jsonb, 'Use at Harbor Summit. Keep phone hidden.', true),
-     ('cap_demo_store', $1, 'Just hi', 'personal', 'Noa', '', 'Didn’t want to hold up the line. If you’d like to talk, here’s how.', $3::jsonb, '', false)`,
+    `INSERT INTO capsules (id, owner_user_id, name, mode, display_name, headline, message, fields, private_note, is_default, design) VALUES
+     ('cap_demo_conf', $1, 'Conference', 'professional', 'Noa Adler', 'Product lead', 'Good to meet you. I’m around all day — say hi.', $2::jsonb, 'Use at Harbor Summit. Keep phone hidden.', true, '{"material":"midnight","foil":"silver","finish":"foil","font":"editorial","layout":"signature","base":"#0f3d2e"}'),
+     ('cap_demo_store', $1, 'Just hi', 'personal', 'Noa', '', 'Didn’t want to hold up the line. If you’d like to talk, here’s how.', $3::jsonb, '', false, '{"material":"pearl","foil":"gold","finish":"holo","font":"classic","layout":"minimal","base":"#0f3d2e"}')`,
     [
       demoId,
       fields([['role', 'Role', 'Product lead', 'instant'], ['company', 'Company', 'Harbor Labs', 'instant'], ['social', 'LinkedIn', 'https://www.linkedin.com/in/example', 'instant'], ['email', 'Work email', 'noa@harborlabs.example', 'instant'], ['website', 'Website', 'https://harborlabs.example', 'expanded'], ['booking', 'Book 20 minutes', 'https://cal.example/noa', 'expanded'], ['phone', 'Phone', '+1 555 010 2030', 'hidden']]),

@@ -10,6 +10,8 @@ import {
   type CapsuleField, type FieldKind, type Layer, type Mode, type PublicCapsuleView,
 } from '@/lib/capsule-model'
 import type { ActionState } from '@/app/actions/types'
+import { CardDesigner } from './CardDesigner'
+import { initials, type CardDesign } from '@/lib/card-design'
 
 export interface EditorValue {
   id?: string
@@ -22,6 +24,7 @@ export interface EditorValue {
   fields: CapsuleField[]
   primaryFieldId: string | null
   private_note: string
+  design: CardDesign
 }
 
 const fid = () => `f_${Math.random().toString(36).slice(2, 10)}`
@@ -52,6 +55,7 @@ export function CapsuleEditor({
       primaryFieldId: v.primaryFieldId && instant.some((f) => f.id === v.primaryFieldId) ? v.primaryFieldId : null,
       hasMore: previewLayer === 'instant' && expanded.length > 0, canSave: true, canConnect: true,
       expiresAt: null, oneTime: false, contextLabel: null, eventName: null, isDemo: false,
+      design: v.design, company: instant.find((f) => f.kind === 'company')?.value ?? null,
     }
   }, [v, previewLayer, canExpand])
 
@@ -64,6 +68,14 @@ export function CapsuleEditor({
         <input type="hidden" name="fields" value={JSON.stringify(v.fields)} />
         <input type="hidden" name="primaryFieldId" value={v.primaryFieldId ?? ''} />
         <input type="hidden" name="mode" value={v.mode} />
+        <input type="hidden" name="design" value={JSON.stringify(v.design)} />
+
+        <fieldset className="card p-5">
+          <legend className="sr-only">Card design</legend>
+          <h2 className="h2 mb-1">Your card</h2>
+          <p className="hint mb-4">Choose how your card looks. It’s what people see first when they open your capsule.</p>
+          <CardDesigner value={v.design} onChange={(d) => set('design', d)} initialsText={initials(v.display_name || 'O')} />
+        </fieldset>
 
         <fieldset className="card space-y-4 p-5">
           <legend className="sr-only">About this capsule</legend>

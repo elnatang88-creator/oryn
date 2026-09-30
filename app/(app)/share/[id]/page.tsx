@@ -14,6 +14,9 @@ import { ShareLive } from '@/components/ShareLive'
 import { ActionForm, Submit } from '@/components/Forms'
 import { timeLeft } from '@/components/CapsuleView'
 import { MODE_COPY } from '@/lib/capsule-model'
+import { normalizeDesign } from '@/lib/card-design'
+import { CardBack, CardFace } from '@/components/LuxuryCard'
+import { CardStage } from '@/components/CardStage'
 
 export const metadata = { title: 'Sharing' }
 
@@ -25,11 +28,14 @@ export default async function ActiveSharePage({ params }: { params: Promise<{ id
   if (!share) notFound()
   const { capsule } = await getCapsule(user.id, share.capsule_id)
   const url = `${await appOrigin()}/c/${share.token}`
-  const svg = await QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#011441', light: '#FFFFFF' } })
+  const svg = await QRCode.toString(url, { type: 'svg', margin: 2, errorCorrectionLevel: 'M', color: { dark: '#0B1024', light: '#FFFFFF' } })
   const plan = await userPlan(await getDb(), user.id)
   const nfcAllowed = has(plan, 'share.nfc') && (await isFlagOn('share.nfc_tag'))
   const live = share.state === 'live' || share.state === 'opened_once'
   const left = timeLeft(share.expires_at ? new Date(share.expires_at).toISOString() : null)
+  const design = normalizeDesign(capsule.design)
+  const company = capsule.fields.find((f) => f.kind === 'company' && f.layer === 'instant' && f.value)?.value ?? null
+  const identity = { displayName: capsule.display_name, headline: capsule.headline, company, avatarUrl: capsule.avatar_url }
 
   return (
     <div className="-mx-4 -my-6 min-h-[calc(100dvh-3.5rem)] overflow-x-hidden bg-navy-900 px-4 py-6 text-white sm:-mx-6 sm:px-6 lg:-my-10 lg:rounded-3xl lg:py-10">
@@ -44,9 +50,12 @@ export default async function ActiveSharePage({ params }: { params: Promise<{ id
 
         {live ? (
           <>
-            <div className="relative mx-auto mt-6 w-full max-w-[300px]">
-              <span className="absolute inset-0 animate-pulse-ring rounded-[28px] border-2 border-electric-400" aria-hidden="true" />
-              <div className="relative rounded-[28px] bg-white p-4" data-testid="share-qr" role="img" aria-label="QR code for your capsule link" dangerouslySetInnerHTML={{ __html: svg }} />
+            <div className="mx-auto mt-6 w-full max-w-[380px]">
+              <CardStage
+                startFlipped
+                front={<CardFace design={design} identity={identity} />}
+                back={<CardBack design={design} qrSvg={svg} caption="Scan to open" qrTestId="share-qr" />}
+              />
             </div>
             <p className="mt-4 text-center text-[15px] text-soft-200">Let them scan it. They see only what you chose.</p>
             <div className="mt-2 flex flex-wrap justify-center gap-2 text-[13px] font-semibold">

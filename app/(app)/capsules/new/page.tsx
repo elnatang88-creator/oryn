@@ -8,6 +8,7 @@ import { PageHeader, PlanGate } from '@/components/ui'
 import { MODES, type Mode } from '@/lib/capsule-model'
 import Link from 'next/link'
 import { MODE_COPY } from '@/lib/capsule-model'
+import { DEFAULT_DESIGN } from '@/lib/card-design'
 
 export const metadata = { title: 'Create a capsule' }
 
@@ -49,7 +50,7 @@ export default async function NewCapsulePage({ searchParams }: { searchParams: P
         submitLabel="Create capsule"
         canExpand={has(plan, 'disclosure.controls')}
         canNotes={has(plan, 'notes.private')}
-        initial={{ name: MODE_COPY[mode].label, mode, display_name: user.display_name, headline: '', message: '', avatar_url: null, fields: templateFields(mode).map((f) => (!has(plan, 'disclosure.controls') && f.layer === 'expanded' ? { ...f, layer: 'instant' } : f)), primaryFieldId: null, private_note: '' }}
+        initial={{ name: MODE_COPY[mode].label, mode, display_name: user.display_name, headline: '', message: '', avatar_url: null, fields: templateFields(mode).map((f) => (!has(plan, 'disclosure.controls') && f.layer === 'expanded' ? { ...f, layer: 'instant' } : f)), primaryFieldId: null, private_note: '', design: mode === 'personal' || mode === 'social' ? { ...DEFAULT_DESIGN, material: 'pearl', foil: 'gold', finish: 'holo', layout: 'minimal' } : DEFAULT_DESIGN }}
       />
     </>
   )

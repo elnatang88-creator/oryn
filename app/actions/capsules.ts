@@ -16,6 +16,12 @@ function readCapsule(fd: FormData) {
   } catch {
     throw invalid('Something was off with the fields. Please try again.')
   }
+  let design: unknown = undefined
+  try {
+    design = str(fd, 'design') ? JSON.parse(str(fd, 'design')) : undefined
+  } catch {
+    throw invalid('Something was off with the card design. Please try again.')
+  }
   const primary = str(fd, 'primaryFieldId')
   return {
     name: str(fd, 'name'),
@@ -28,6 +34,7 @@ function readCapsule(fd: FormData) {
     fields: fields as never,
     primary_action: primary ? { fieldId: primary } : null,
     private_note: str(fd, 'private_note'),
+    design,
   }
 }
 

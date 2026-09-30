@@ -108,5 +108,9 @@ export interface PublicCapsuleView {
   eventName: string | null
   /** True when the capsule belongs to a fictional demo account; recipients are told plainly. */
   isDemo: boolean
+  /** The card design chosen by the sender (public by nature: it's how their card looks). */
+  design: import('./card-design').CardDesign
+  /** Company, if the sender shows it in the first layer (printed on the card). */
+  company: string | null
 }
 

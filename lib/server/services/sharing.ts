@@ -10,6 +10,7 @@ import { has, requireCapability, userPlan } from '../plans'
 import { claimHash, signShareToken, verifyShareToken } from '../tokens'
 import { sha256 } from '../secrets'
 import type { Capsule } from './capsules'
+import { normalizeDesign } from '../../card-design'
 import { CHANNELS, MODE_COPY, type Channel, type CapsuleField, type InteractionLevel, type PublicCapsuleView } from '../../capsule-model'
 
 export type Scope = 'public' | 'limited' | 'event' | 'organization' | 'recipient'
@@ -181,7 +182,7 @@ async function loadForRecipient(db: Db, sessionId: string) {
 
 /** Applies event rules and the session's layer policy to the LIVE capsule. Private notes never pass this point. */
 export function project(
-  capsule: Pick<Capsule, 'mode' | 'display_name' | 'headline' | 'message' | 'avatar_url' | 'accent' | 'fields' | 'primary_action'>,
+  capsule: Pick<Capsule, 'mode' | 'display_name' | 'headline' | 'message' | 'avatar_url' | 'accent' | 'fields' | 'primary_action'> & { design?: unknown },
   s: Pick<ShareSession, 'allow_expanded' | 'interaction_level' | 'expires_at' | 'one_time' | 'context_label'>,
   layer: 'instant' | 'expanded',
   ctx: { eventName?: string | null; eventRules?: Record<string, unknown> | null; isDemo?: boolean } = {},
@@ -213,6 +214,9 @@ export function project(
     contextLabel: null, // the owner's context label is private to the owner
     eventName: ctx.eventName ?? null,
     isDemo: !!ctx.isDemo,
+    design: normalizeDesign(capsule.design),
+    // Only printed on the card when the sender placed their company in the first layer.
+    company: instant.find((f) => f.kind === 'company')?.value ?? null,
   }
 }
 

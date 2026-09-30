@@ -2,10 +2,8 @@ import { hrefForField, type PublicCapsuleView } from '@/lib/capsule-model'
 import { FieldIcon } from './FieldIcon'
 import { ArrowUpRight, Clock, Eye, Lock } from 'lucide-react'
 import { Logo } from './Logo'
-
-function initials(name: string) {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join('') || '•'
-}
+import { CardFace } from './LuxuryCard'
+import { CardStage } from './CardStage'
 
 function prettyValue(kind: string, value: string) {
   if (['website', 'social', 'booking', 'link'].includes(kind)) return value.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
@@ -31,11 +29,12 @@ export function CapsuleView({ view, preview = false, now }: { view: PublicCapsul
   const primary = view.fields.find((f) => f.id === view.primaryFieldId)
   const rest = view.fields.filter((f) => f.id !== view.primaryFieldId)
   const left = timeLeft(view.expiresAt, now)
+  const identity = { displayName: view.displayName, headline: view.headline, company: view.company, avatarUrl: view.avatarUrl }
   return (
     <article className="overflow-hidden rounded-capsule bg-white shadow-capsule" aria-label={`${view.displayName}’s ORYN capsule`}>
       {view.isDemo && <p className="bg-amber-100 px-4 py-2 text-center text-[13px] font-semibold text-amber-900" role="note" data-testid="demo-capsule">Demo capsule — this is a fictional person, not a real user</p>}
-      <header className="relative bg-navy-900 px-6 pb-7 pt-5 text-white">
-        <div className="flex flex-wrap items-center gap-2 text-[12px] font-semibold text-soft-200" data-testid="viewing-indicator">
+      <div className="bg-navy-950 px-3 pb-3 pt-3">
+        <div className="mb-2 flex flex-wrap items-center gap-2 px-1 text-[12px] font-semibold text-soft-200" data-testid="viewing-indicator">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
             <Eye className="h-3.5 w-3.5" aria-hidden="true" />
             {view.modeLabel} capsule{view.layer === 'expanded' ? ' · more details' : ''}
@@ -48,22 +47,9 @@ export function CapsuleView({ view, preview = false, now }: { view: PublicCapsul
           )}
           {view.oneTime && <span className="rounded-full bg-white/10 px-2.5 py-1">Opens once</span>}
         </div>
-        <div className="mt-6 flex items-center gap-4">
-          {view.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={view.avatarUrl} alt="" referrerPolicy="no-referrer" className="h-16 w-16 rounded-2xl object-cover ring-2 ring-white/20" />
-          ) : (
-            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-electric text-xl font-bold" aria-hidden="true">{initials(view.displayName)}</div>
-          )}
-          <div className="min-w-0">
-            <h1 dir="auto" className="truncate text-[24px] font-bold leading-tight" data-testid="capsule-name">{view.displayName}</h1>
-            {view.headline && <p dir="auto" className="mt-0.5 text-[15px] text-soft-200">{view.headline}</p>}
-          </div>
-        </div>
-        {view.message && <p dir="auto" className="mt-5 rounded-2xl bg-white/[0.07] px-4 py-3 text-[15px] leading-relaxed text-white/95">{view.message}</p>}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/oryn-mark.svg" alt="" aria-hidden="true" className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 opacity-[0.12]" />
-      </header>
+        <CardStage front={<CardFace design={view.design} identity={identity} nameTestId="capsule-name" />} />
+      </div>
+      {view.message && <p dir="auto" className="mx-4 mt-4 rounded-2xl bg-soft-50 px-4 py-3 text-[15px] leading-relaxed text-ink">{view.message}</p>}
 
       <div className="space-y-2 p-4">
         {primary && <FieldRow f={primary} primary preview={preview} />}

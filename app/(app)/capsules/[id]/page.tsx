@@ -9,6 +9,7 @@ import { AppError } from '@/lib/server/errors'
 import { archiveCapsuleAction, updateCapsuleAction } from '@/app/actions/capsules'
 import { CapsuleEditor } from '@/components/CapsuleEditor'
 import { PageHeader } from '@/components/ui'
+import { normalizeDesign } from '@/lib/card-design'
 
 export const metadata = { title: 'Edit capsule' }
 
@@ -38,7 +39,7 @@ export default async function EditCapsulePage({ params, searchParams }: { params
         submitLabel="Save changes"
         canExpand={has(plan, 'disclosure.controls')}
         canNotes={has(plan, 'notes.private')}
-        initial={{ id: c.id, name: c.name, mode: c.mode, display_name: c.display_name, headline: c.headline, message: c.message, avatar_url: c.avatar_url, fields: c.fields, primaryFieldId: c.primary_action?.fieldId ?? null, private_note: c.private_note }}
+        initial={{ id: c.id, name: c.name, mode: c.mode, display_name: c.display_name, headline: c.headline, message: c.message, avatar_url: c.avatar_url, fields: c.fields, primaryFieldId: c.primary_action?.fieldId ?? null, private_note: c.private_note, design: normalizeDesign(c.design) }}
       />
       <form action={archiveCapsuleAction} className="mt-10 border-t border-soft-200 pt-6">
         <input type="hidden" name="id" value={c.id} />

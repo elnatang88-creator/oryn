@@ -32,3 +32,57 @@
   .h1 { @apply text-[26px] font-bold tracking-tight text-navy-900 sm:text-3xl; }
   .h2 { @apply text-lg font-bold text-navy-900; }
 }
+
+/* ───────────── ORYN card (materials, foil, light) — see lib/card-design.ts ───────────── */
+@layer components {
+  .lc-holder { container-type: inline-size; width: 100%; }
+  .lc-card { position: relative; width: 100%; aspect-ratio: 1.586; border-radius: 4.6cqw; overflow: hidden; container-type: inline-size;
+    background: var(--mat); color: var(--ink-card);
+    box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 -1px 0 rgba(0,0,0,.4) inset, 0 40px 70px -30px rgba(0,0,0,.85), 0 18px 30px -18px rgba(0,0,0,.6); }
+  .lc-texture { position: absolute; inset: 0; background: var(--texture, none); opacity: .5; mix-blend-mode: var(--texture-blend, overlay); pointer-events: none; }
+  .lc-sheen { position: absolute; inset: -20%; background: radial-gradient(40% 40% at var(--mx, 30%) var(--my, 20%), rgba(255,255,255,var(--sheen, .28)), transparent 60%); mix-blend-mode: soft-light; pointer-events: none; }
+  .lc-holo { position: absolute; inset: -30%; background: conic-gradient(from calc(var(--hx, 0) * 1deg) at var(--mx, 50%) var(--my, 50%), #ff8fd6, #8fd3ff, #b6ff9e, #ffe58f, #ff8fd6); mix-blend-mode: color-dodge; opacity: 0; pointer-events: none; }
+  .lc-finish-holo .lc-holo { opacity: .22; }
+  .lc-edge { position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset; pointer-events: none; }
+  .lc-foil { filter: var(--foil-shadow, none); background: var(--foil); background-size: 220% 100%; background-position: var(--foil-pos, 30%) 0;
+    -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+  .lc-finish-foil .lc-foil, .lc-finish-holo .lc-foil { animation: lc-shimmer 6s ease-in-out infinite; }
+  .lc-finish-matte .lc-foil { background-size: 100% 100%; }
+  .lc-mark { width: 7cqw; aspect-ratio: 1; background: var(--foil); background-size: 220% 100%;
+    -webkit-mask: url(/brand/oryn-mark.svg) center / contain no-repeat; mask: url(/brand/oryn-mark.svg) center / contain no-repeat; }
+  .lc-rule { height: .35cqw; min-height: 1px; background: var(--foil); background-size: 220% 100%; border-radius: 2px; }
+  .lc-face { position: absolute; inset: 0; padding: 7cqw 7.5cqw; display: flex; flex-direction: column; font-family: var(--card-font); }
+  .lc-name { font-size: var(--name-size, 7.4cqw); line-height: 1.12; letter-spacing: var(--name-track, .01em); font-weight: var(--name-weight, 400); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lc-title { font-family: "Heebo", system-ui, sans-serif; font-size: 3.1cqw; letter-spacing: .06em; font-weight: 500; opacity: .88; }
+  .lc-company { font-family: "Heebo", system-ui, sans-serif; font-size: 2.8cqw; letter-spacing: .22em; text-transform: uppercase; font-weight: 700; }
+  .lc-mono { font-size: 21cqw; line-height: 1; font-family: var(--card-font); }
+  .lc-top { display: flex; justify-content: space-between; align-items: center; }
+  .lc-photo { width: 24cqw; aspect-ratio: 1; flex: none; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 .6cqw rgba(255,255,255,.12), 0 1.4cqw 3cqw rgba(0,0,0,.35); }
+  .lc-photo-initials { display: grid; place-items: center; background: var(--foil); background-size: 220% 100%; color: rgba(0,0,0,.55); font-size: 9cqw; font-family: var(--card-font); }
+  .lc-l-monogram { align-items: center; justify-content: center; text-align: center; gap: 1.6cqw; }
+  .lc-l-monogram .lc-mark { position: absolute; top: 6cqw; inset-inline-start: 6.5cqw; width: 5.2cqw; }
+  .lc-l-signature { justify-content: space-between; }
+  .lc-bottom { display: grid; gap: 1.4cqw; }
+  .lc-l-minimal { align-items: center; justify-content: center; text-align: center; gap: 2.4cqw; }
+  .lc-l-minimal .lc-mark { position: absolute; bottom: 6cqw; width: 4.6cqw; }
+  .lc-l-photo { flex-direction: row; align-items: center; gap: 5cqw; }
+  .lc-l-photo .lc-mark { position: absolute; top: 6cqw; inset-inline-end: 6.5cqw; width: 5.2cqw; }
+  .lc-who { display: grid; gap: 1.4cqw; min-width: 0; }
+  .lc-back { position: absolute; inset: 0; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 5cqw; padding: 5.5cqw; font-family: var(--card-font); }
+  .lc-qr { width: 50cqw; aspect-ratio: 1; padding: 1.8cqw; border-radius: 3.6cqw; background: var(--foil); background-size: 220% 100%; box-shadow: 0 1.5cqw 4cqw rgba(0,0,0,.35); }
+  .lc-qr svg { width: 100%; height: 100%; display: block; border-radius: 2.2cqw; background: #fff; }
+  .lc-back-text { display: grid; gap: 3cqw; justify-items: start; }
+  .lc-hint { font-size: 4.2cqw; line-height: 1.3; }
+
+  .lc-stage { padding: clamp(14px, 5vw, 36px); border-radius: 28px;
+    background: radial-gradient(80% 70% at 50% 18%, rgba(120,150,255,.16), transparent 70%), radial-gradient(60% 60% at 50% 110%, rgba(0,0,0,.8), transparent 70%), linear-gradient(180deg, #0A1022, #05080F);
+    touch-action: pan-y; }
+  .lc-perspective { perspective: 1400px; }
+  .lc-tilt { transition: transform .5s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
+  .lc-flipper { position: relative; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+  .lc-flipper.is-flipped { transform: rotateY(180deg); }
+  .lc-side { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .lc-side-back { position: absolute; inset: 0; transform: rotateY(180deg); }
+}
+@keyframes lc-shimmer { 0%, 100% { background-position: 10% 0 } 50% { background-position: 90% 0 } }
+@media (prefers-reduced-motion: reduce) { .lc-foil { animation: none !important; } .lc-tilt, .lc-flipper { transition: none; } }

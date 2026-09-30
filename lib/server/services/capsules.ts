@@ -7,6 +7,7 @@ import { audit } from '../audit'
 import { track } from '../analytics'
 import { has, requireCapability, userPlan } from '../plans'
 import { membership } from '../permissions'
+import { isValidDesign, normalizeDesign, DEFAULT_DESIGN, type CardDesign } from '../../card-design'
 import { FIELD_KINDS, LAYERS, MODES, MODE_TEMPLATES, INTERACTION_LEVELS, type CapsuleField, type InteractionLevel, type Mode } from '../../capsule-model'
 
 export interface Capsule {
@@ -21,6 +22,7 @@ export interface Capsule {
   avatar_url: string | null
   accent: string
   fields: CapsuleField[]
+  design: CardDesign
   primary_action: { fieldId: string } | null
   private_note: string
   is_default: boolean
@@ -75,6 +77,7 @@ const capsuleInput = z.object({
   fields: z.array(fieldSchema).max(20).default([]),
   primary_action: z.object({ fieldId: z.string() }).nullable().default(null),
   private_note: z.string().max(2000).default(''),
+  design: z.unknown().optional().refine((v) => v === undefined || isValidDesign(v), 'That card design isn’t available.'),
 })
 export type CapsuleInput = z.input<typeof capsuleInput>
 
@@ -84,8 +87,9 @@ function parse(input: unknown) {
   const data = r.data
   // Empty fields are dropped rather than shared as blanks.
   data.fields = data.fields.filter((f) => f.value)
+  const design = normalizeDesign(data.design ?? DEFAULT_DESIGN)
   if (data.primary_action && !data.fields.some((f) => f.id === data.primary_action!.fieldId && f.layer === 'instant')) data.primary_action = null
-  return data
+  return { ...data, design }
 }
 
 export function newFieldId() {
@@ -130,9 +134,9 @@ export async function createCapsule(userId: string, input: CapsuleInput, opts: {
   const id = newId('cap')
   await db.tx(async (t) => {
     await t.query(
-      `INSERT INTO capsules (id, owner_user_id, org_id, name, mode, display_name, headline, message, avatar_url, accent, fields, primary_action, private_note, is_default)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14)`,
-      [id, userId, opts.orgId ?? null, data.name, data.mode, data.display_name, data.headline, data.message, data.avatar_url, data.accent, JSON.stringify(data.fields), data.primary_action ? JSON.stringify(data.primary_action) : null, data.private_note, n === 0],
+      `INSERT INTO capsules (id, owner_user_id, org_id, name, mode, display_name, headline, message, avatar_url, accent, fields, primary_action, private_note, is_default, design)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15::jsonb)`,
+      [id, userId, opts.orgId ?? null, data.name, data.mode, data.display_name, data.headline, data.message, data.avatar_url, data.accent, JSON.stringify(data.fields), data.primary_action ? JSON.stringify(data.primary_action) : null, data.private_note, n === 0, JSON.stringify(data.design)],
     )
     const personal = data.mode === 'personal' || data.mode === 'social'
     await t.query(
@@ -155,10 +159,10 @@ export async function updateCapsule(userId: string, capsuleId: string, input: Ca
   if (!has(plan, 'disclosure.controls') && data.fields.some((f) => f.layer === 'expanded')) await requireCapability(db, plan, 'disclosure.controls', userId)
   if (!has(plan, 'notes.private') && data.private_note && data.private_note !== before.private_note) await requireCapability(db, plan, 'notes.private', userId)
   await db.query(
-    `UPDATE capsules SET name=$3, mode=$4, display_name=$5, headline=$6, message=$7, avatar_url=$8, accent=$9, fields=$10::jsonb, primary_action=$11::jsonb, private_note=$12,
+    `UPDATE capsules SET name=$3, mode=$4, display_name=$5, headline=$6, message=$7, avatar_url=$8, accent=$9, fields=$10::jsonb, primary_action=$11::jsonb, private_note=$12, design=$13::jsonb,
             version = version + 1, updated_at = now()
       WHERE id = $1 AND owner_user_id = $2`,
-    [capsuleId, userId, data.name, data.mode, data.display_name, data.headline, data.message, data.avatar_url, data.accent, JSON.stringify(data.fields), data.primary_action ? JSON.stringify(data.primary_action) : null, data.private_note],
+    [capsuleId, userId, data.name, data.mode, data.display_name, data.headline, data.message, data.avatar_url, data.accent, JSON.stringify(data.fields), data.primary_action ? JSON.stringify(data.primary_action) : null, data.private_note, JSON.stringify(data.design)],
   )
   const visibilityChanged = JSON.stringify(before.fields.map((f) => [f.id, f.layer])) !== JSON.stringify(data.fields.map((f) => [f.id, f.layer]))
   await audit(db, { actor: userId, action: 'capsule.updated', targetType: 'capsule', targetId: capsuleId, meta: { visibilityChanged, version: before.version + 1 } })
