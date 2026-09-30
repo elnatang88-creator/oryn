@@ -114,7 +114,7 @@ test('QA-01…10: full flow on iPhone — sign up, capsule in Hebrew, exact laye
   await shot(s, '01-editor-hebrew')
   await noHorizontalScroll(s)
   await s.getByRole('button', { name: 'Create capsule' }).click()
-  await expect(s.getByTestId('created-banner')).toBeVisible()
+  await expect(s.getByTestId('first-run')).toBeVisible()
 
   // 4. Share — one hand: the Share button sits bottom-centre, in the thumb zone.
   await s.goto('/today')
@@ -170,7 +170,7 @@ test('QA-01…10: full flow on iPhone — sign up, capsule in Hebrew, exact laye
 
   // 7a. Learn more: Layer 2 only.
   await rp.getByTestId('learn-more').tap()
-  await expect(rp.getByText('noa@studio.example')).toBeVisible()
+  await expect(rp.getByTestId('capsule-field').filter({ hasText: 'noa@studio.example' })).toBeVisible()
   const kinds2 = await rp.getByTestId('capsule-field').evaluateAll((els) => els.map((e) => e.getAttribute('data-kind')))
   expect(kinds2.sort()).toEqual(['company', 'email', 'role', 'social'])
   const html2 = await rp.content()
@@ -231,10 +231,10 @@ test('QA-01…10: full flow on iPhone — sign up, capsule in Hebrew, exact laye
   await expect(s.getByTestId('note').filter({ hasText: 'רוצה את מחקר' })).toBeVisible()
   await s.getByTestId('followup-title').fill('לשלוח לסם את המחקר')
   await s.getByRole('button', { name: 'Set', exact: true }).tap()
-  await expect(s.getByText('לשלוח לסם את המחקר')).toBeVisible()
+  await expect(s.getByText('לשלוח לסם את המחקר', { exact: true })).toBeVisible()
   await s.reload()
   await expect(s.getByTestId('note').filter({ hasText: 'רוצה את מחקר' })).toBeVisible()
-  await expect(s.getByText('לשלוח לסם את המחקר')).toBeVisible()
+  await expect(s.getByText('לשלוח לסם את המחקר', { exact: true })).toBeVisible()
   expect(await s.getByTestId('note').first().locator('p').evaluate((el) => getComputedStyle(el).direction)).toBe('rtl')
   await shot(s, '06-contact-note-followup')
   await noHorizontalScroll(s)
@@ -446,9 +446,7 @@ test('QA-M3: errors are clear and non-technical', async ({ browser }) => {
   // A failed submission keeps what the person already typed.
   await p.getByTestId('field-value-social').fill('instagram.com/ok')
   await p.getByRole('button', { name: 'Create capsule' }).tap()
-  await expect(p.getByTestId('created-banner')).toBeVisible()
-  await p.getByRole('link', { name: 'Share it' }).tap()
-  await p.getByRole('button', { name: 'Start sharing' }).tap()
+  await expect(p.getByTestId('first-run')).toBeVisible()
   const link = (await p.getByTestId('share-url').textContent())!.trim()
   const r = await iphone(browser) // a separate, signed-out recipient
   await r.page.goto(link + '/connect')

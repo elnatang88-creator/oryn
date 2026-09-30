@@ -15,5 +15,5 @@ export async function GET(req: NextRequest) {
   const via = req.nextUrl.searchParams.get('via') === 'shortcut' ? 'shortcut' : 'qr'
   const { id } = await quickShare(user.id, via as Channel)
   const then = req.nextUrl.searchParams.get('then')
-  return relativeRedirect(`/share/${id}${then === 'present' ? '/present' : then === 'qr' ? '/qr' : ''}`)
+  return relativeRedirect(`/share/${id}${then === 'present' ? '/present' : then === 'qr' ? '/qr' : then === 'first' ? '?first=1' : ''}`)
 }

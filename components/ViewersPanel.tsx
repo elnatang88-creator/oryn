@@ -31,7 +31,7 @@ export function ViewersPanel({ summary, viewers }: { summary: { opens: number; m
       </div>
       {viewers ? (
         viewers.length === 0 ? (
-          <p className="card px-4 py-4 text-[15px] text-ink-muted">When an ORYN member opens your capsule, they appear here. People without an account stay anonymous.</p>
+          <p className="card px-4 py-4 text-[15px] text-ink-muted">When an ORYN member opens your card, they appear here. People without an account stay anonymous.</p>
         ) : (
           <ul className="card divide-y divide-soft-100 overflow-hidden">
             {viewers.map((v, i) => (

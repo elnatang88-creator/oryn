@@ -32,9 +32,9 @@ export function PresentView({ front, back, url, name, closeHref, qrHref }: { fro
         <span className="text-xs text-soft-300" aria-live="polite">{awake === 'on' ? 'Screen stays on' : ''}</span>
       </div>
       <div className="flex flex-1 items-center justify-center px-4">
-        <div className="w-full max-w-[560px]"><CardStage rise showFlipButton={false} front={front} back={back} /></div>
+        <div className="w-full max-w-[520px]"><CardStage rise surface="present" hint={false} front={front} back={back} /></div>
       </div>
-      <p className="text-center text-xs text-soft-300">Tap the card to turn it over</p>
+      <p className="text-center text-sm text-soft-300">Double-tap to flip</p>
       <div className="mx-auto mt-4 grid w-full max-w-sm grid-cols-2 gap-3 px-4 pb-[max(env(safe-area-inset-bottom),1.25rem)]">
         {canShare
           ? <button type="button" onClick={() => navigator.share({ title: `${name} · ORYN card`, url }).catch(() => {})} className="btn min-h-[52px] rounded-2xl bg-white/10 text-white" data-testid="present-share"><Share2 className="h-5 w-5" aria-hidden="true" /> Send</button>

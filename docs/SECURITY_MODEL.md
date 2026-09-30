@@ -95,3 +95,15 @@ CSP (`default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`, `form-
 | Data leakage on exchange | Each side gets the other's share projection (first + permitted second layer); hidden fields and notes never leave; other people's card backs never show their QR | — |
 | Impersonation | Requests carry the signed-in user; answering is owner-checked; a person can't answer their own or someone else's request (tested) | — |
 | Wallet | Pass contains card-face data + one revocable link; Google save links are RS256-signed server-side; Apple is refused until a signing service exists | Key custody for wallet certificates (company-owned) |
+
+## Product pass (2026-09-30)
+
+| Area | Control |
+|---|---|
+| Client analytics endpoint | Auth + same-origin, allow-listed names, props reduced to ids/enums, 900/h per user |
+| Card back | Owner surfaces show only first-layer details; other members' cards show the ORYN mark until you're connected; after connecting, only what their share projection allowed |
+| People search | Notes are searched only for their owner (tested: another user's note never matches) |
+| Tags / reminders | Owner-checked in the service; tags validated (≤8, ≤24 chars) |
+| Wallet permanent link | One revocable `wallet_pass` share per person, `follow_default` → always the current active card; stopping it closes the pass |
+| Offline Present (service worker) | Caches only static assets and the **last Present screen** (your own card); never API data or other pages; cleared on sign-in/sign-out pages. Shared devices: sign out clears it. |
+| Google Wallet errors | Return to the Wallet screen with an error state; only same-site `/share/<id>/wallet` paths are accepted as the return path |

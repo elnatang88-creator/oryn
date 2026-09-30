@@ -172,3 +172,19 @@ Notation below: `count(e)` = number of events named `e` in the window; `users(e)
 - `connect_requested` / `connect_accepted` carry `props.via = 'nearby'` for member exchanges. No location, cell or handle is ever put in analytics.
 - `privacy_control_used` with `control: 'nearby_visibility'` when someone changes who can find them.
 - Success signal to watch: time from Share opened → connection accepted (target: seconds), and share of Nearby exchanges vs. link/QR.
+
+## Event catalog v2 (2026-09-30) — `lib/analytics-events.ts`
+
+One schema for every event: `name · created_at · user_id · session_id · props`. `props` pass an allow-list (`cleanProps`): ids (`card_id`, `connection_id`, `context_id`) and enums (`channel`, `surface`, `platform`, `source`, `side`, `count`) only. Names, emails, phone numbers, free text and location are dropped before storage (unit-tested).
+
+| Where | Events |
+|---|---|
+| Client (`POST /api/v1/events`, signed-in, same-origin, rate-limited, allow-listed) | `share_opened`, `card_flipped`, `card_selected`, `nearby_opened`, `nearby_impression`, `nearby_profile_opened`, `nearby_how_it_works_opened`, `present_card_opened`, `qr_opened`, `share_sheet_opened`, `share_method_used`, `wallet_viewed`, `person_opened` |
+| Server | `connection_created` (card_id, channel, connection_id, source), `nearby_visibility_enabled/disabled`, `wallet_add_started/failed`, `tags_updated`, `public_card_cta_clicked` (card owner, card_id, channel, kind of detail) |
+| Existing names kept (canonical mapping) | `capsule_created`=card_created · `capsule_edited`=card_updated · `share_viewed`=public_card_opened (props.channel=qr ≈ qr_scanned) · `share_saved_vcard`=contact_saved · `connect_requested`=connection_requested · `connect_accepted`=connection_accepted · `connect_declined`=connection_deferred |
+
+Not measurable honestly, so not emitted: `wallet_add_completed` (neither platform tells the web app a pass was added), `app_opened` for recipients (they are anonymous), `connection_request_received` (same moment as `connect_requested`; derive it).
+
+**Attribution** lives on the relationship itself, not only in events: `connections.my_capsule_id` (which of my cards), `connections.channel` (how), `event_id` (where). So "Conference card → Nearby → Blake → accepted" and "which card works" are plain queries (`relationshipSummary`).
+
+**North star — Meaningful Connections:** connections that got a note or a follow-up (already on Insights). Supporting: exchange rate (connections ÷ card opens), acceptance rate (accepted ÷ requested), save rate, follow-up rate, repeat interaction (member views after connecting, on the person timeline).

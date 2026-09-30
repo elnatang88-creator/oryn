@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, Bell, CheckCircle2, Circle, QrCode, UserPlus } from 'lucide-react'
 import { requireUser } from '@/lib/server/request'
-import { todaySummary } from '@/lib/server/services/today'
+import { relationshipSummary, todaySummary } from '@/lib/server/services/today'
 import { listCapsules } from '@/lib/server/services/capsules'
 import { RespondButtons } from '@/components/RespondButtons'
 import { toggleFollowUpAction, markReadAction } from '@/app/actions/connections'
@@ -14,10 +14,10 @@ import { LiveRefresh } from '@/components/LiveRefresh'
 export const metadata = { title: 'Today' }
 
 const ACTIVITY: Record<string, string> = {
-  opened: 'Your capsule was opened',
+  opened: 'Your card was opened',
   expanded: 'Someone chose “Learn more”',
   saved_vcard: 'Your details were saved to a phone',
-  kept: 'Your capsule was kept in ORYN',
+  kept: 'Your card was kept in ORYN',
   connect_requested: 'New request to connect',
   blocked_revoked: 'A stopped link was tried — it stayed closed',
 }
@@ -28,24 +28,51 @@ const shareNow = <a href="/share/quick" className="text-sm font-semibold text-el
 
 export default async function TodayPage() {
   const user = await requireUser()
-  const [t, capsules, vs] = await Promise.all([todaySummary(user.id), listCapsules(user.id), viewerSummary(user.id)])
+  const [t, capsules, vs, rs] = await Promise.all([todaySummary(user.id), listCapsules(user.id), viewerSummary(user.id), relationshipSummary(user.id)])
   const viewers = vs.canSeeWho ? await listViewers(user.id, 8) : null
   const first = user.display_name.split(' ')[0]
 
   if (capsules.length === 0) {
     return (
       <>
-        <PageHeader title={`Hi ${first}`} sub="Start with one capsule. It takes about a minute." />
-        <Empty title="No capsule yet" body="A capsule is what people see when you share. You choose every detail in it." action={<Link href="/capsules/new" className="btn-share">Create my first capsule</Link>} />
+        <PageHeader title={`Hi ${first}`} sub="Start with your card. It takes about a minute." />
+        <Empty title="No card yet" body="Your card is what people see when you share. You choose every detail on it." action={<Link href="/capsules/new" className="btn-share">Create my card</Link>} />
       </>
     )
   }
 
   return (
     <>
-      <PageHeader title="Today" sub={`This week: opened ${t.counts.opened} ${t.counts.opened === 1 ? 'time' : 'times'} · ${t.counts.expanded} chose “learn more” · ${t.counts.saved} saved`} />
+      <PageHeader title="Today" sub="Who you met, what’s next, and what’s working." />
 
       <LiveRefresh />
+      <section className="mb-8" aria-labelledby="week" data-testid="this-week">
+        <h2 id="week" className="h2 mb-3">This week</h2>
+        <dl className="grid grid-cols-4 gap-2">
+          {([['Card opens', rs.week.opens], ['Connections', rs.week.connections], ['Saves', rs.week.saves], ['Follow-ups', rs.week.followups]] as const).map(([k, v]) => (
+            <div key={k} className="card px-2 py-3 text-center" data-testid={`week-${k.toLowerCase().replace(/\W+/g, '-')}`}><dd className="text-2xl font-bold tabular-nums text-navy-900">{v}</dd><dt className="text-[11px] font-semibold leading-tight text-ink-muted">{k}</dt></div>
+          ))}
+        </dl>
+        {(rs.topCards.length > 0 || rs.topChannel) && (
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {rs.topCards[0] && <div className="card px-4 py-3" data-testid="top-card"><p className="text-xs font-semibold text-ink-muted">Top card · 30 days</p><p dir="auto" className="truncate font-semibold">{rs.topCards[0].name}</p><p className="text-xs text-ink-muted">{rs.topCards[0].n} connections</p></div>}
+            {rs.topChannel && <div className="card px-4 py-3" data-testid="top-channel"><p className="text-xs font-semibold text-ink-muted">Top source · 30 days</p><p className="truncate font-semibold">{rs.topChannel.label}</p><p className="text-xs text-ink-muted">{rs.topChannel.n} connections</p></div>}
+          </div>
+        )}
+        {rs.quiet.length > 0 && (
+          <div className="card mt-2 px-4 py-3" data-testid="worth-follow-up">
+            <p className="text-sm font-semibold">Worth a follow-up</p>
+            <ul className="mt-1 divide-y divide-soft-100">
+              {rs.quiet.map((q) => (
+                <li key={q.id}><Link href={`/connections/${q.id}`} className="flex min-h-[48px] items-center justify-between gap-2 py-1.5">
+                  <span className="min-w-0"><span dir="auto" className="block truncate font-medium">{q.name}</span><span className="block truncate text-xs text-ink-muted">{q.place ? `${q.place} · ` : ''}{relTime(q.met_at)} · no note yet</span></span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
+                </Link></li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
       <ViewersPanel summary={vs} viewers={viewers} />
 
       {t.notifications.length > 0 && (

@@ -49,7 +49,9 @@ test('founder demo: create → share → recipient → workspace → revoke', as
   await page.getByLabel('Private note').fill('SECRET: only for Harbor Summit')
   await shot(page, '01-capsule-editor')
   await page.getByRole('button', { name: 'Create capsule' }).click()
-  await expect(page.getByTestId('created-banner')).toBeVisible()
+  // First card: straight to the card itself, with the three ways to give it.
+  await expect(page.getByTestId('first-run')).toBeVisible()
+  await expect(page.getByTestId('wallet-card-name')).toHaveText('Maya Stone')
 
   // 3. Activate ORYN: from anywhere, one tap opens MY CARD (the card is the product, not a QR). Measure it.
   await page.goto('/today')
@@ -81,7 +83,7 @@ test('founder demo: create → share → recipient → workspace → revoke', as
 
   // 6. Learn more.
   await r.page.getByTestId('learn-more').click()
-  await expect(r.page.getByText('maya@studio.example')).toBeVisible()
+  await expect(r.page.getByTestId('capsule-field').filter({ hasText: 'maya@studio.example' })).toBeVisible()
   await expect(r.page.getByText('555 010 7777')).toHaveCount(0)
   // 7. ORYN continuation offered only now, in the browser.
   await expect(r.page.getByTestId('app-offer')).toBeVisible()
@@ -97,7 +99,7 @@ test('founder demo: create → share → recipient → workspace → revoke', as
 
   // 8. Sender sees the interaction in the workspace.
   await page.goto('/today')
-  await expect(page.getByText('This week: opened 1 time')).toBeVisible()
+  await expect(page.getByTestId('week-card-opens')).toContainText('1')
   await expect(page.getByTestId('pending-request')).toContainText('Sam Rivera')
   await shot(page, '05-today')
   await page.getByTestId('pending-request').getByRole('button', { name: 'Connect' }).click()
@@ -110,7 +112,7 @@ test('founder demo: create → share → recipient → workspace → revoke', as
   // 10. Follow-up.
   await page.getByTestId('followup-title').fill('Send Sam the research')
   await page.getByRole('button', { name: 'Set', exact: true }).click()
-  await expect(page.getByText('Send Sam the research')).toBeVisible()
+  await expect(page.getByText('Send Sam the research', { exact: true })).toBeVisible()
   await shot(page, '06-contact')
 
   // 11. Revoke.

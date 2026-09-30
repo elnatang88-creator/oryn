@@ -2,6 +2,7 @@ import 'server-only'
 import { getDb } from '../db'
 import { AppError } from '../errors'
 import { audit } from '../audit'
+import { track } from '../analytics'
 import { requireCapability, userPlan } from '../plans'
 import { getCapsule, defaultCapsuleId } from './capsules'
 import { startShare, shareUrl } from './sharing'
@@ -18,10 +19,12 @@ export async function walletLink(userId: string) {
   await requireCapability(db, await userPlan(db, userId), 'share.wallet', userId)
   const capsuleId = await defaultCapsuleId(userId)
   if (!capsuleId) throw new AppError('not_found', 'Create your card first.')
+  // One permanent link per person. It follows whichever card is active, so the pass never has to be reissued.
   const [s] = await db.query<{ id: string }>(
-    `SELECT id FROM share_sessions WHERE owner_user_id = $1 AND capsule_id = $2 AND channel = 'wallet_pass' AND revoked_at IS NULL AND expires_at IS NULL ORDER BY created_at DESC LIMIT 1`, [userId, capsuleId])
+    `SELECT id FROM share_sessions WHERE owner_user_id = $1 AND channel = 'wallet_pass' AND follow_default AND revoked_at IS NULL AND expires_at IS NULL ORDER BY created_at DESC LIMIT 1`, [userId])
   if (s) return { shareId: s.id, url: shareUrl(signShareToken(s.id, null)), capsuleId }
   const created = await startShare(userId, { capsuleId, channel: 'wallet_pass', durationMinutes: null, oneTime: false, contextLabel: 'Wallet pass' })
+  await db.query(`UPDATE share_sessions SET follow_default = TRUE, one_time = FALSE WHERE id = $1`, [created.id])
   return { shareId: created.id, url: created.url, capsuleId }
 }
 
@@ -33,7 +36,12 @@ export async function walletCardData(userId: string, capsuleId: string, url: str
 
 /** "Add to Google Wallet": a signed save link, or a clear integration-required error. Never a fake success. */
 export async function googleWalletSaveLink(userId: string, origin: string) {
-  if (!walletStatus().google.configured) throw new AppError('conflict', 'Google Wallet isn’t connected on this ORYN server yet.')
+  const db0 = await getDb()
+  if (!walletStatus().google.configured) {
+    await track(db0, 'wallet_add_failed', { userId, props: { platform: 'google', source: 'not_configured' } })
+    throw new AppError('conflict', 'Google Wallet isn’t connected on this ORYN server yet.')
+  }
+  await track(db0, 'wallet_add_started', { userId, props: { platform: 'google' } })
   const link = await walletLink(userId)
   const data = await walletCardData(userId, link.capsuleId, link.url.startsWith('http') ? link.url : `${origin}${link.url}`)
   const cfg = googleConfig()

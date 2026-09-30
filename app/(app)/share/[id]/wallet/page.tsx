@@ -7,6 +7,7 @@ import { has, userPlan } from '@/lib/server/plans'
 import { walletColors, walletStatus, type WalletStatus } from '@/lib/server/wallet'
 import { PlanGate } from '@/components/ui'
 import { LogoMark } from '@/components/Logo'
+import { TrackOnMount } from '@/components/TrackOnMount'
 
 export const metadata = { title: 'Add to Wallet' }
 
@@ -14,20 +15,22 @@ export const metadata = { title: 'Add to Wallet' }
  * Wallet. The preview is rendered from the same card data a real pass would carry. Each platform shows its
  * true state: ready (Google, once configured) or "integration pending" with exactly what's missing.
  */
-export default async function WalletPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+export default async function WalletPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
+  const [{ id }, sp] = await Promise.all([params, searchParams])
   const { user, share, capsule, design, identity } = await loadOwnerShare(id)
   const allowed = has(await userPlan(await getDb(), user.id), 'share.wallet')
   const status = walletStatus()
   const ua = (await headers()).get('user-agent') ?? ''
   const order: ('apple' | 'google')[] = /Android/i.test(ua) ? ['google', 'apple'] : ['apple', 'google']
+  const phone = /iPhone|iPad|Android/i.test(ua)
   const c = walletColors(design)
   return (
     <div className="-mx-4 -my-6 min-h-[calc(100dvh-3.5rem)] bg-soft-50 px-4 pb-10 pt-4 sm:-mx-6 sm:px-6 lg:-my-10 lg:rounded-3xl lg:py-10">
       <div className="mx-auto max-w-sm">
+        <TrackOnMount name="wallet_viewed" props={{ card_id: capsule.id, surface: 'wallet' }} />
         <Link href={`/share/${share.id}`} className="btn-quiet -ml-2"><ChevronLeft className="h-5 w-5" aria-hidden="true" /> My card</Link>
         <h1 className="h1 mt-2">Keep your card in your Wallet</h1>
-        <p className="mt-1 text-[15px] text-ink-muted">Open it from the lock screen and let people scan it — even without signal. They still see only what you chose.</p>
+        <p className="mt-1 text-[15px] text-ink-muted">Open it from your lock screen — even without signal. The pass always opens your active card, so it never needs updating.</p>
 
         <figure className="mt-6" data-testid="wallet-preview">
           <div className="mx-auto w-full max-w-[320px] overflow-hidden rounded-[22px] shadow-capsule" style={{ background: c.background, color: c.foreground }}>
@@ -48,24 +51,27 @@ export default async function WalletPage({ params }: { params: Promise<{ id: str
           <figcaption className="mt-2 text-center text-xs text-ink-muted">Preview of the pass, built from your card “{capsule.name}”.</figcaption>
         </figure>
 
+        {sp.error && <p role="alert" className="mt-6 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-signal-stop" data-testid="wallet-add-failed">Couldn’t add the pass. Nothing was added to your phone — try again later.</p>}
+        {!phone && <p className="mt-6 rounded-2xl bg-soft-100 px-4 py-3 text-sm text-navy-900" data-testid="wallet-unsupported">Wallet passes are added from a phone. Open ORYN on your iPhone or Android phone to add this pass.</p>}
         {!allowed ? (
           <div className="mt-6"><PlanGate message="Wallet passes are part of Pro." /></div>
         ) : (
           <div className="mt-6 space-y-3">
-            {order.map((p) => <PlatformRow key={p} s={status[p]} />)}
+            {order.map((p) => <PlatformRow key={p} s={status[p]} back={`/share/${share.id}/wallet`} />)}
           </div>
         )}
-        <p className="mt-6 text-xs text-ink-muted">Adding a pass creates one permanent link for it. You can stop that link any time from Today or Data &amp; privacy; the pass then opens “no longer shared”.</p>
+        <p className="mt-6 text-xs text-ink-muted">ORYN never says a pass was added — your phone’s Wallet does. Adding a pass creates one permanent link for it. You can stop that link any time from Today or Data &amp; privacy; the pass then opens “no longer shared”.</p>
       </div>
     </div>
   )
 }
 
-function PlatformRow({ s }: { s: WalletStatus }) {
+function PlatformRow({ s, back }: { s: WalletStatus; back: string }) {
   const name = s.platform === 'apple' ? 'Apple Wallet' : 'Google Wallet'
   if (s.configured) {
     return (
       <form method="post" action={`/api/v1/wallet/${s.platform}`} className="card p-4" data-testid={`wallet-${s.platform}-ready`}>
+        <input type="hidden" name="back" value={back} />
         <button className="btn w-full bg-black text-white hover:bg-black/85"><Smartphone className="h-5 w-5" aria-hidden="true" /> Add to {name}</button>
       </form>
     )

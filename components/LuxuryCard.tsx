@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { designVars, initials, type CardDesign } from '@/lib/card-design'
+import { FieldIcon } from './FieldIcon'
+import type { FieldKind } from '@/lib/capsule-model'
 
 export interface CardIdentity {
   displayName: string
@@ -79,7 +81,7 @@ export function CardBack({ design, qrSvg, caption, qrTestId }: { design: CardDes
   )
 }
 
-/** The back when the owner chose "ORYN mark only": no code, just the mark and their name in foil. */
+/** Before permission (e.g. a Nearby preview): the back shows only the ORYN mark and the name — no details, no code. */
 export function BrandBack({ design, name }: { design: CardDesign; name: string }) {
   return (
     <div className="lc-holder">
@@ -94,7 +96,38 @@ export function BrandBack({ design, name }: { design: CardDesign; name: string }
   )
 }
 
-/** Renders whichever back the owner designed in Card Studio. */
-export function DesignedBack({ design, qrSvg, name, caption = 'Scan to open my card', qrTestId }: { design: CardDesign; qrSvg: string; name: string; caption?: string; qrTestId?: string }) {
-  return design.back === 'brand' ? <BrandBack design={design} name={name} /> : <CardBack design={design} qrSvg={qrSvg} caption={caption} qrTestId={qrTestId} />
+export interface CardDetail { kind: string; label: string; value: string }
+const ON_FRONT = new Set(['role', 'company'])
+const pretty = (kind: string, v: string) => (['website', 'social', 'booking', 'link'].includes(kind) ? v.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : v)
+
+/**
+ * The back of a card: exactly the details that card permits (never more), plus an optional small code.
+ * Kept light on purpose — at most four lines.
+ */
+export function DetailsBack({ design, name, details, qrSvg, qrTestId }: { design: CardDesign; name: string; details: CardDetail[]; qrSvg?: string | null; qrTestId?: string }) {
+  const rows = details.filter((d) => d.value && !ON_FRONT.has(d.kind)).slice(0, 4)
+  return (
+    <div className="lc-holder">
+    <div className={`lc-card lc-finish-${design.finish}`} style={designVars(design) as CSSProperties} data-material={design.material} data-testid="card-back-details">
+      <div className="lc-texture" /><div className="lc-holo" /><div className="lc-sheen" /><div className="lc-edge" />
+      <div className={`lc-back-details ${qrSvg ? 'has-qr' : ''}`}>
+        <div className="lc-back-info">
+          <div className="lc-back-name lc-foil" dir="auto">{name}</div>
+          {rows.length ? (
+            <ul className="lc-back-rows">
+              {rows.map((d, i) => <li key={i}><FieldIcon kind={d.kind as FieldKind} className="lc-back-icon" /><span dir="auto">{pretty(d.kind, d.value)}</span></li>)}
+            </ul>
+          ) : <p className="lc-back-empty">Just a hello — no details on this card.</p>}
+        </div>
+        {qrSvg && <div className="lc-qr lc-qr-sm" data-testid={qrTestId} role="img" aria-label="Code that opens this card" dangerouslySetInnerHTML={{ __html: qrSvg }} />}
+        <div className="lc-mark lc-back-mark" aria-hidden="true" />
+      </div>
+    </div>
+    </div>
+  )
+}
+
+/** Renders the back the owner designed in Card Studio: permitted details, with or without a small code. */
+export function DesignedBack({ design, qrSvg, name, details, qrTestId }: { design: CardDesign; qrSvg: string; name: string; details: CardDetail[]; qrTestId?: string }) {
+  return <DetailsBack design={design} name={name} details={details} qrSvg={design.back === 'qr' ? qrSvg : null} qrTestId={qrTestId} />
 }

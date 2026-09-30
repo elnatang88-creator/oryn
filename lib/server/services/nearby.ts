@@ -63,6 +63,7 @@ export async function setNearbyVisibility(userId: string, visibility: string) {
   else await db.query(`UPDATE nearby_presence SET visibility = $2 WHERE user_id = $1`, [userId, visibility])
   await audit(db, { actor: userId, action: 'nearby.visibility_changed', targetType: 'user', targetId: userId, meta: { visibility } })
   await track(db, 'privacy_control_used', { userId, props: { control: 'nearby_visibility', value: visibility } })
+  await track(db, visibility === 'off' ? 'nearby_visibility_disabled' : 'nearby_visibility_enabled', { userId, props: { source: visibility } })
 }
 
 /** Keeps me discoverable for the next two minutes. The client sends a coarse cell (never coordinates) and/or an event. */
@@ -152,7 +153,7 @@ export async function nearbyState(me: string) {
   const list: NearbyPerson[] = people.map((p) => {
     const con = connected.find((c) => c.contact_user_id === p.user_id)
     const relation = con ? 'connected' : toMe.some((r) => r.from_user_id === p.user_id) ? 'requested_you' : mineOut.some((r) => r.owner_user_id === p.user_id) ? 'requested' : 'none'
-    return { handle: p.handle, name: p.name, headline: p.headline || p.capsule.headline, industry: p.industry, proximity: proximityLabel(p, mine!), isDemo: p.demo, card: cardFace(p.capsule), relation, connectionId: con?.id ?? null }
+    return { handle: p.handle, name: p.capsule.display_name || p.name, headline: p.headline || p.capsule.headline, industry: p.industry, proximity: proximityLabel(p, mine!), isDemo: p.demo, card: cardFace(p.capsule), relation, connectionId: con?.id ?? null }
   })
   return { visibility: u.nearby_visibility, present: !!mine, eventId: mine?.event_id ?? null, people: list, incoming: await incomingMember(db, me), outgoing: await outgoingMember(db, me) }
 }
@@ -169,13 +170,19 @@ async function incomingMember(db: Db, me: string) {
 
 /** My recent requests. A decline is private to them, so it reads exactly like "still waiting". */
 async function outgoingMember(db: Db, me: string) {
-  const rows = await db.query<{ id: string; status: string; name: string; connection_id: string | null }>(
-    `SELECT r.id, r.status, u.display_name AS name,
-            (SELECT k.id FROM connections k WHERE k.owner_user_id = $1 AND k.contact_user_id = r.owner_user_id AND k.status = 'active' ORDER BY k.created_at DESC LIMIT 1) AS connection_id
+  // Names come from the card the other person is showing (or the card they gave me), never their account name,
+  // so requester, recipient, confirmation and People always agree.
+  const rows = await db.query<{ id: string; status: string; name: string; connection_id: string | null; conn_name: string | null; card: NearbyCard | null }>(
+    `SELECT r.id, r.status, coalesce(pc.display_name, u.display_name) AS name, k.id AS connection_id, k.name AS conn_name, k.card
        FROM connection_requests r JOIN users u ON u.id = r.owner_user_id
+       LEFT JOIN nearby_presence p ON p.user_id = r.owner_user_id LEFT JOIN capsules pc ON pc.id = p.capsule_id
+       LEFT JOIN LATERAL (SELECT k.id, k.name, k.card FROM connections k WHERE k.owner_user_id = $1 AND k.contact_user_id = r.owner_user_id AND k.status = 'active' ORDER BY k.created_at DESC LIMIT 1) k ON true
       WHERE r.from_user_id = $1 AND r.kind = 'member' AND r.created_at > now() - interval '1 day'
       ORDER BY r.created_at DESC LIMIT 10`, [me])
-  return rows.map((r) => ({ id: r.id, name: r.name, status: r.status === 'accepted' ? ('accepted' as const) : ('waiting' as const), connectionId: r.status === 'accepted' ? r.connection_id : null }))
+  return rows.map((r) => {
+    const accepted = r.status === 'accepted'
+    return { id: r.id, name: accepted && r.conn_name ? r.conn_name : r.name, status: accepted ? ('accepted' as const) : ('waiting' as const), connectionId: accepted ? r.connection_id : null, card: accepted && r.card ? { ...r.card, avatarUrl: null, design: normalizeDesign(r.card.design) } : null }
+  })
 }
 
 /**
@@ -204,7 +211,8 @@ export async function requestNearby(me: string, handle: string) {
   await rateLimit(db, `nearby-pair:${me}:${target.user_id}`, 3, 86400)
 
   const [myPresence] = await db.query<{ capsule_id: string }>(`SELECT capsule_id FROM nearby_presence WHERE user_id = $1`, [me])
-  const [meRow] = await db.query<{ display_name: string }>(`SELECT display_name FROM users WHERE id = $1`, [me])
+  // The name on the card I'm offering is the name they'll see everywhere in this exchange.
+  const [meRow] = await db.query<{ display_name: string }>(`SELECT c.display_name FROM capsules c WHERE c.id = $1`, [myPresence.capsule_id])
   // What I'm offering: a share of my current card. Its link is never sent anywhere; it scopes what they receive.
   const share = await startShare(me, { capsuleId: myPresence.capsule_id, channel: 'nearby', contextLabel: target.event_name ?? 'Nearby', durationMinutes: null, oneTime: false })
   const requestId = newId('req')
@@ -216,7 +224,7 @@ export async function requestNearby(me: string, handle: string) {
     await t.query(`INSERT INTO notifications (id, user_id, kind, body, link) VALUES ($1,$2,'connect_request',$3,'/share/nearby')`, [newId('ntf'), target.user_id, `${meRow.display_name} would like to connect.`])
     await audit(t, { actor: me, action: 'connection_request.sent', targetType: 'connection_request', targetId: requestId, meta: { via: 'nearby' } })
   })
-  await track(db, 'connect_requested', { userId: target.user_id, props: { via: 'nearby' } })
+  await track(db, 'connect_requested', { userId: me, props: { via: 'nearby', channel: 'nearby', card_id: myPresence.capsule_id } })
   return { status: 'requested' as const, requestId }
 }
 

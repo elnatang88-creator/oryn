@@ -29,6 +29,14 @@ Product model: **Create → Wallet → Nearby → Present → Connect → People
 - Wallet data contract: Apple `pass.json` (generic style: identity credential), Google Wallet Generic object, and the **Google "Save to Wallet" RS256 signing** (verified in tests with a generated key). The pass link is one non-expiring, revocable share.
 - Privacy: export includes Nearby setting and presence; deletion removes presence, member requests and Nearby rate-limit keys (deletion scan test); visibility changes are audited.
 
+### Added in the product pass (2026-09-30)
+- The card is an object everywhere (1.586 ratio, no panel behind it); **double-tap to flip** (0.6 s Y-axis turn, keyboard + screen-reader button, reduced motion respected). The back shows what that card permits (first layer), with a small code if the owner chose it.
+- Share: "Using <card>" switcher (one tap to change the active card), Nearby + Present primary, Wallet secondary, QR/links tertiary. First card → first-run: see it, flip it, three ways to give it.
+- Nearby: on/off switch + "Visible to", "How it works" sheet, calm location states with how-to-enable, people shown as their cards, names always the name on the card.
+- The connection moment: two cards meet, the seal lands (~0.9 s), shown only after the server confirms. "Open in People" / "Add context".
+- People: their card, met at / via / which of your cards, tags, one-tap reminder, history timeline, search by name/company/event/tag/own notes.
+- Wallet pass link follows the active card; states for unsupported device, pending, ready, failed. Offline Present via a small service worker.
+
 ### Demo / simulated
 - **Demo members** Daniel Cohen, Sarah Levi, Eli Ward: fictional, on `@oryn.local`, unusable passwords, in a presence cell (`demo`) that no phone can produce, **shown only to demo accounts**, labelled "demo". They **auto-accept after ~2 s** (`simulateDemoReplies`), which never runs for real users.
 - **Near-realtime is polling**: clients poll every 2 s (every 1 s for a minute after sending a request); presence heartbeats every 30 s with a 2-minute expiry. Measured in E2E: A's tap reaches B in ~0.9–1.9 s; A sees "connected" ~2.4–3.5 s after tapping (B's tap included).

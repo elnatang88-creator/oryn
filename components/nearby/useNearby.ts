@@ -8,7 +8,7 @@ export type Visibility = 'off' | 'everyone' | 'connections' | 'event'
 export interface Card { displayName: string; headline: string; company: string | null; avatarUrl: string | null; design: CardDesign }
 export interface Person { handle: string; name: string; headline: string; industry: string | null; proximity: string; isDemo: boolean; card: Card; relation: 'none' | 'connected' | 'requested' | 'requested_you'; connectionId: string | null }
 export interface Incoming { id: string; name: string; headline: string; industry: string | null; createdAt: string; card: Card }
-export interface Outgoing { id: string; name: string; status: 'accepted' | 'waiting'; connectionId: string | null }
+export interface Outgoing { id: string; name: string; status: 'accepted' | 'waiting'; connectionId: string | null; card?: Card | null }
 export interface NearbyData { visibility: Visibility; present: boolean; eventId: string | null; people: Person[]; incoming: Incoming[]; outgoing: Outgoing[] }
 export type LocationState = 'unknown' | 'prompt' | 'locating' | 'ok' | 'denied' | 'unavailable'
 

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { QrCode, Users } from 'lucide-react'
 import { requireUser } from '@/lib/server/request'
 import { getEvent } from '@/lib/server/services/events'
+import { myEventRelationships } from '@/lib/server/services/today'
 import { AppError } from '@/lib/server/errors'
 import { eventRulesAction, eventStatusAction } from '@/app/actions/workspace'
 import { ActionForm, Submit } from '@/components/Forms'
@@ -16,6 +17,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const data = await getEvent(user.id, id).catch((e) => { if (e instanceof AppError) return null; throw e })
   if (!data) notFound()
   const { event: e, stats } = data
+  const mine = await myEventRelationships(user.id, e.id)
   const next = e.status === 'draft' ? { s: 'live', label: 'Go live' } : e.status === 'live' ? { s: 'ended', label: 'End event' } : null
   return (
     <>
@@ -28,6 +30,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
           <div key={k} className="card px-4 py-3"><dt className="text-sm text-ink-muted">{k}</dt><dd className="text-2xl font-bold text-navy-900">{v}</dd></div>
         ))}
       </dl>
+      <section className="card mb-8 p-5" data-testid="my-event-relationships">
+        <h2 className="h2">Your relationships from this event</h2>
+        <p className="mt-1 text-sm text-ink-muted">People you met here: <b className="text-navy-900">{mine.people}</b> · with a note: <b className="text-navy-900">{mine.noted}</b> · follow-ups open: <b className="text-navy-900">{mine.followups}</b></p>
+        {mine.people > 0 && <Link href={`/connections?q=${encodeURIComponent(e.name)}`} className="btn-more mt-3 w-full sm:w-auto">See them in People</Link>}
+      </section>
       <div className="mb-8 grid gap-3 sm:grid-cols-2">
         <Link href={`/events/${e.id}/participants`} className="card flex min-h-[64px] items-center gap-3 px-5 hover:border-electric-400"><Users className="h-5 w-5 text-electric" aria-hidden="true" /> <span className="font-semibold">Participants</span></Link>
         <Link href={`/stations?org=${e.org_id}`} className="card flex min-h-[64px] items-center gap-3 px-5 hover:border-electric-400"><QrCode className="h-5 w-5 text-electric" aria-hidden="true" /> <span className="font-semibold">Stations & QR codes</span></Link>

@@ -7,8 +7,8 @@ import { signOutAction } from '@/app/actions/auth'
 
 const NAV = [
   { href: '/today', label: 'Today', icon: Home },
-  { href: '/capsules', label: 'My Capsules', icon: Layers },
-  { href: '/connections', label: 'Connections', icon: Users },
+  { href: '/capsules', label: 'My cards', icon: Layers },
+  { href: '/connections', label: 'People', icon: Users },
   { href: '/follow-ups', label: 'Follow-ups', icon: CalendarCheck },
   { href: '/events', label: 'Events', icon: CalendarDays },
   { href: '/teams', label: 'Teams', icon: UsersRound },
@@ -52,7 +52,7 @@ export function AppShell({ user, children }: { user: { display_name: string; pla
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-soft-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden" aria-label="Main">
         <div className="mx-auto grid max-w-md grid-cols-5 items-end px-2 pt-1.5">
           <Tab href="/today" label="Today" icon={Home} />
-          <Tab href="/capsules" label="Capsules" icon={Layers} />
+          <Tab href="/capsules" label="Cards" icon={Layers} />
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- starts a share, so it must never be prefetched */}
           <a href="/share/quick" className="-mt-6 flex flex-col items-center gap-1 pb-2" data-testid="tab-share">
             <span className="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[#1f6bff] to-[#0038b8] text-white shadow-lift ring-4 ring-white"><ExchangeCardsIcon className="h-8 w-8" /></span>

@@ -91,6 +91,7 @@ export async function recordFieldTap(token: string, fieldId: string, ctx: { clai
   const db = await getDb()
   await rateLimit(db, `tap:${res.session.id}:${ctx.ipKey}`, 30, 3600)
   await db.query(`INSERT INTO interactions (id, share_session_id, owner_user_id, kind, field_kind) VALUES ($1,$2,$3,'field_clicked',$4)`, [newId('int'), res.session.id, res.session.owner_user_id, field.kind])
+  await track(db, 'public_card_cta_clicked', { userId: res.session.owner_user_id, props: { card_id: res.session.capsule_id, channel: res.session.channel, source: field.kind } })
 }
 
 const profileInput = z.object({

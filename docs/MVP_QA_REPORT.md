@@ -113,7 +113,9 @@ The run of `npm run verify:env` against the local demo setup **exits 1 on purpos
 
 ## 7. Final results and readiness
 
-**Latest run (2026-09-30, after Share / Nearby / Present / Wallet):** unit 53/53 on PGlite (52/52 on PostgreSQL 16 before the last added test); browser 28/28 (Android phone 7, desktop 7, two-phone Nearby 5, iPhone QA 9); typecheck, lint and production build clean. Measured: tap → my card ~0.25 s; Nearby A tap → B sees the request ~0.9–1.9 s; A sees "connected" ~2.4–3.5 s including B's tap. What is working, simulated or still needs integration: [NEARBY_AND_WALLET](NEARBY_AND_WALLET.md). The table below is the earlier baseline.
+**Latest run (2026-09-30, product pass: card object, double-tap flip, relationship memory, Today intelligence, analytics v2, offline Present):** unit 62/62 on PGlite and 62/62 on PostgreSQL 16; browser 28/28 incl. QA flows A (first card → first-run → double-tap flip), B (Nearby → connect → moment → People with context, tag, reminder, timeline, search), C (Present → flip → QR → recipient), D (Wallet pending states), E (permission change reflected publicly), F (location denied → event fallback), G (nobody nearby), H (Not now is silent). Failures found and fixed during the pass: migration comments broke the SQL splitter (C14); duplicated company in Nearby rows; "Nearby · Nearby" repeated in People; tests updated for text that now also appears on card backs and in the timeline (C15).
+
+**Previous run (after Share / Nearby / Present / Wallet):** unit 53/53 on PGlite (52/52 on PostgreSQL 16 before the last added test); browser 28/28 (Android phone 7, desktop 7, two-phone Nearby 5, iPhone QA 9); typecheck, lint and production build clean. Measured: tap → my card ~0.25 s; Nearby A tap → B sees the request ~0.9–1.9 s; A sees "connected" ~2.4–3.5 s including B's tap. What is working, simulated or still needs integration: [NEARBY_AND_WALLET](NEARBY_AND_WALLET.md). The table below is the earlier baseline.
 
 
 | Suite | Database | Tests | Passed | Failed |

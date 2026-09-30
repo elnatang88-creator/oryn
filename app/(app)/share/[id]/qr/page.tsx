@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import { loadOwnerShare } from '../load'
 import { ShareAnotherWay } from '@/components/ShareAnotherWay'
 import { CopyLink } from '@/components/CopyLink'
+import { TrackOnMount } from '@/components/TrackOnMount'
 
 export const metadata = { title: 'QR code' }
 
@@ -12,6 +13,7 @@ export default async function QrModePage({ params }: { params: Promise<{ id: str
   const { share, capsule, url, svg, live } = await loadOwnerShare(id)
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-white px-5 pb-[max(env(safe-area-inset-bottom),1.25rem)] pt-[max(env(safe-area-inset-top),1rem)] text-ink">
+      <TrackOnMount name="qr_opened" props={{ card_id: capsule.id, surface: 'qr' }} />
       <Link href={`/share/${share.id}`} className="btn-quiet -ml-2 self-start" data-testid="qr-back"><ChevronLeft className="h-5 w-5" aria-hidden="true" /> My card</Link>
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center py-6">
         {live ? (

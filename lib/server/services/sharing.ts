@@ -171,8 +171,12 @@ export async function revokeAllShares(userId: string) {
 
 async function loadForRecipient(db: Db, sessionId: string) {
   const [row] = await db.query<ShareSession & { capsule: Capsule; event_name: string | null; event_rules: Record<string, unknown> | null; event_status: string | null; owner_deleted: boolean; owner_demo: boolean }>(
+    // A permanent link (e.g. a Wallet pass) with follow_default always shows the owner's CURRENT active card.
     `SELECT s.*, to_jsonb(c.*) AS capsule, e.name AS event_name, e.rules AS event_rules, e.status AS event_status, (u.deleted_at IS NOT NULL) AS owner_deleted, (u.email LIKE '%@oryn.local') AS owner_demo
-       FROM share_sessions s JOIN capsules c ON c.id = s.capsule_id JOIN users u ON u.id = s.owner_user_id
+       FROM share_sessions s JOIN users u ON u.id = s.owner_user_id
+       JOIN capsules c ON c.id = CASE WHEN s.follow_default THEN coalesce(
+            (SELECT d.id FROM capsules d WHERE d.owner_user_id = s.owner_user_id AND d.status = 'active' ORDER BY d.is_default DESC, d.updated_at DESC LIMIT 1), s.capsule_id)
+          ELSE s.capsule_id END
        LEFT JOIN events e ON e.id = s.event_id
       WHERE s.id = $1`,
     [sessionId],

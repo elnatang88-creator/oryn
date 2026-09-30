@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { listCapsules } from '@/lib/server/services/capsules'
 import { revalidatePath } from 'next/cache'
 import { archiveCapsule, createCapsule, setDefaultCapsule, templateFields, updateCapsule, updatePolicy } from '@/lib/server/services/capsules'
 import { requireUser } from '@/lib/server/request'
@@ -42,6 +43,8 @@ export async function createCapsuleAction(_: ActionState, fd: FormData) {
   return run(async () => {
     const user = await requireUser()
     const id = await createCapsule(user.id, readCapsule(fd))
+    // First card: straight to the magic — see it, flip it, give it. Later cards go back to the editor.
+    if ((await listCapsules(user.id)).length === 1) redirect('/share/quick?then=first')
     redirect(`/capsules/${id}?created=1`)
   })
 }

@@ -87,3 +87,16 @@ Add a new numbered file in `db/migrations/` (e.g. `0002_*.sql`); never edit an a
 | `connection_requests.kind`, `.from_user_id` | `member` requests between ORYN members reuse the one request pipeline; one pending request per pair |
 | `connections.source = 'nearby'` | Both sides of an accepted Nearby exchange; `contact_user_id` links the member |
 | `capsules.design.back` | `qr` or `brand` — what the back of the card shows |
+
+## Relationship memory (migration 0005)
+
+| Column | Purpose |
+|---|---|
+| `connections.card` | The other person's card face at connect time (design, name, headline, company) — what People shows as their card |
+| `connections.my_capsule_id` | Which of my cards I gave (attribution: "which card works") |
+| `connections.channel` | nearby · qr/link · wallet_pass · station · kept · manual |
+| `connections.tags` | My private tags (Investor, Founder, Follow up…) |
+| `share_sessions.follow_default` | A permanent link (Wallet pass) resolves to the owner's **current active card** |
+| `analytics_events.session_id` | Per-tab random id for client events |
+
+Terminology decided in this pass: a **card** is a projection of one identity for a context (front + back = first layer). Its **capsule** is what else that person gets on "Learn more" (deck, booking, portfolio). Tables keep the name `capsules`.

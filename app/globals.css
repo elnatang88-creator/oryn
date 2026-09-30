@@ -73,15 +73,27 @@
   .lc-qr svg { width: 100%; height: 100%; display: block; border-radius: 2.2cqw; background: #fff; }
   .lc-back-text { display: grid; gap: 3cqw; justify-items: start; }
   .lc-hint { font-size: 4.2cqw; line-height: 1.3; }
+  .lc-back-details { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr; align-items: center; padding: 6.5cqw 7cqw; font-family: var(--card-font); }
+  .lc-back-details.has-qr { grid-template-columns: 1fr auto; gap: 4cqw; }
+  .lc-back-info { min-width: 0; display: grid; gap: 3.4cqw; }
+  .lc-back-name { font-size: 5.2cqw; line-height: 1.1; font-weight: var(--name-weight); letter-spacing: var(--name-track); }
+  .lc-back-rows { display: grid; gap: 2.4cqw; font-family: "Heebo", system-ui, sans-serif; font-size: 3.5cqw; line-height: 1.25; color: var(--ink-card); }
+  .lc-back-rows li { display: flex; align-items: center; gap: 2.2cqw; min-width: 0; }
+  .lc-back-rows span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lc-back-icon { width: 3.8cqw; height: 3.8cqw; flex: none; opacity: .8; }
+  .lc-back-empty { font-size: 3.4cqw; color: var(--ink-card); }
+  .lc-qr-sm { width: 27cqw; padding: 1.2cqw; border-radius: 2.6cqw; }
+  .lc-back-mark { position: absolute; top: 6cqw; inset-inline-end: 6.5cqw; width: 4.6cqw; }
+  .lc-back-details.has-qr .lc-back-mark { display: none; }
   .lc-back-brand { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 4cqw; font-family: var(--card-font); }
   .lc-mark-lg { width: 16cqw; }
 
-  .lc-stage { padding: clamp(14px, 5vw, 36px); border-radius: 28px;
-    background: radial-gradient(80% 70% at 50% 18%, rgba(120,150,255,.16), transparent 70%), radial-gradient(60% 60% at 50% 110%, rgba(0,0,0,.8), transparent 70%), linear-gradient(180deg, #0A1022, #05080F);
-    touch-action: pan-y; }
+  /* The card floats on the page — no panel behind it. Padding leaves room for its shadow and tilt. */
+  .lc-stage { padding: 10px 6px 18px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  .lc-stage-light .lc-card { box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 -1px 0 rgba(0,0,0,.25) inset, 0 28px 50px -26px rgba(5,11,31,.55), 0 10px 20px -14px rgba(5,11,31,.35); }
   .lc-perspective { perspective: 1400px; }
   .lc-tilt { transition: transform .5s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
-  .lc-flipper { position: relative; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+  .lc-flipper { position: relative; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.75,.2,1); }
   .lc-flipper.is-flipped { transform: rotateY(180deg); }
   .lc-side { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
   .lc-side-back { position: absolute; inset: 0; transform: rotateY(180deg); }
@@ -116,3 +128,12 @@
 @keyframes sheet { from { transform: translateY(100%); } to { transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { [class*="animate-[sheet"], [class*="animate-[fade"] { animation: none !important; } }
+
+/* Connection moment: two cards meet, the ORYN seal lands. ~0.9 s total. */
+.oryn-merge-left { animation: merge-left .55s cubic-bezier(.2,.9,.25,1) both; }
+.oryn-merge-right { animation: merge-right .55s cubic-bezier(.2,.9,.25,1) both; }
+.oryn-merge-seal { animation: merge-seal .35s cubic-bezier(.2,1.3,.4,1) .5s both; }
+@keyframes merge-left { from { transform: translateX(-70px) rotate(-10deg); opacity: 0; } to { transform: translateX(22px) rotate(-5deg); opacity: 1; } }
+@keyframes merge-right { from { transform: translateX(70px) rotate(10deg); opacity: 0; } to { transform: translateX(-22px) rotate(5deg); opacity: 1; } }
+@keyframes merge-seal { from { transform: translate(-50%, -50%) scale(.3); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .oryn-merge-left, .oryn-merge-right, .oryn-merge-seal { animation: none; } .oryn-merge-left { transform: translateX(22px) rotate(-5deg); } .oryn-merge-right { transform: translateX(-22px) rotate(5deg); } }

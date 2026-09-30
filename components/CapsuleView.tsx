@@ -2,7 +2,7 @@ import { hrefForField, type PublicCapsuleView } from '@/lib/capsule-model'
 import { FieldIcon } from './FieldIcon'
 import { ArrowUpRight, Clock, Eye, Lock } from 'lucide-react'
 import { Logo } from './Logo'
-import { CardFace } from './LuxuryCard'
+import { CardFace, DetailsBack } from './LuxuryCard'
 import { CardStage } from './CardStage'
 
 function prettyValue(kind: string, value: string) {
@@ -47,7 +47,8 @@ export function CapsuleView({ view, preview = false, now }: { view: PublicCapsul
           )}
           {view.oneTime && <span className="rounded-full bg-white/10 px-2.5 py-1">Opens once</span>}
         </div>
-        <CardStage front={<CardFace design={view.design} identity={identity} nameTestId="capsule-name" />} />
+        <CardStage surface={preview ? 'studio' : 'recipient'} front={<CardFace design={view.design} identity={identity} nameTestId="capsule-name" />}
+          back={<DetailsBack design={view.design} name={view.displayName} details={view.fields} />} />
       </div>
       {view.message && <p dir="auto" className="mx-4 mt-4 rounded-2xl bg-soft-50 px-4 py-3 text-[15px] leading-relaxed text-ink">{view.message}</p>}
 

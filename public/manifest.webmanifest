@@ -28,6 +28,16 @@
   ],
   "shortcuts": [
     {
+      "name": "Present my card",
+      "short_name": "Present",
+      "description": "Show your card full screen — works offline once opened",
+      "url": "/share/quick?then=present"
+    },
+    {
+      "name": "Nearby",
+      "url": "/share/nearby"
+    },
+    {
       "name": "Share now",
       "short_name": "Share",
       "description": "Open your default capsule, ready to share",

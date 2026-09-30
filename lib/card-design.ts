@@ -22,7 +22,7 @@ export type CardBackKind = (typeof CARD_BACKS)[number]
 export interface CardDesign { material: Material; foil: Foil; finish: Finish; font: CardFont; layout: CardLayout; base: string; back: CardBackKind }
 
 export const DEFAULT_DESIGN: CardDesign = { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram', base: '#0f3d2e', back: 'qr' }
-export const BACK_LABELS: Record<CardBackKind, string> = { qr: 'Code to open my card', brand: 'ORYN mark only' }
+export const BACK_LABELS: Record<CardBackKind, string> = { qr: 'Details + small code', brand: 'Details only' }
 
 const svg = (body: string, w = 300, h = 300) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'>${body}</svg>`)}")`
 const noise = (freq: number, alpha: number) => svg(`<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='${freq}' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 ${alpha} 0'/></filter><rect width='100%' height='100%' filter='url(#n)'/>`)

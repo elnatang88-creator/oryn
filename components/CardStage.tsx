@@ -1,48 +1,69 @@
 'use client'
 
 import { useRef, useState, type ReactNode, type PointerEvent } from 'react'
+import { trackClient } from '@/lib/track-client'
+
+const DOUBLE_TAP_MS = 320
 
 /**
- * Holds a card up to the light: move to tilt it, and (when a back is given) tap the card to flip it.
- * Without JavaScript the card simply renders flat — nothing is lost.
+ * The card as a physical object. Double-tap (or double-click) flips it around the Y axis; Enter/Space and a
+ * screen-reader button do the same. On a pointer device it tilts slightly toward the cursor.
+ * Front and back share one size, so flipping never shifts the layout. Without JavaScript it renders flat.
  */
-export function CardStage({ front, back, startFlipped = false, flipLabel, showFlipButton = true, rise = false }: {
-  front: ReactNode; back?: ReactNode; startFlipped?: boolean; flipLabel?: string; showFlipButton?: boolean; rise?: boolean
+export function CardStage({ front, back, startFlipped = false, hint = true, rise = false, tone = 'dark', surface, className = '' }: {
+  front: ReactNode; back?: ReactNode; startFlipped?: boolean; hint?: boolean; rise?: boolean; tone?: 'dark' | 'light'
+  surface?: 'share' | 'present' | 'studio' | 'people' | 'nearby' | 'recipient' | 'first_run'; className?: string
 }) {
   const [flipped, setFlipped] = useState(startFlipped)
   const tilt = useRef<HTMLDivElement>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const lastTap = useRef<{ t: number; x: number; y: number } | null>(null)
+
+  function flip() {
+    if (!back) return
+    setFlipped((f) => {
+      if (surface) trackClient('card_flipped', { surface, side: f ? 'front' : 'back' })
+      return !f
+    })
+    if ('vibrate' in navigator) try { navigator.vibrate?.(8) } catch { /* not allowed */ }
+  }
+  function onUp(e: PointerEvent<HTMLDivElement>) {
+    const now = Date.now()
+    const p = lastTap.current
+    if (p && now - p.t < DOUBLE_TAP_MS && Math.hypot(e.clientX - p.x, e.clientY - p.y) < 30) { lastTap.current = null; flip() }
+    else lastTap.current = { t: now, x: e.clientX, y: e.clientY }
+  }
   function move(e: PointerEvent<HTMLDivElement>) {
     const el = tilt.current
     if (!el || e.pointerType === 'touch' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const r = el.getBoundingClientRect()
     const px = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), py = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))
-    el.style.transform = `rotateX(${(0.5 - py) * 16}deg) rotateY(${(px - 0.5) * 20}deg)`
+    el.style.transform = `rotateX(${(0.5 - py) * 10}deg) rotateY(${(px - 0.5) * 14}deg)`
     el.style.setProperty('--mx', `${px * 100}%`); el.style.setProperty('--my', `${py * 100}%`)
     el.style.setProperty('--hx', String(Math.round(px * 360))); el.style.setProperty('--foil-pos', `${Math.round(px * 100)}%`)
     clearTimeout(timer.current)
-    timer.current = setTimeout(() => { el.style.transform = '' }, 1800)
+    timer.current = setTimeout(() => { el.style.transform = '' }, 1600)
   }
-  const flip = () => back && setFlipped((f) => !f)
   return (
-    <div className={`lc-stage ${rise ? 'lc-rise' : ''}`} onPointerMove={move} onPointerLeave={() => { if (tilt.current) tilt.current.style.transform = '' }}>
+    <div className={`lc-stage ${tone === 'light' ? 'lc-stage-light' : ''} ${rise ? 'lc-rise' : ''} ${className}`} onPointerMove={move} onPointerLeave={() => { if (tilt.current) tilt.current.style.transform = '' }}>
       <div className="lc-perspective">
         <div className="lc-tilt" ref={tilt}>
           <div
-            className={`lc-flipper ${flipped ? 'is-flipped' : ''} ${back ? 'cursor-pointer' : ''}`}
-            onClick={flip}
-            {...(back ? { role: 'button', tabIndex: 0, 'aria-label': flipped ? 'Card back. Tap to show the front' : 'Card front. Tap to show the back', 'aria-pressed': flipped, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip() } } } : {})}
+            className={`lc-flipper ${flipped ? 'is-flipped' : ''}`}
+            onPointerUp={back ? onUp : undefined}
+            {...(back ? { tabIndex: 0, role: 'group', 'aria-roledescription': 'card', 'aria-label': flipped ? 'Card back' : 'Card front', onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip() } } } : {})}
             data-testid="card-flipper" data-flipped={flipped}
           >
-            <div className="lc-side">{front}</div>
-            {back && <div className="lc-side lc-side-back">{back}</div>}
+            <div className="lc-side" aria-hidden={back ? flipped : undefined}>{front}</div>
+            {back && <div className="lc-side lc-side-back" aria-hidden={!flipped}>{back}</div>}
           </div>
         </div>
       </div>
-      {back && showFlipButton && (
-        <button type="button" className="btn mx-auto mt-4 flex min-h-[44px] rounded-xl bg-white/10 px-4 text-sm text-white hover:bg-white/15" onClick={flip} data-testid="flip-card">
-          {flipLabel ?? (flipped ? 'Show the front' : 'Show the back')}
-        </button>
+      {back && (
+        <>
+          <button type="button" className="sr-only" onClick={flip} data-testid="flip-card">{flipped ? 'Show the front of the card' : 'Show the back of the card'}</button>
+          {hint && <p className={`mt-2 text-center text-xs ${tone === 'light' ? 'text-ink-muted' : 'text-soft-300'}`} aria-hidden="true">Double-tap to flip</p>}
+        </>
       )}
     </div>
   )
