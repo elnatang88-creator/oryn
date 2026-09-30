@@ -6,8 +6,8 @@
 | Branch | `oryn-v1` |
 | Build tested | Production build (`next build` + `next start`), fresh embedded Postgres per run, demo data seeded and labelled |
 | Devices | **iPhone profile:** 390×844 px, 3× pixel density, touch, iPhone user agent, rendered by Chromium. **Android phone:** Pixel 7 profile. **Desktop:** 1360×900. WebKit (Safari's engine) is not installed in this environment. |
-| Final result | **19/19 end-to-end scenarios pass · 29/29 unit/integration tests pass · typecheck, lint and build clean** |
-| Verdict | The full flow works end to end in the browser tests. **It is not yet "demo-ready"** until the items in §5 marked *Before demo* are done: above all, a pass on a real iPhone and a real Android phone. |
+| Final result | **48 tests (29 unit/integration + 19 end-to-end), each run on two databases = 96 runs: 96 passed, 0 failed.** Typecheck, lint and production build clean. Deployment smoke check: 13/13 against a local production-mode server. See §7. |
+| Verdict | **Ready for a local demo only** (a laptop, or two phones once there's an online link). **Not verified for staging, and not production-ready.** No isolated staging environment has been checked yet (environment variables, database permissions, TLS, deployment protection). See §8. |
 
 Screenshots: `docs/screenshots/qa-*.png` (iPhone), `phone-*.png`, `desktop-*.png`. Tests: `tests/e2e/qa.spec.ts`, `tests/e2e/demo.spec.ts`, `tests/unit/*`.
 
@@ -89,7 +89,44 @@ Screenshots: `docs/screenshots/qa-*.png` (iPhone), `phone-*.png`, `desktop-*.png
 | R8 | "Where are you?" on the share screen needs a scroll on a small iPhone; Stop sharing is below it | Low | Later |
 | R9 | Items from SECURITY_TEST_REPORT §4 (pen test, production Postgres, proxy IP trust, RLS, 2FA) | — | Before real users / business data |
 
-## 6. How to reproduce
+## 6. Command failures during QA — none hidden
+
+Every command that exited non-zero while this QA was being done (tool runs, not only tests), with a classification and the re-run.
+
+| # | Command (what it was for) | Exit / error | Classification | Re-run after fix |
+|---|---|---|---|---|
+| C1 | `grep … .next/server/app/today/page.js.nft.json` (check SQL migrations ship in the build) | 2: no such file | **Wrong command.** The pages live under `app/(app)/…`, so the build path is `.next/server/app/(app)/today/…` | Correct path: `db/migrations/0001_init.sql` is in the trace. **Pass.** No product change needed |
+| C2 | `initdb -D /tmp/claude-0/pg/data` (start a real PostgreSQL for testing) | 1: Permission denied | **Environment.** `/tmp/claude-0` is `root`-only (mode 700), so the `postgres` user can't enter it | Re-run in `/var/tmp/orynpg`: PostgreSQL 16.13 running. **Pass** |
+| C3 | `npm run verify:env` (first run of the new deployment check) | 1: TypeScript syntax error | **Real bug in my new script** (`if … else` on one line) | Fixed; typecheck and lint clean; check runs. **Pass** |
+| C4 | `pkill -f …` inside a combined command (twice, earlier in QA) | 144 | **Tooling.** The pattern also matched the shell running it, which killed itself | Replaced by `fuser -k <port>`; later runs clean |
+| C5 | Ad-hoc download probe using `.tap()` | Error: page does not support tap | **Wrong command** (context created without touch) | Re-run with click and touch: file name correct. **Pass** |
+| C6 | Chromium download of a Hebrew file name | Saved as `download` | **Environment.** The container has no UTF-8 locale | With `LANG=C.UTF-8` (as on real phones): `נועה אדלר.vcf`. Test browser configured accordingly |
+| C7 | Test failures F1–F9 and T1–T4 (§3) | Test assertions | Real product bugs (F) and test-script errors (T) | All fixed and re-run; see §3 |
+
+The run of `npm run verify:env` against the local demo setup **exits 1 on purpose**: it reports 5 production failures (demo data on, superuser database role, no TLS, no `CRON_SECRET`, `DATABASE_SSL=disable`). That is the check doing its job. These are exactly the items staging must get right.
+
+## 7. Final results and readiness
+
+| Suite | Database | Tests | Passed | Failed |
+|---|---|---|---|---|
+| Unit / integration (Vitest) | Embedded Postgres (PGlite) | 29 | 29 | 0 |
+| Unit / integration (Vitest) | **PostgreSQL 16 server** | 29 | 29 | 0 |
+| End-to-end browser (Playwright: Android phone 5, desktop 5, iPhone QA 9) | Embedded Postgres | 19 | 19 | 0 |
+| End-to-end browser, same suite, production mode | **PostgreSQL 16 server** | 19 | 19 | 0 |
+| **Total** | | **96 runs of 48 tests** | **96** | **0** |
+| Cold-start concurrency (8 servers at once) | PostgreSQL 16 | 1 | 1 | 0 |
+| `verify:http` smoke check | local production-mode server | 13 checks | 13 (2 warnings: no https locally, demo data on) | 0 |
+
+**Readiness**
+
+| Level | Status | Why |
+|---|---|---|
+| Local demo | **Yes**, with the local demo account | Full flow verified end to end in the browser tests |
+| Demo from real phones (online link) | **Not yet** | Needs a deployment (docs/DEPLOY_VERCEL.md) and a pass on a real iPhone and Android phone (R1) |
+| Staging | **Not verified** | No isolated staging environment exists yet. To verify it: (1) `npm run verify:env` with staging's variables must show 0 failures; (2) `npm run verify:http <staging-url>` must show 0 failures; (3) run the E2E suite against staging's database copy; (4) confirm deployment protection, the least-privilege DB role, TLS, backups and the cron secret |
+| Production | **No** | Also requires SECURITY_TEST_REPORT §4 (external pen test, 2FA, RLS, proxy IP trust, restore drill) and the legal documents |
+
+## 8. How to reproduce
 
 ```bash
 npm install
@@ -97,4 +134,12 @@ npm run typecheck && npm run lint && npm test     # 29 unit/integration tests
 npm run build
 npm run test:e2e                                  # 19 end-to-end tests (phone, desktop, iPhone QA)
 npx playwright test --project=iphone              # the QA suite only
+
+# Same suites on a real PostgreSQL server:
+TEST_DATABASE_URL=postgres://user@host/db npm test
+E2E_DATABASE_URL=postgres://user@host/empty_db npm run test:e2e
+
+# Deployment checks (never print secret values):
+npm run verify:env                                # run with the target environment's variables
+npm run verify:http https://your-staging-url
 ```

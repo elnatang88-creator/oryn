@@ -12,7 +12,9 @@
     "test:e2e": "playwright test",
     "worker": "tsx --conditions=react-server scripts/worker.ts",
     "db:migrate": "tsx --conditions=react-server scripts/migrate.ts",
-    "db:reset": "rm -rf .data/pglite"
+    "db:reset": "rm -rf .data/pglite",
+    "verify:env": "tsx --conditions=react-server scripts/verify-deployment.ts env",
+    "verify:http": "tsx --conditions=react-server scripts/verify-deployment.ts http"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
