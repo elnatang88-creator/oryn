@@ -24,7 +24,7 @@ export async function exportAction(_: ActionState) {
 export async function deletionAction(_: ActionState, fd: FormData) {
   return run(async () => {
     const user = await requireUser()
-    await requestDeletion(user.id, str(fd, 'confirm'))
+    await requestDeletion(user.id, str(fd, 'password'))
     revalidatePath('/settings/privacy')
     return 'Scheduled. All your shares stopped now. You can cancel for 7 days.'
   })

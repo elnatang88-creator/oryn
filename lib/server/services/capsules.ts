@@ -192,6 +192,7 @@ export async function setDefaultCapsule(userId: string, capsuleId: string) {
   await loadOwned(db, userId, capsuleId)
   await db.tx(async (t) => {
     await t.query(`UPDATE capsules SET is_default = (id = $2) WHERE owner_user_id = $1`, [userId, capsuleId])
+    await audit(t, { actor: userId, action: 'capsule.default_changed', targetType: 'capsule', targetId: capsuleId })
   })
 }
 

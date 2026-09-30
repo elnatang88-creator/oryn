@@ -2,6 +2,7 @@ import { getDb } from '@/lib/server/db'
 import { signUp } from '@/lib/server/services/auth'
 import { applyPlanChange } from '@/lib/server/services/billing'
 
+export const PASSWORD = 'correct horse battery'
 let n = 0
 export async function makeUser(plan: 'free' | 'pro' | 'business' = 'pro', name = 'Test Person') {
   n++

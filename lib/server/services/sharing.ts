@@ -330,6 +330,8 @@ export async function requestConnection(token: string, input: z.input<typeof con
       requestId, res.session.id, res.session.owner_user_id, recipientId, parsed.data.name, parsed.data.contact, parsed.data.message,
     ])
     await logInteraction(t, res.session, 'connect_requested', { recipientId })
+    // Who asked and how to reach them stay in the request row; the log records only that it happened.
+    await audit(t, { actor: null, action: 'connection_request.received', targetType: 'connection_request', targetId: requestId, orgId: res.session.org_id })
     await t.query(`INSERT INTO notifications (id, user_id, kind, body, link) VALUES ($1,$2,'connect_request',$3,$4)`, [
       newId('ntf'), res.session.owner_user_id, `${parsed.data.name} would like to connect.`, '/connections/requests',
     ])
@@ -373,4 +375,5 @@ export async function setShareContext(userId: string, shareId: string, label: st
   const db = await getDb()
   const r = await db.query(`UPDATE share_sessions SET context_label = $3 WHERE id = $1 AND owner_user_id = $2 RETURNING id`, [shareId, userId, label.trim().slice(0, 80)])
   if (!r.length) throw notFound('That share')
+  await audit(db, { actor: userId, action: 'share.context_updated', targetType: 'share_session', targetId: shareId })
 }

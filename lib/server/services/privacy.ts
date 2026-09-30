@@ -6,6 +6,8 @@ import { track } from '../analytics'
 import { invalid, notFound } from '../errors'
 import { enqueue } from '../jobs'
 import { rateLimit } from '../ratelimit'
+import { verifyPassword } from './auth'
+import { hmac } from '../secrets'
 
 export const DELETION_GRACE_DAYS = 7
 
@@ -64,13 +66,22 @@ export async function downloadExport(userId: string, exportId: string) {
   return e.payload
 }
 
-export async function requestDeletion(userId: string, confirmEmail: string) {
+/**
+ * Step 1 of account deletion. Requires re-authentication with the current password (knowing the
+ * email is not enough). Every share closes immediately; erasure runs when the grace period ends.
+ */
+export async function requestDeletion(userId: string, password: string) {
+  if (typeof password !== 'string' || !password) throw invalid('Enter your password to confirm.')
   const db = await getDb()
-  const [u] = await db.query<{ email: string }>(`SELECT email FROM users WHERE id = $1`, [userId])
-  if (!u || u.email !== confirmEmail.trim().toLowerCase()) throw invalid('Type your account email to confirm.')
+  await rateLimit(db, `delete-reauth:${userId}`, 5, 900)
+  const [u] = await db.query<{ password_hash: string }>(`SELECT password_hash FROM users WHERE id = $1 AND deleted_at IS NULL`, [userId])
+  if (!u || !(await verifyPassword(password, u.password_hash))) {
+    await audit(db, { actor: userId, action: 'account.deletion_reauth_failed', targetType: 'user', targetId: userId })
+    throw invalid('That password isn’t right.')
+  }
   const [existing] = await db.query(`SELECT 1 FROM deletion_requests WHERE user_id = $1 AND status = 'scheduled'`, [userId])
   if (existing) return
-  const when = new Date(Date.now() + DELETION_GRACE_DAYS * 86400_000)
+  const when = new Date(Date.now() + graceDays() * 86400_000)
   const id = newId('del')
   await db.tx(async (t) => {
     await t.query(`INSERT INTO deletion_requests (id, user_id, scheduled_for) VALUES ($1,$2,$3)`, [id, userId, when])
@@ -82,28 +93,67 @@ export async function requestDeletion(userId: string, confirmEmail: string) {
   await track(db, 'deletion_requested', { userId })
 }
 
+function graceDays() {
+  const v = Number(process.env.ORYN_DELETION_GRACE_DAYS ?? DELETION_GRACE_DAYS)
+  return Number.isFinite(v) && v >= 0 ? v : DELETION_GRACE_DAYS
+}
+
 export async function cancelDeletion(userId: string) {
   const db = await getDb()
   const r = await db.query(`UPDATE deletion_requests SET status = 'canceled' WHERE user_id = $1 AND status = 'scheduled' RETURNING id`, [userId])
   if (r.length) await audit(db, { actor: userId, action: 'account.deletion_canceled', targetType: 'user', targetId: userId })
 }
 
-/** Hard delete. Cascades remove capsules, shares, connections, notes and follow-ups. Audit rows are kept but de-identified. */
+/**
+ * Step 2: erase. Everything the person owns is deleted or de-identified; nothing owned by another
+ * user or another tenant is deleted. Safety rules:
+ *  - the request must belong to this user, be scheduled and be due (a mismatched job does nothing);
+ *  - organizations are never deleted by a blind cascade: shared ones are handed to another member,
+ *    and a solo organization is deleted only after other users' records inside it are detached.
+ */
 export async function executeDeletion(db: Db, requestId: string, userId: string) {
-  const [req] = await db.query<{ status: string }>(`SELECT status FROM deletion_requests WHERE id = $1`, [requestId])
-  if (!req || req.status !== 'scheduled') return
   await db.tx(async (t) => {
+    const [req] = await t.query<{ id: string }>(
+      `SELECT id FROM deletion_requests WHERE id = $1 AND user_id = $2 AND status = 'scheduled' AND scheduled_for <= now() FOR UPDATE`,
+      [requestId, userId],
+    )
+    if (!req) return
+    const [u] = await t.query<{ email: string }>(`SELECT email FROM users WHERE id = $1`, [userId])
+    if (!u) return
+
+    // Organizations this person owns.
     const owned = await t.query<{ org_id: string }>(`SELECT org_id FROM memberships WHERE user_id = $1 AND role = 'owner'`, [userId])
-    for (const o of owned) {
-      const [other] = await t.query<{ user_id: string }>(`SELECT user_id FROM memberships WHERE org_id = $1 AND user_id <> $2 ORDER BY (role = 'admin') DESC, created_at LIMIT 1`, [o.org_id, userId])
-      if (other) await t.query(`UPDATE memberships SET role = 'owner' WHERE org_id = $1 AND user_id = $2`, [o.org_id, other.user_id])
+    for (const { org_id } of owned) {
+      const [heir] = await t.query<{ user_id: string }>(
+        `SELECT user_id FROM memberships WHERE org_id = $1 AND user_id <> $2 ORDER BY (role = 'admin') DESC, (role = 'manager') DESC, created_at LIMIT 1`, [org_id, userId])
+      if (heir) {
+        await t.query(`UPDATE memberships SET role = 'owner' WHERE org_id = $1 AND user_id = $2`, [org_id, heir.user_id])
+        await t.query(`UPDATE organizations SET created_by = $2 WHERE id = $1`, [org_id, heir.user_id])
+        await audit(t, { actor: null, action: 'org.ownership_transferred', targetType: 'organization', targetId: org_id, orgId: org_id, meta: { reason: 'owner_account_deleted' } })
+      } else {
+        // Solo organization: other users' shares at its events belong to them — close and detach, never delete.
+        await t.query(`UPDATE share_sessions SET revoked_at = coalesce(revoked_at, now()), org_id = NULL, event_id = NULL WHERE org_id = $1 AND owner_user_id <> $2`, [org_id, userId])
+        await t.query(`DELETE FROM organizations WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM memberships WHERE org_id = $1 AND user_id <> $2)`, [org_id, userId])
+      }
     }
-    await t.query(`UPDATE organizations SET created_by = (SELECT user_id FROM memberships WHERE org_id = organizations.id AND role = 'owner' AND user_id <> $1 LIMIT 1) WHERE created_by = $1 AND EXISTS (SELECT 1 FROM memberships WHERE org_id = organizations.id AND user_id <> $1)`, [userId])
-    await t.query(`DELETE FROM organizations WHERE created_by = $1`, [userId])
-    await t.query(`UPDATE events SET created_by = (SELECT user_id FROM memberships WHERE org_id = events.org_id AND role = 'owner' LIMIT 1) WHERE created_by = $1`, [userId])
-    await t.query(`UPDATE audit_events SET actor_user_id = NULL, meta = meta || '{"deidentified":true}'::jsonb WHERE actor_user_id = $1`, [userId])
+    // Records in organizations that stay: point authorship at the current owner instead of the person.
+    await t.query(`UPDATE organizations o SET created_by = m.user_id FROM memberships m WHERE o.created_by = $1 AND m.org_id = o.id AND m.role = 'owner' AND m.user_id <> $1`, [userId])
+    await t.query(`UPDATE events e SET created_by = m.user_id FROM memberships m WHERE e.created_by = $1 AND m.org_id = e.org_id AND m.role = 'owner' AND m.user_id <> $1`, [userId])
+    // Their entries in other organizations' participant lists: de-identify.
+    await t.query(`UPDATE event_participants SET user_id = NULL, email = 'deleted-' || id || '@deleted.invalid', display_name = 'Deleted account', status = 'removed' WHERE user_id = $1 OR email = $2`, [userId, u.email])
+
+    // Logs keep their integrity but lose the identity.
+    await t.query(`UPDATE audit_events SET actor_user_id = NULL, meta = (meta - 'device') || '{"deidentified":true}'::jsonb WHERE actor_user_id = $1`, [userId])
+    await t.query(`UPDATE audit_events SET target_id = NULL WHERE target_type = 'user' AND target_id = $1`, [userId])
+    await t.query(`UPDATE audit_events SET meta = meta - 'owner' WHERE meta->>'owner' = $1`, [userId])
     await t.query(`UPDATE analytics_events SET user_id = NULL WHERE user_id = $1`, [userId])
-    // The deletion request row cascades away with the user; the de-identified audit event is the lasting record.
+    await t.query(`DELETE FROM rate_limits WHERE key = ANY($1)`, [[`signin-fail:${hmac(`email:${u.email}`).slice(0, 24)}`, `delete-reauth:${userId}`, `share:${userId}`, `export:${userId}`, `pwchange:${userId}`]])
+    await t.query(`DELETE FROM jobs WHERE payload->>'userId' = $1`, [userId])
+    await t.query(`DELETE FROM subscriptions WHERE subject_type = 'user' AND subject_id = $1`, [userId])
+
+    // The user row: cascades to capsules, visibility policies, their share sessions and QR destinations,
+    // interactions, connection requests to them, connections, private notes, follow-ups, notifications,
+    // devices, sessions, exports, memberships and this deletion request.
     await t.query(`DELETE FROM users WHERE id = $1`, [userId])
     await audit(t, { actor: null, action: 'account.deleted', targetType: 'user', targetId: null, meta: { requestId } })
   })

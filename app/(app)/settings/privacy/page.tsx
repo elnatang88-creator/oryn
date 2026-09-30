@@ -70,7 +70,7 @@ export default async function PrivacyPage() {
         ) : (
           <ActionForm action={deletionAction} className="mt-2 space-y-3">
             <p className="text-[15px] text-ink-muted">Every share closes now. After 7 days, your capsules, connections, notes and history are erased. Security logs keep a record without your identity.</p>
-            <div><label className="label" htmlFor="confirm">Type your email to confirm</label><input id="confirm" name="confirm" type="email" className="input" autoComplete="off" /></div>
+            <div><label className="label" htmlFor="delpw">Enter your password to confirm</label><input id="delpw" name="password" type="password" className="input" autoComplete="current-password" /></div>
             <Submit className="btn-stop w-full">Delete my account</Submit>
           </ActionForm>
         )}

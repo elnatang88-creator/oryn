@@ -132,13 +132,17 @@ export async function addNote(userId: string, connectionId: string, body: string
   await requireCapability(db, await userPlan(db, userId), 'notes.private', userId)
   const [c] = await db.query(`SELECT 1 FROM connections WHERE id = $1 AND owner_user_id = $2`, [connectionId, userId])
   if (!c) throw notFound('That connection')
-  await db.query(`INSERT INTO private_notes (id, connection_id, owner_user_id, body) VALUES ($1,$2,$3,$4)`, [newId('note'), connectionId, userId, text])
+  const noteId = newId('note')
+  await db.query(`INSERT INTO private_notes (id, connection_id, owner_user_id, body) VALUES ($1,$2,$3,$4)`, [noteId, connectionId, userId, text])
+  // The note text is never written to logs.
+  await audit(db, { actor: userId, action: 'note.added', targetType: 'private_note', targetId: noteId })
   await track(db, 'note_added', { userId })
 }
 
 export async function deleteNote(userId: string, noteId: string) {
   const db = await getDb()
-  await db.query(`DELETE FROM private_notes WHERE id = $1 AND owner_user_id = $2`, [noteId, userId])
+  const r = await db.query(`DELETE FROM private_notes WHERE id = $1 AND owner_user_id = $2 RETURNING id`, [noteId, userId])
+  if (r.length) await audit(db, { actor: userId, action: 'note.deleted', targetType: 'private_note', targetId: noteId })
 }
 
 const followUpInput = z.object({
@@ -155,6 +159,7 @@ export async function addFollowUp(userId: string, connectionId: string, input: z
   if (!c) throw notFound('That connection')
   const id = newId('fu')
   await db.query(`INSERT INTO follow_ups (id, connection_id, owner_user_id, title, due_on) VALUES ($1,$2,$3,$4,$5)`, [id, connectionId, userId, r.data.title, r.data.dueOn])
+  await audit(db, { actor: userId, action: 'followup.created', targetType: 'follow_up', targetId: id })
   await track(db, 'followup_created', { userId })
   return id
 }
@@ -163,6 +168,7 @@ export async function setFollowUpDone(userId: string, followUpId: string, done: 
   const db = await getDb()
   const r = await db.query(`UPDATE follow_ups SET done_at = ${done ? 'now()' : 'NULL'} WHERE id = $1 AND owner_user_id = $2 RETURNING id`, [followUpId, userId])
   if (!r.length) throw notFound('That follow-up')
+  await audit(db, { actor: userId, action: done ? 'followup.completed' : 'followup.reopened', targetType: 'follow_up', targetId: followUpId })
   if (done) await track(db, 'followup_completed', { userId })
 }
 
@@ -186,4 +192,5 @@ export async function updateConnectionContext(userId: string, connectionId: stri
   const db = await getDb()
   const r = await db.query(`UPDATE connections SET met_where = $3 WHERE id = $1 AND owner_user_id = $2 RETURNING id`, [connectionId, userId, metWhere.trim().slice(0, 120)])
   if (!r.length) throw notFound('That connection')
+  await audit(db, { actor: userId, action: 'connection.context_updated', targetType: 'connection', targetId: connectionId })
 }

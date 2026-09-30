@@ -146,9 +146,10 @@ describe('data lifecycle', () => {
     const [e] = await (await db()).query<{ payload: { capsules: { private_note: string }[] } }>(`SELECT payload FROM data_exports WHERE id = $1`, [exportId])
     expect(e.payload.capsules[0].private_note).toBe('my note')
 
-    expect(await code(requestDeletion(u.id, 'wrong@example.com'))).toBe('invalid')
-    await requestDeletion(u.id, u.email)
+    expect(await code(requestDeletion(u.id, 'wrong password'))).toBe('invalid')
+    await requestDeletion(u.id, 'correct horse battery')
     expect((await resolveShare(share.token)).status).toBe('revoked')
+    await (await db()).query(`UPDATE deletion_requests SET scheduled_for = now() WHERE user_id = $1`, [u.id])
     const [req] = await (await db()).query<{ id: string }>(`SELECT id FROM deletion_requests WHERE user_id = $1`, [u.id])
     await executeDeletion(await db(), req.id, u.id)
     const left = await (await db()).query(`SELECT 1 FROM capsules WHERE owner_user_id = $1 UNION ALL SELECT 1 FROM users WHERE id = $1`, [u.id])
@@ -156,5 +157,36 @@ describe('data lifecycle', () => {
     expect((await resolveShare(share.token)).status).toBe('not_found')
     const audit = await (await db()).query(`SELECT 1 FROM audit_events WHERE actor_user_id = $1`, [u.id])
     expect(audit).toHaveLength(0)
+  })
+})
+
+describe('audit trail', () => {
+  it('records sensitive actions without storing private content', async () => {
+    const { createCapsule: cc, setDefaultCapsule } = await import('@/lib/server/services/capsules')
+    const { startShare: ss, requestConnection, setShareContext } = await import('@/lib/server/services/sharing')
+    const conn = await import('@/lib/server/services/connections')
+    const u = await makeUser('pro', 'Auditee')
+    const capsuleId = await cc(u.id, { name: 'A', mode: 'professional', display_name: 'A', fields: fields(), private_note: 'SECRET-CAPSULE-NOTE' })
+    await setDefaultCapsule(u.id, capsuleId)
+    const share = await ss(u.id, { capsuleId })
+    await setShareContext(u.id, share.id, 'SECRET-PLACE')
+    await requestConnection(share.token, { name: 'SECRET-NAME', contact: 'secret-contact@example.com', message: 'SECRET-MESSAGE' }, { claimToken: null, ipKey: 'audit1' })
+    const [req] = await conn.listRequests(u.id)
+    const { connectionId } = await conn.respondToRequest(u.id, req.id, true)
+    await conn.addNote(u.id, connectionId!, 'SECRET-NOTE-BODY')
+    const fu = await conn.addFollowUp(u.id, connectionId!, { title: 'SECRET-FOLLOWUP', dueOn: '2026-10-10' })
+    await conn.setFollowUpDone(u.id, fu, true)
+    await conn.updateConnectionContext(u.id, connectionId!, 'SECRET-MET-WHERE')
+
+    const rows = await (await db()).query<{ action: string; meta: unknown }>(`SELECT action, meta FROM audit_events WHERE actor_user_id = $1 OR target_id = ANY($2)`, [u.id, [req.id]])
+    const actions = rows.map((r) => r.action)
+    expect(actions).toEqual(expect.arrayContaining(['user.created', 'session.created', 'capsule.created', 'capsule.default_changed', 'share.started', 'share.context_updated', 'connection_request.received', 'connection_request.accepted', 'note.added', 'followup.created', 'followup.completed', 'connection.context_updated']))
+    const everything = JSON.stringify(await (await db()).query(`SELECT * FROM audit_events`))
+    for (const secret of ['SECRET-CAPSULE-NOTE', 'SECRET-PLACE', 'SECRET-NAME', 'secret-contact@example.com', 'SECRET-MESSAGE', 'SECRET-NOTE-BODY', 'SECRET-FOLLOWUP', 'SECRET-MET-WHERE', 'correct horse battery']) {
+      expect(everything).not.toContain(secret)
+    }
+    // Passwords and session tokens never appear in any table in the clear.
+    const sessions = JSON.stringify(await (await db()).query(`SELECT * FROM sessions WHERE user_id = $1`, [u.id]))
+    expect(sessions).not.toContain(u.token)
   })
 })

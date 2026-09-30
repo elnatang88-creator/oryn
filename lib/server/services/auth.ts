@@ -4,7 +4,7 @@ import { promisify } from 'node:util'
 import { z } from 'zod'
 import { getDb, type Db } from '../db'
 import { newId } from '../ids'
-import { sha256, safeEqual } from '../secrets'
+import { hmac, sha256, safeEqual } from '../secrets'
 import { AppError, invalid } from '../errors'
 import { audit } from '../audit'
 import { track } from '../analytics'
@@ -82,17 +82,20 @@ export async function signUp(input: { email: string; password: string; displayNa
   return { userId: id, ...(await createSession(db, id, ctx.deviceId, ctx.userAgent)) }
 }
 
+/** Rate-limit key for failed sign-ins. A keyed hash, so no email address is stored in the limiter. */
+const failKey = (email: string) => `signin-fail:${hmac(`email:${email}`).slice(0, 24)}`
+
 export async function signIn(input: { email: string; password: string }, ctx: { userAgent: string; deviceId: string | null; ipKey: string }) {
   const email = String(input.email ?? '').trim().toLowerCase()
   const db = await getDb()
   await rateLimit(db, `signin:${ctx.ipKey}`, 30, 900)
   // Per-account lockout counts failed attempts only, so a real user signing in often is never blocked.
-  if (await isLimited(db, `signin-fail:${email}`, 8, 900)) throw new AppError('rate_limited', 'Too many attempts. Please wait a moment and try again.')
+  if (await isLimited(db, failKey(email), 8, 900)) throw new AppError('rate_limited', 'Too many attempts. Please wait a moment and try again.')
   const [u] = await db.query<{ id: string; password_hash: string }>(`SELECT id, password_hash FROM users WHERE email = $1 AND deleted_at IS NULL`, [email])
   // Always run a hash so response time does not reveal whether the email exists.
   const ok = u ? await verifyPassword(String(input.password ?? ''), u.password_hash) : (await hashPassword('timing-equalizer'), false)
   if (!u || !ok) {
-    await rateLimit(db, `signin-fail:${email}`, 1000, 900)
+    await rateLimit(db, failKey(email), 1000, 900)
     await audit(db, { actor: u?.id ?? null, action: 'signin.failed', targetType: 'user', targetId: u?.id ?? null })
     throw invalid('That email and password don’t match.')
   }
