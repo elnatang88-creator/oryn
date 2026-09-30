@@ -43,10 +43,12 @@ export async function buildExport(db: Db, exportId: string, userId: string) {
   const payload = {
     format: 'oryn-export-v1',
     generatedAt: new Date().toISOString(),
-    account: (await q(`SELECT id, email, display_name, plan_key, retention_days, created_at FROM users WHERE id = $1`))[0],
+    account: (await q(`SELECT id, email, display_name, profile_headline, industry, view_visibility, plan_key, retention_days, created_at FROM users WHERE id = $1`))[0],
     capsules: await q(`SELECT c.*, to_jsonb(p.*) AS policy FROM capsules c LEFT JOIN visibility_policies p ON p.capsule_id = c.id WHERE c.owner_user_id = $1`),
     shareSessions: await q(`SELECT id, capsule_id, channel, scope, context_label, one_time, interaction_level, view_count, expanded_count, saved_count, expires_at, revoked_at, created_at FROM share_sessions WHERE owner_user_id = $1`),
-    interactions: await q(`SELECT share_session_id, kind, created_at FROM interactions WHERE owner_user_id = $1`),
+    interactions: await q(`SELECT share_session_id, kind, field_kind, created_at FROM interactions WHERE owner_user_id = $1`),
+    membersWhoViewedMe: await q(`SELECT v.capsule_id, u.display_name AS viewer_name, v.view_count, v.expanded, v.first_viewed_at, v.last_viewed_at FROM capsule_views v JOIN users u ON u.id = v.viewer_user_id WHERE v.owner_user_id = $1`),
+    capsulesIViewed: await q(`SELECT c.name AS capsule_name, o.display_name AS owner_name, v.view_count, v.first_viewed_at, v.last_viewed_at FROM capsule_views v JOIN capsules c ON c.id = v.capsule_id JOIN users o ON o.id = v.owner_user_id WHERE v.viewer_user_id = $1`),
     connectionRequests: await q(`SELECT id, from_name, from_contact, message, status, created_at, responded_at FROM connection_requests WHERE owner_user_id = $1`),
     connections: await q(`SELECT * FROM connections WHERE owner_user_id = $1`),
     privateNotes: await q(`SELECT connection_id, body, created_at FROM private_notes WHERE owner_user_id = $1`),
@@ -173,5 +175,6 @@ export async function pruneRetention(db: Db, userId: string) {
   const [u] = await db.query<{ retention_days: number | null }>(`SELECT retention_days FROM users WHERE id = $1`, [userId])
   if (!u?.retention_days) return 0
   const r = await db.query(`DELETE FROM interactions WHERE owner_user_id = $1 AND created_at < now() - make_interval(days => $2) RETURNING id`, [userId, u.retention_days])
+  await db.query(`DELETE FROM capsule_views WHERE owner_user_id = $1 AND last_viewed_at < now() - make_interval(days => $2)`, [userId, u.retention_days])
   return r.length
 }

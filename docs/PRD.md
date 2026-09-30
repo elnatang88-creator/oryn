@@ -111,9 +111,10 @@ Each step up the ladder reveals more about the recipient, and each step is the r
 
 | Step | Recipient action | What the sender learns |
 |---|---|---|
-| 1 | Opens the capsule | Anonymous "opened" count. Nothing identifying. |
+| 1 | Opens the capsule | Without an ORYN account (or viewing privately): anonymous "opened" count. Signed in to ORYN: the member's ORYN profile (name, one line, field), shown to Pro owners; the member is told on the page first (founders' decision 2026-09-30, A2). |
 | 2 | Taps "Learn more" | Anonymous "expanded" count. |
 | 3 | Taps "Save to phone" (vCard) | Anonymous "saved" count. |
+| 3a | Taps a detail (phone, email, link) | Anonymous count by kind of detail. |
 | 4 | Sends a connection request (types their name + one way to reach them) | Identifiable record, because the recipient provided it. |
 | 5 | Chooses "Keep in ORYN" (signs in) | Still only an anonymous "saved" count. The kept copy lives in the *recipient's* workspace; the sender is not told who kept it. |
 

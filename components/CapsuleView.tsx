@@ -80,7 +80,7 @@ function FieldRow({ f, primary = false, preview }: { f: PublicCapsuleView['field
     </>
   )
   const cls = `flex min-h-[60px] items-center gap-3 rounded-2xl px-3 py-2.5 ${primary ? 'bg-electric text-white' : 'bg-soft-50 hover:bg-soft-100'}`
-  const test = { 'data-testid': 'capsule-field', 'data-kind': f.kind }
+  const test = { 'data-testid': 'capsule-field', 'data-kind': f.kind, 'data-field-id': f.id }
   if (!href || preview) return <div className={cls} {...test}>{body}</div>
   return (
     <a href={href} className={cls} {...test} {...(external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}>

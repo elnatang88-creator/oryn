@@ -12,6 +12,7 @@ We measure whether ORYN is **useful**, not whether it is busy. Every metric belo
 
 ## 1. Privacy rules for analytics (non-negotiable)
 
+0. **Exception by founders' decision (2026-09-30):** a signed-in ORYN member's view is stored in `capsule_views` (owner product data, not analytics) and shown to Pro owners, with notice and an opt-out. `analytics_events` still never carry recipient identity. Detail taps (`interactions.kind = 'field_clicked'`, `field_kind`) are anonymous.
 1. **Recipient events are anonymous counts.** `share_viewed`, `share_expanded`, `share_saved_vcard`, `app_offer_shown`, and `app_offer_accepted` carry no recipient identity.
 2. **No IP address storage** for recipient events, including in logs retained for analytics.
 3. **No device fingerprinting** and no persistent recipient identifiers for analytics. (The one-time claim cookie exists only to enforce one-time access and is not used for analytics.)

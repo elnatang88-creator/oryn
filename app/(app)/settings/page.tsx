@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ChevronRight, CreditCard, Lock, ShieldCheck, Shield } from 'lucide-react'
+import { ChevronRight, CreditCard, Lock, ShieldCheck, Shield, UserRound } from 'lucide-react'
 import { requireUser } from '@/lib/server/request'
 import { PageHeader } from '@/components/ui'
 
@@ -8,6 +8,7 @@ export const metadata = { title: 'Settings' }
 export default async function SettingsPage() {
   const user = await requireUser()
   const items = [
+    { href: '/settings/profile', icon: UserRound, title: 'Your ORYN profile', body: 'Name, field, and whether owners see that you viewed' },
     { href: '/settings/privacy', icon: Lock, title: 'Data & privacy', body: 'What’s shared, export, retention, delete account' },
     { href: '/settings/security', icon: ShieldCheck, title: 'Security', body: 'Password, signed-in devices and sessions' },
     { href: '/settings/plan', icon: CreditCard, title: 'Plan', body: `You’re on ${user.plan_key}` },

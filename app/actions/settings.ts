@@ -8,6 +8,7 @@ import { cancelDeletion, requestDeletion, requestExport, setRetention } from '@/
 import { changePassword, revokeOtherSessions, revokeSession, signOut } from '@/lib/server/services/auth'
 import { applyPlanChange, billingMode } from '@/lib/server/services/billing'
 import { setFlag, setUserPlanAsAdmin, updatePlan } from '@/lib/server/services/admin'
+import { updateProfile } from '@/lib/server/services/viewers'
 import { invalid } from '@/lib/server/errors'
 import { run, str } from './run'
 import type { ActionState } from './types'
@@ -112,4 +113,18 @@ export async function signOutEverywhereAction() {
   await signOut((await cookies()).get(SESSION_COOKIE)?.value)
   await clearSessionCookie()
   redirect('/signin')
+}
+
+export async function profileAction(_: ActionState, fd: FormData) {
+  return run(async () => {
+    const user = await requireUser()
+    await updateProfile(user.id, {
+      display_name: str(fd, 'display_name'),
+      profile_headline: str(fd, 'profile_headline'),
+      industry: str(fd, 'industry') || null,
+      view_visibility: str(fd, 'view_visibility') === 'private' ? 'private' : 'visible',
+    })
+    revalidatePath('/', 'layout')
+    return 'Saved.'
+  })
 }

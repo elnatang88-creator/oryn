@@ -215,3 +215,46 @@ test('workspace pages require sign-in; security headers are set', async ({ page,
   const csrf = await request.post('/api/v1/shares', { data: {}, headers: { origin: 'https://evil.example' } })
   expect(csrf.status()).toBe(403)
 })
+
+test('who viewed you: a signed-in member is told, and the Pro owner sees their profile and field live', async ({ page, browser }, info) => {
+  await signInDemo(page)
+  await page.goto('/share/quick')
+  const url = (await page.getByTestId('share-url').textContent())!.trim()
+
+  // A different ORYN member, on their own phone, with a profile.
+  const v = await recipient(browser)
+  const name = `Viewer ${info.project.name} ${Date.now() % 100000}`
+  await v.page.goto('/signup')
+  await v.page.getByLabel('Your name').fill(name)
+  await v.page.getByLabel('Email').fill(`viewer-${info.project.name}-${Date.now()}@example.com`)
+  await v.page.getByLabel('Password').fill('a-long-test-password')
+  await v.page.getByRole('button', { name: 'Create account' }).click()
+  await expect(v.page).toHaveURL(/\/capsules\/new/)
+  await v.page.goto('/settings/profile')
+  await v.page.getByLabel('One line about you').fill('Partner · Carmel Ventures')
+  await v.page.getByLabel('Your field').selectOption('finance')
+  await v.page.getByRole('button', { name: 'Save profile' }).click()
+  await expect(v.page.getByText('Saved.')).toBeVisible()
+
+  // Opening the capsule: told up front that the owner will see it.
+  await v.page.goto(url)
+  await expect(v.page.getByTestId('viewer-notice')).toContainText('can see that you viewed this')
+
+  // The owner's Today updates on its own and shows who, with their field.
+  await page.goto('/today')
+  const row = page.getByTestId('viewer-row').filter({ hasText: name })
+  await expect(row).toBeVisible({ timeout: 15000 })
+  await expect(row).toContainText('Finance & investment')
+  await shot(page, '09-who-viewed')
+  await page.goto('/insights')
+  await expect(page.getByTestId('industry-bars')).toContainText('Finance & investment')
+
+  // Private viewing: the member is told, and is not added.
+  await v.page.goto('/settings/profile')
+  await v.page.getByTestId('visibility-private').check()
+  await v.page.getByRole('button', { name: 'Save profile' }).click()
+  await expect(v.page.getByText('Saved.')).toBeVisible()
+  await v.page.goto(url)
+  await expect(v.page.getByTestId('viewer-notice')).toContainText('viewing privately')
+  await v.ctx.close()
+})

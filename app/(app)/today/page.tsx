@@ -7,6 +7,9 @@ import { RespondButtons } from '@/components/RespondButtons'
 import { toggleFollowUpAction, markReadAction } from '@/app/actions/connections'
 import { revokeShareAction } from '@/app/actions/sharing'
 import { Empty, PageHeader, Section, fmtDate, relTime } from '@/components/ui'
+import { listViewers, viewerSummary } from '@/lib/server/services/viewers'
+import { ViewersPanel } from '@/components/ViewersPanel'
+import { LiveRefresh } from '@/components/LiveRefresh'
 
 export const metadata = { title: 'Today' }
 
@@ -25,7 +28,8 @@ const shareNow = <a href="/share/quick" className="text-sm font-semibold text-el
 
 export default async function TodayPage() {
   const user = await requireUser()
-  const [t, capsules] = await Promise.all([todaySummary(user.id), listCapsules(user.id)])
+  const [t, capsules, vs] = await Promise.all([todaySummary(user.id), listCapsules(user.id), viewerSummary(user.id)])
+  const viewers = vs.canSeeWho ? await listViewers(user.id, 8) : null
   const first = user.display_name.split(' ')[0]
 
   if (capsules.length === 0) {
@@ -40,6 +44,9 @@ export default async function TodayPage() {
   return (
     <>
       <PageHeader title="Today" sub={`This week: opened ${t.counts.opened} ${t.counts.opened === 1 ? 'time' : 'times'} · ${t.counts.expanded} chose “learn more” · ${t.counts.saved} saved`} />
+
+      <LiveRefresh />
+      <ViewersPanel summary={vs} viewers={viewers} />
 
       {t.notifications.length > 0 && (
         <div className="card mb-6 flex items-start gap-3 px-4 py-3">
@@ -146,7 +153,6 @@ export default async function TodayPage() {
             ))}
           </ul>
         )}
-        <p className="mt-2 text-xs text-ink-muted">ORYN never tells you who opened your capsule. People identify themselves only if they choose to connect.</p>
       </Section>
     </>
   )

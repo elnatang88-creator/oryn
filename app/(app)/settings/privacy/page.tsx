@@ -21,7 +21,8 @@ export default async function PrivacyPage() {
         <ul className="mt-4 space-y-3 text-[15px]">
           <li className="flex gap-3"><PublicBadge>Shared</PublicBadge><span>Only details you place in a capsule, only while a share is open, only to people who open that link.</span></li>
           <li className="flex gap-3"><PrivateBadge /><span>Private notes, follow-ups, hidden details, where you met, and your connections list.</span></li>
-          <li className="flex gap-3"><PrivateBadge>Never collected</PrivateBadge><span>Who opened your capsule. We count opens; we don’t identify people unless they choose to connect.</span></li>
+          <li className="flex gap-3"><PrivateBadge>Anonymous</PrivateBadge><span>People without an ORYN account who open your capsule. We only count those opens.</span></li>
+          <li className="flex gap-3"><PublicBadge>Members</PublicBadge><span>When you open someone’s capsule while signed in, they can see your ORYN profile (name, one line, field) — unless you choose to <a href="/settings/profile" className="font-semibold underline">view privately</a>. The capsule page always tells you which.</span></li>
         </ul>
       </section>
 

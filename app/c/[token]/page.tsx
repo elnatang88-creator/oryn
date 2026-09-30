@@ -2,7 +2,10 @@ import Link from 'next/link'
 import { headers } from 'next/headers'
 import { ArrowDownToLine, ChevronRight, UserPlus } from 'lucide-react'
 import { resolveShare } from '@/lib/server/services/sharing'
-import { readClaim } from '@/lib/server/request'
+import { currentUser, readClaim } from '@/lib/server/request'
+import { recordMemberView } from '@/lib/server/services/viewers'
+import { ViewerNotice } from '@/components/ViewerNotice'
+import { TapTracker } from '@/components/TapTracker'
 import { openOnceAction, reportAction } from '@/app/actions/recipient'
 import { CapsuleView } from '@/components/CapsuleView'
 import { RecipientFrame, Unavailable, isBot } from '@/components/Recipient'
@@ -39,9 +42,14 @@ export default async function InstantView({ params }: { params: Promise<{ token:
   if (res.status !== 'ok') return <Unavailable status={res.status} />
   const { view } = res
   const first = view.displayName.split(' ')[0]
+  const me = await currentUser()
+  const member = me && me.id !== res.session.owner_user_id ? me : null
+  if (member && !isBot(ua)) await recordMemberView({ capsuleId: res.session.capsule_id, ownerId: res.session.owner_user_id, viewerId: member.id, shareSessionId: res.session.id, expanded: false })
 
   return (
     <RecipientFrame>
+      <TapTracker token={token} />
+      {member && <ViewerNotice viewerName={member.display_name} ownerFirst={first} visible={member.view_visibility === 'visible'} />}
       <div className="animate-rise"><CapsuleView view={view} /></div>
       <div className="mt-5 space-y-2.5" data-testid="recipient-actions">
         {view.hasMore && (

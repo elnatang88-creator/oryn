@@ -22,6 +22,7 @@ export interface User {
   is_platform_admin: boolean
   retention_days: number | null
   created_at: Date
+  view_visibility: 'visible' | 'private'
 }
 
 export async function hashPassword(pw: string): Promise<string> {
@@ -107,7 +108,7 @@ export async function userForSessionToken(token: string | undefined | null): Pro
   if (!token || token.length > 100) return null
   const db = await getDb()
   const [row] = await db.query<User & { session_id: string; last_seen_at: Date }>(
-    `SELECT u.id, u.email, u.display_name, u.plan_key, u.is_platform_admin, u.retention_days, u.created_at, s.id AS session_id, s.last_seen_at
+    `SELECT u.id, u.email, u.display_name, u.plan_key, u.is_platform_admin, u.retention_days, u.created_at, u.view_visibility, s.id AS session_id, s.last_seen_at
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND s.revoked_at IS NULL AND s.expires_at > now() AND u.deleted_at IS NULL`,
     [sha256(token)],

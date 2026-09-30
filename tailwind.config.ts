@@ -22,9 +22,11 @@ const config: Config = {
       },
       keyframes: {
         rise: { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'none' } },
+        grow: { from: { transform: 'scaleX(0)' }, to: { transform: 'scaleX(1)' } },
+        growY: { from: { transform: 'scaleY(0)' }, to: { transform: 'scaleY(1)' } },
         pulseRing: { '0%': { transform: 'scale(0.98)', opacity: '0.7' }, '100%': { transform: 'scale(1.12)', opacity: '0' } },
       },
-      animation: { rise: 'rise 280ms ease-out both', 'pulse-ring': 'pulseRing 1.8s ease-out infinite' },
+      animation: { rise: 'rise 280ms ease-out both', grow: 'grow 700ms cubic-bezier(.2,.8,.2,1) both', 'grow-y': 'growY 600ms cubic-bezier(.2,.8,.2,1) both', 'pulse-ring': 'pulseRing 1.8s ease-out infinite' },
     },
   },
   plugins: [],

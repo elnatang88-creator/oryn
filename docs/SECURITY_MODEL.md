@@ -9,7 +9,7 @@
 | Asset | Why it matters |
 |---|---|
 | Hidden capsule fields and private notes | The core promise: "only what you chose". A leak breaks trust permanently. |
-| Recipient anonymity | Opening a capsule must not identify or track the recipient. |
+| Recipient anonymity | Opening a capsule without an ORYN account must not identify or track the recipient. Signed-in members are shown to the owner only with notice on the page and a private-viewing opt-out (A2, changed 2026-09-30). |
 | Connections, follow-ups, "where we met" | Personal relationship data. |
 | Workspace data (events, stations, members) | Belongs to the business; must not cross tenants. |
 | Accounts and sessions | Account takeover = someone else sharing as you. |
@@ -28,6 +28,7 @@
 | **Information disclosure** — private note in public view | Bug in projection | Single projection function `project()` builds the recipient shape field-by-field; the private note, hidden fields and owner context label never enter it. Unit + E2E tests assert they never appear in recipient output or the vCard | Add a CI lint rule forbidding `capsules.*` in recipient routes |
 | Information disclosure — cross-tenant read | User A reads org B's event | Every service query scoped by `owner_user_id` or checked by `requireOrgPermission()`; non-members get *not found*; tests in `tests/unit/security.test.ts` | Postgres Row-Level Security as defense in depth (see §6) |
 | Information disclosure — link previews | Chat app unfurls a one-time link | One-time capsules never reveal content on a passive load — they require a deliberate "Open it" tap; bots don't count as opens; capsule pages send generic Open Graph text, `noindex`, `no-store` | — |
+| Information disclosure — member views | Owner learns more about a member than the member expects | Only name, headline and field; notice on every capsule page; "view privately" opt-out; owner and self views never recorded; rows cascade on either account's deletion; included in both people's export; pruned by retention | Privacy-policy wording and lawful basis per region (counsel) |
 | Information disclosure — recipient tracking | Sender learns who opened | No IP, fingerprint, location or identity stored for opens/expands/saves; rate-limit buckets use a keyed hash of the IP, never the IP | Document cookie use in the formal privacy policy |
 | **Denial of service / abuse** | Spam connection requests, harassment | Postgres-backed rate limits (sign-up, sign-in, share creation, connect requests per IP and per share, reports, exports); silent decline; "Report a problem" on every capsule; admin reports queue | Edge rate limiting/WAF; CAPTCHA fallback under attack; block list per user |
 | **Elevation of privilege** | Member makes themselves admin | Role matrix in code; owners-only for admin changes; self-role change refused; removal revokes their workspace shares | SSO/SCIM for Enterprise; access reviews |

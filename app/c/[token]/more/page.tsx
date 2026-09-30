@@ -3,7 +3,10 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ArrowDownToLine, BookmarkPlus, ChevronLeft, UserPlus } from 'lucide-react'
 import { resolveShare } from '@/lib/server/services/sharing'
-import { readClaim } from '@/lib/server/request'
+import { currentUser, readClaim } from '@/lib/server/request'
+import { recordMemberView } from '@/lib/server/services/viewers'
+import { ViewerNotice } from '@/components/ViewerNotice'
+import { TapTracker } from '@/components/TapTracker'
 import { CapsuleView } from '@/components/CapsuleView'
 import { RecipientFrame, Unavailable, isBot } from '@/components/Recipient'
 import { getDb } from '@/lib/server/db'
@@ -24,11 +27,16 @@ export default async function ExpandedView({ params }: { params: Promise<{ token
   const res = bot ? peek : await resolveShare(token, { claimToken: claim, layer: 'expanded', record: true })
   if (res.status !== 'ok') return <Unavailable status={res.status} />
   const { view } = res
+  const me = await currentUser()
+  const member = me && me.id !== res.session.owner_user_id ? me : null
+  if (member && !bot) await recordMemberView({ capsuleId: res.session.capsule_id, ownerId: res.session.owner_user_id, viewerId: member.id, shareSessionId: res.session.id, expanded: true })
   if (!bot && view.canSave) await track(await getDb(), 'app_offer_shown', { userId: res.session.owner_user_id, props: { layer: 'expanded' } })
 
   return (
     <RecipientFrame>
+      <TapTracker token={token} />
       <Link href={`/c/${token}`} className="btn-quiet mb-3 -ml-2"><ChevronLeft className="h-5 w-5" aria-hidden="true" /> Back</Link>
+      {member && <ViewerNotice viewerName={member.display_name} ownerFirst={view.displayName.split(' ')[0]} visible={member.view_visibility === 'visible'} />}
       <CapsuleView view={view} />
       <div className="mt-5 grid grid-cols-2 gap-2.5">
         {view.canSave && <a href={`/c/${token}/vcard`} rel="nofollow" className="btn-save"><ArrowDownToLine className="h-5 w-5" aria-hidden="true" /> Save</a>}

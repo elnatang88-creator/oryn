@@ -10,7 +10,8 @@ Source of truth: [`db/migrations/0001_init.sql`](../db/migrations/0001_init.sql)
 |---|---|---|
 | Person | `owner_user_id` | Capsules, shares, connections, notes, follow-ups, interactions. Every service query for these includes `owner_user_id = <caller>`. |
 | Business workspace | `org_id` | Events, participants, stations, QR destinations, org audit events. Every service call checks membership + role via `requireOrgPermission()` first. |
-| Recipient | none | A recipient is anonymous until they choose to identify themselves (a connection request). |
+| Recipient | none | A recipient without an ORYN account is anonymous until they choose to identify themselves (a connection request). |
+| Member view | `capsule_views` | One row per (capsule, signed-in viewer) who allows it: counts, first/last view, whether they chose Learn more. Cascades on deletion of either account. Viewer profile: `users.profile_headline`, `users.industry`, `users.view_visibility`. |
 
 Non-members asking for another tenant's resources get **not found**, never "forbidden", so the existence of other tenants' data is not revealed.
 

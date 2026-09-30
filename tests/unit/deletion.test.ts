@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { recordMemberView } from '@/lib/server/services/viewers'
 import { makeUser, fields, db, PASSWORD } from './helpers'
 import { signIn, userForSessionToken } from '@/lib/server/services/auth'
 import { addMember } from '@/lib/server/services/orgs'
@@ -86,6 +87,11 @@ describe('account deletion removes or de-identifies everything the person owns',
     const strangerCap = await createCapsule(stranger.id, { name: 'S', mode: 'professional', display_name: 'Stranger', fields: fields() })
     const strangerShare = await startShare(stranger.id, { capsuleId: strangerCap })
     const kept = await keepCapsule(stranger.id, share.token, null)
+    // Member views in both directions ("who viewed you").
+    const [myShare] = await d.query<{ id: string }>(`SELECT id FROM share_sessions WHERE owner_user_id = $1`, [me.id])
+    const [theirShare] = await d.query<{ id: string }>(`SELECT id FROM share_sessions WHERE owner_user_id = $1`, [stranger.id])
+    expect(await recordMemberView({ capsuleId: cap, ownerId: me.id, viewerId: stranger.id, shareSessionId: myShare.id, expanded: false })).toBe(true)
+    expect(await recordMemberView({ capsuleId: strangerCap, ownerId: stranger.id, viewerId: me.id, shareSessionId: theirShare.id, expanded: true })).toBe(true)
 
     await requestDeletion(me.id, PASSWORD)
     // Grace period passes.
@@ -118,6 +124,7 @@ describe('account deletion removes or de-identifies everything the person owns',
     const [participant] = await d.query<{ display_name: string; status: string }>(`SELECT display_name, status FROM event_participants WHERE event_id = $1`, [colleagueEvent])
     expect(participant).toEqual({ display_name: 'Deleted account', status: 'removed' })
     expect(await d.query(`SELECT 1 FROM audit_events WHERE action = 'account.deleted'`)).not.toHaveLength(0)
+    expect(await d.query(`SELECT 1 FROM capsule_views WHERE owner_user_id = $1 OR viewer_user_id = $1`, [me.id])).toHaveLength(0)
   })
 
   it('after deletion the person can no longer read anything', async () => {

@@ -16,7 +16,7 @@
 | # | Decision | Why | Main alternative | Cost to reverse |
 |---|---|---|---|---|
 | A1 | **Web first.** The recipient experience is a web page. No app is needed to view, save or ask to connect. | The recipient must never be forced to download anything; the web works on every phone today. | Native app first | Low. Native apps can be added on top of `/api/v1`. |
-| A2 | **The sender sees counts, never who.** Opening, "Learn more", saving and keeping are counted anonymously. A recipient becomes identifiable only by sending a connect request. | This is the core promise: the other person decides. It also avoids tracking people who never agreed. | Show senders who viewed (a common category pattern) | Medium. It would break the privacy promise and need a consent flow. |
+| A2 | ~~**The sender sees counts, never who.**~~ **Changed by the founders on 2026-09-30, see below and the decision log.** Original text: Opening, "Learn more", saving and keeping are counted anonymously. A recipient becomes identifiable only by sending a connect request. | This is the core promise: the other person decides. It also avoids tracking people who never agreed. | Show senders who viewed (a common category pattern) | Medium. It would break the privacy promise and need a consent flow. |
 | A3 | **Declining is silent.** "Not now" on a request is never communicated; closing the capsule is never reported. | No pressure, no awkwardness; especially important in personal moments. | Notify on decline | Low |
 | A4 | **Recipients see the live capsule.** Edits and revocation apply to links already shared. | "Always reversible" requires it. | A snapshot at share time | Medium |
 | A5 | **One-time capsules open only on a deliberate tap.** Link previews and prefetch can never use up the single view. | Chat apps pre-open links; without this, "opens once" would silently fail. | Open on first page load | Low |
@@ -33,6 +33,16 @@
 ---
 
 # Part B — Open decisions (only the founders can make these)
+
+### A2 as changed (2026-09-30)
+
+- **Signed-in ORYN member opens a capsule:** the owner can see that member's ORYN profile (display name, one-line headline, chosen field), which capsule, how many times, and whether they chose "Learn more".
+- **The member is always told first.** A note above the card reads "You're signed in as X. Y can see that you viewed this." with a link to change it.
+- **Opt-out:** Settings → Your ORYN profile → "View privately". The owner then gets only an anonymous count.
+- **No account:** unchanged, anonymous counts only. No IP, device or location is stored.
+- **Detail taps** (a phone, email, link) are recorded only as the *kind* of detail, never by whom, and only for details that person could see.
+- **Plan:** names, fields and interest analytics are Pro/Business/Enterprise (`insights.viewers`). Free owners see the counts and how many were members.
+- **Open for counsel:** this is personal data about the viewer; the privacy policy must describe it and the lawful basis (notice + opt-out vs. opt-in) must be confirmed for EU/IL users before launch.
 
 ## 1. Final logo asset
 
@@ -165,6 +175,7 @@ Everything that runs ORYN must belong to the company, not to individuals.
 | # | Decision | Chosen option | Date | Decided by |
 |---|---|---|---|---|
 | A1–A14 | Part A decisions (approve / change each) | | | |
+| A2 (changed) | Who viewed you | Signed-in ORYN members who open a capsule are shown to the owner by profile (name, one line, field) unless they chose "view privately". They are told on the capsule page before the content, every time. People without an account stay anonymous counts. Names, fields and tap analytics are Pro (`insights.viewers`); Free sees counts. | 2026-09-30 | Founders (via chat): "מי שצפה בפרופיל והוא חלק מהאפליקציה אז רואים את הפרופיל שלו" |
 | 1 | Logo | Founders' symbol + reconstructed ORYN wordmark (interim) | 2026-09-30 | Founders (via chat) |
 | 2 | Hosting & database | | | |
 | 3 | Email provider | | | |

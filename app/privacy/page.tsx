@@ -13,8 +13,9 @@ export default function PrivacyNotice() {
       <h2 className="h2 mt-8">If someone shared a capsule with you</h2>
       <ul className="mt-2 list-disc space-y-1 pl-6">
         <li>You don’t need an account. You see only what they chose to share.</li>
-        <li>They see a count of opens — not who you are, not your IP address, not your device.</li>
-        <li>You become known to them only if you choose to send a request to connect.</li>
+        <li>If you are not signed in to ORYN, they see a count of opens — not who you are, not your IP address, not your device. You become known to them only if you choose to send a request to connect.</li>
+        <li>If you are signed in to ORYN, they can see your ORYN profile (name, one line, field) and that you viewed — unless you chose to view privately in your profile settings. The capsule page always tells you which applies before you read it.</li>
+        <li>If you tap a detail (for example a phone number), they see which kind of detail was tapped, never by whom.</li>
         <li>If you don’t want to continue, close the page. Nothing is sent.</li>
         <li>A small first-party cookie lets a “opens once” capsule stay open on your device. It carries no identity.</li>
       </ul>

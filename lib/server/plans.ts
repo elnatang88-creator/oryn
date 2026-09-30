@@ -8,7 +8,7 @@ export type Capability =
   | 'followups' | 'notes.private' | 'branding.advanced' | 'share.nfc' | 'share.wallet' | 'history.extended'
   | 'insights.personal' | 'org.workspace' | 'org.brand' | 'org.roles' | 'events' | 'stations' | 'insights.org'
   | 'org.admin' | 'data.export.org' | 'audit.logs' | 'org.controls' | 'sso' | 'scim' | 'access.policies'
-  | 'support.dedicated' | 'retention.custom' | 'security.review' | 'domains.custom' | 'api' | 'data.regional'
+  | 'support.dedicated' | 'retention.custom' | 'security.review' | 'domains.custom' | 'api' | 'data.regional' | 'insights.viewers'
 
 export interface Plan {
   key: string
@@ -28,6 +28,7 @@ export const CAPABILITY_COPY: Record<string, string> = {
   'share.nfc': 'NFC tag sharing is part of Pro.',
   'share.wallet': 'Wallet passes are part of Pro.',
   'insights.personal': 'Personal insights are part of Pro.',
+  'insights.viewers': 'Seeing which members viewed you, and their fields, is part of Pro.',
   'org.workspace': 'Team workspaces are part of Business.',
   events: 'Event mode is part of Business.',
   stations: 'Stations and QR destinations are part of Business.',
