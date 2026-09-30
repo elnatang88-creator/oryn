@@ -85,4 +85,17 @@ Also built: Teams (workspace, members, roles, teams, org audit log), Insights, F
 
 ## E2E results
 
-_Filled in from the latest run; see the summary at the end of the build report._
+10 of 10 passed (Chromium, Pixel 7 phone profile + 1360×900 desktop), against a production build:
+
+| Test | Result |
+|---|---|
+| Founder demo, all 12 steps (phone, desktop) | Pass. Tap → live QR: ~230–300 ms |
+| Seeded account: Today, station QR → capsule, event rule hides phone | Pass |
+| Recipient on throttled network (400 kbps, 400 ms latency) | Pass. Instant View visible in ~1.4 s |
+| Recipient with JavaScript disabled: view, Learn more, send request | Pass |
+| One-time capsule: link-preview bot doesn't consume it; second device refused | Pass |
+| Workspace requires sign-in; CSP/nosniff headers; API 401; cross-site POST 403 | Pass |
+
+Bugs the E2E run caught and fixed in this build: the Connect/Not now buttons could be read as "decline" when JavaScript was on (decision now travels in a hidden field; the server refuses anything else); `Referrer-Policy: no-referrer` made browsers send `Origin: null`, breaking no-JS form posts (now `same-origin`); the plan-change confirmation disappeared on re-render.
+
+Screenshots: `docs/screenshots/`.

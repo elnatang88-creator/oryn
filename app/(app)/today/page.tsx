@@ -3,7 +3,8 @@ import { ArrowRight, Bell, CheckCircle2, Circle, QrCode, UserPlus } from 'lucide
 import { requireUser } from '@/lib/server/request'
 import { todaySummary } from '@/lib/server/services/today'
 import { listCapsules } from '@/lib/server/services/capsules'
-import { respondAction, toggleFollowUpAction, markReadAction } from '@/app/actions/connections'
+import { RespondButtons } from '@/components/RespondButtons'
+import { toggleFollowUpAction, markReadAction } from '@/app/actions/connections'
 import { revokeShareAction } from '@/app/actions/sharing'
 import { Empty, PageHeader, Section, fmtDate, relTime } from '@/components/ui'
 
@@ -63,11 +64,7 @@ export default async function TodayPage() {
                     {r.message && <p className="mt-2 rounded-xl bg-soft-50 px-3 py-2 text-[15px]">“{r.message}”</p>}
                   </div>
                 </div>
-                <form action={respondAction} className="mt-3 grid grid-cols-2 gap-2">
-                  <input type="hidden" name="id" value={r.id} />
-                  <button name="decision" value="accept" className="btn-connect">Connect</button>
-                  <button name="decision" value="decline" className="btn-quiet border border-soft-200">Not now</button>
-                </form>
+<RespondButtons id={r.id} />
               </li>
             ))}
           </ul>

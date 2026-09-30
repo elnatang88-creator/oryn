@@ -138,5 +138,6 @@ Append new entries at the bottom. Use ISO dates.
 
 | Date | Author(s) | Mechanism | Entry | Evidence (commit / file / screenshot) |
 |---|---|---|---|---|
-| 2026-09-30 | Elnatan, Orian, Shoval | A–F | Initial record of v1 mechanisms as designed and being implemented. | This file; commit hash: _to be filled_ |
+| 2026-09-30 | Elnatan, Orian, Shoval | A–F | Initial record of v1 mechanisms as designed and being implemented. | This file; first implementation commit `eb90eb1` (branch `claude/oryn-product-strategy-02whh5`) |
+| 2026-09-30 | Founders (engineering assistance) | A–F | All six mechanisms implemented and verified by automated tests (`tests/unit/*`, `tests/e2e/demo.spec.ts`), including one-time claim on deliberate tap only and live event-rule intersection. | Commit following `eb90eb1`; `docs/screenshots/` |
 | | | | | |

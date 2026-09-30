@@ -124,7 +124,7 @@ test('founder demo: create → share → recipient → workspace → revoke', as
 
 test('seeded demo account: Today, station code, event rules', async ({ page, browser }) => {
   await signInDemo(page)
-  await expect(page.getByTestId('pending-request')).toContainText('Dana Cole')
+  await expect(page.getByTestId('pending-request').filter({ hasText: 'Dana Cole' })).toBeVisible()
 
   await page.goto('/stations')
   const link = page.getByTestId('station').first().locator('a[href^="/q/"]')
@@ -195,7 +195,8 @@ test('one-time capsule: link preview does not consume it; second device is refus
 
   const second = await recipient(browser)
   await second.page.goto(url)
-  await second.page.getByRole('button', { name: 'Open it' }).click().catch(() => {})
+  // Already claimed: no "Open it" button is offered at all.
+  await expect(second.page.getByRole('button', { name: 'Open it' })).toHaveCount(0)
   await expect(second.page.getByTestId('recipient-unavailable')).toHaveAttribute('data-status', 'claimed')
   await first.ctx.close(); await second.ctx.close()
 })

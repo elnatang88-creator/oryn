@@ -10,7 +10,9 @@ import type { ActionState } from './types'
 
 export async function respondAction(fd: FormData) {
   const user = await requireUser()
-  const accept = str(fd, 'decision') === 'accept'
+  const decision = str(fd, 'decision')
+  if (decision !== 'accept' && decision !== 'decline') return // never guess a decision
+  const accept = decision === 'accept'
   const { connectionId } = await respondToRequest(user.id, str(fd, 'id'), accept)
   revalidatePath('/today')
   revalidatePath('/connections/requests')

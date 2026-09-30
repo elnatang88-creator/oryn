@@ -64,7 +64,7 @@ Safety and privacy controls (stop a share, stop all shares, expiry, one-time, ex
 
 ## 7. HTTP hardening (next.config.ts, middleware.ts)
 
-CSP (`default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`, `form-action 'self'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`, `Permissions-Policy`, HSTS (production), `Cache-Control: private, no-store` + `X-Robots-Tag: noindex` on `/c/*` and `/q/*`. `poweredByHeader` off.
+CSP (`default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`, `form-action 'self'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin (nothing sent to other sites; `no-referrer` breaks form posts because browsers then send `Origin: null`)`, `X-Frame-Options: DENY`, `Permissions-Policy`, HSTS (production), `Cache-Control: private, no-store` + `X-Robots-Tag: noindex` on `/c/*` and `/q/*`. `poweredByHeader` off.
 
 ## 8. Monitoring and alerting (required before production)
 
