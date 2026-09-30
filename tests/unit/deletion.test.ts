@@ -93,6 +93,11 @@ describe('account deletion removes or de-identifies everything the person owns',
     expect(await recordMemberView({ capsuleId: cap, ownerId: me.id, viewerId: stranger.id, shareSessionId: myShare.id, expanded: false })).toBe(true)
     expect(await recordMemberView({ capsuleId: strangerCap, ownerId: stranger.id, viewerId: me.id, shareSessionId: theirShare.id, expanded: true })).toBe(true)
 
+    // Nearby: presence plus a member request in each direction.
+    const { heartbeat, setNearbyVisibility, nearbyState, requestNearby } = await import('@/lib/server/services/nearby')
+    for (const u of [me, stranger]) { await setNearbyVisibility(u.id, 'everyone'); await heartbeat(u.id, { cell: 'sv8wrqf' }) }
+    await requestNearby(me.id, (await nearbyState(me.id)).people.find((p) => p.name === 'Stranger')!.handle)
+
     await requestDeletion(me.id, PASSWORD)
     // Grace period passes.
     await d.query(`UPDATE deletion_requests SET scheduled_for = now() - interval '1 second' WHERE user_id = $1`, [me.id])

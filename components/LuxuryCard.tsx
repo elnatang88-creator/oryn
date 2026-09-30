@@ -78,3 +78,23 @@ export function CardBack({ design, qrSvg, caption, qrTestId }: { design: CardDes
     </div>
   )
 }
+
+/** The back when the owner chose "ORYN mark only": no code, just the mark and their name in foil. */
+export function BrandBack({ design, name }: { design: CardDesign; name: string }) {
+  return (
+    <div className="lc-holder">
+    <div className={`lc-card lc-finish-${design.finish}`} style={designVars(design) as CSSProperties} data-material={design.material} data-testid="card-back-brand">
+      <div className="lc-texture" /><div className="lc-holo" /><div className="lc-sheen" /><div className="lc-edge" />
+      <div className="lc-back-brand">
+        <div className="lc-mark lc-mark-lg" aria-hidden="true" />
+        <div className="lc-hint lc-foil" dir="auto">{name}</div>
+      </div>
+    </div>
+    </div>
+  )
+}
+
+/** Renders whichever back the owner designed in Card Studio. */
+export function DesignedBack({ design, qrSvg, name, caption = 'Scan to open my card', qrTestId }: { design: CardDesign; qrSvg: string; name: string; caption?: string; qrTestId?: string }) {
+  return design.back === 'brand' ? <BrandBack design={design} name={name} /> : <CardBack design={design} qrSvg={qrSvg} caption={caption} qrTestId={qrTestId} />
+}

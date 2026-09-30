@@ -124,17 +124,22 @@ test('QA-01…10: full flow on iPhone — sign up, capsule in Hebrew, exact laye
   expect(Math.abs(tab!.x + tab!.width / 2 - 195)).toBeLessThan(20)
   const t0 = Date.now()
   await s.getByTestId('tab-share').tap()
-  await expect(s.getByTestId('share-qr')).toBeVisible()
-  report.tapToQrMs = Date.now() - t0
+  await expect(s.getByTestId('wallet-card')).toBeVisible()
+  report.tapToCardMs = Date.now() - t0
   const url = (await s.getByTestId('share-url').textContent())!.trim()
   const shareScreen = s.url()
-  // The QR really encodes this link (decoded from the rendered pixels).
+  // QR mode on request: the QR really encodes this link (decoded from the rendered pixels).
+  await s.getByTestId('open-qr').tap()
   expect(await decodeQr(s, '[data-testid=share-qr]')).toBe(url)
-  // The real Share button hands the link to the system share sheet.
-  await s.getByRole('button', { name: 'Send link' }).tap()
+  await s.getByTestId('qr-back').tap()
+  // "Share another way" hands the link to the system share sheet.
+  await s.getByTestId('share-another-way').tap()
+  await s.getByTestId('share-system').tap()
   const shared = await s.evaluate(() => (window as unknown as { __shared: { url: string }[] }).__shared)
   expect(shared[0].url).toBe(url)
-  // A private place label, set by the sender.
+  await s.keyboard.press('Escape')
+  // A private place label, set by the sender (in Link settings).
+  await s.getByTestId('link-settings').locator('summary').tap()
   await s.getByLabel(/Where are you/).fill('SECRET-LOCATION קפה')
   await s.getByRole('button', { name: 'Save', exact: true }).tap()
   await expect(s.getByText('Saved. Only you see this.')).toBeVisible()
@@ -242,6 +247,7 @@ test('QA-01…10: full flow on iPhone — sign up, capsule in Hebrew, exact laye
 
   // Revoke → blocked everywhere.
   await s.goto(shareScreen)
+  await s.getByTestId('link-settings').locator('summary').tap()
   await s.getByTestId('stop-sharing').tap()
   await expect(s.getByTestId('share-stopped')).toBeVisible()
   await rp.goto(url)

@@ -105,6 +105,14 @@ A user may have **multiple capsules** (subject to plan) and choose a **default**
 
 Hidden fields are never sent to the recipient's browser.
 
+## 6b. Product model (2026-09-30)
+
+**Create → Wallet → Nearby → Present → Connect → People.** The card designed in Card Studio is the product; the Share button opens it like a wallet. Nearby (opt-in) finds ORYN members around you; Present shows the card full screen for anyone; QR and links are fallbacks; every exchange ends in People. People without ORYN never need the app. Details and status: [NEARBY_AND_WALLET](NEARBY_AND_WALLET.md).
+
+| Step | Recipient action | What the sender learns |
+|---|---|---|
+| Nearby | An ORYN member who is visible taps Connect | Their card face and a request; details only after the other side accepts (mutual exchange of what each card permits) |
+
 ## 7. The Consent Ladder
 
 Each step up the ladder reveals more about the recipient, and each step is the recipient's choice.

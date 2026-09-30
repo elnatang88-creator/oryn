@@ -22,6 +22,7 @@ export default async function PrivacyPage() {
           <li className="flex gap-3"><PublicBadge>Shared</PublicBadge><span>Only details you place in a capsule, only while a share is open, only to people who open that link.</span></li>
           <li className="flex gap-3"><PrivateBadge /><span>Private notes, follow-ups, hidden details, where you met, and your connections list.</span></li>
           <li className="flex gap-3"><PrivateBadge>Anonymous</PrivateBadge><span>People without an ORYN account who open your capsule. We only count those opens.</span></li>
+          <li className="flex gap-3"><PublicBadge>Nearby</PublicBadge><span>Off unless you turn it on. When on, ORYN members around you can see your card face while Share or Nearby is open. Your phone sends only a rough area (about 150 m), never your exact location, and it’s forgotten within two minutes. <Link href="/share/nearby" className="font-semibold underline">Nearby settings</Link></span></li>
           <li className="flex gap-3"><PublicBadge>Members</PublicBadge><span>When you open someone’s capsule while signed in, they can see your ORYN profile (name, one line, field) — unless you choose to <a href="/settings/profile" className="font-semibold underline">view privately</a>. The capsule page always tells you which.</span></li>
         </ul>
       </section>

@@ -9,7 +9,7 @@ const SAMPLE: PublicCapsuleView = {
   message: 'Didn’t want to hold up the line. If you’d like to talk, here’s how.', avatarUrl: null, accent: 'blue',
   fields: [{ id: 'f1', kind: 'social', label: 'Instagram', value: 'https://instagram.com/example' }],
   primaryFieldId: 'f1', hasMore: false, canSave: true, canConnect: true, expiresAt: null, oneTime: true, contextLabel: null, eventName: null,
-  design: { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram', base: '#0f3d2e' }, company: null, isDemo: false,
+  design: { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram', base: '#0f3d2e', back: 'qr' }, company: null, isDemo: false,
 }
 
 export default function Landing() {

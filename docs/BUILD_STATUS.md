@@ -79,13 +79,13 @@ Also built: Teams (workspace, members, roles, teams, org audit log), Insights, F
 
 - `npm run typecheck` — clean
 - `npm run lint` — clean
-- `npm test` — 38 tests (PGlite and PostgreSQL 16), incl. who-viewed: member recorded with profile, private/owner/deleted never recorded, Pro gate, industry aggregation, taps limited to visible details, export both ways, deletion scan. Earlier list: 29 tests (see SECURITY_TEST_REPORT for the list added in QA): full demo flow on a real Postgres schema, private-data projection, one-time/expiry/tamper, view-only policy, silent decline, keep-in-ORYN privacy, quick-share reuse, tenant isolation across users and workspaces, role enforcement, event rules on live shares, station reassignment/pause, admin hidden, auth + session revocation, sign-in rate limit, hashed secrets, export + deletion lifecycle, plan gates, catalog-driven limits, input validation (script URLs)
+- `npm test` — 52 tests (PGlite and PostgreSQL 16), incl. Nearby (opt-in, visibility rules, no enumeration, silent decline, mutual connect, only permitted fields exchanged) and Wallet (public data only, Google RS256 signature verifies, Pro gate). Earlier: 38 tests (PGlite and PostgreSQL 16), incl. who-viewed: member recorded with profile, private/owner/deleted never recorded, Pro gate, industry aggregation, taps limited to visible details, export both ways, deletion scan. Earlier list: 29 tests (see SECURITY_TEST_REPORT for the list added in QA): full demo flow on a real Postgres schema, private-data projection, one-time/expiry/tamper, view-only policy, silent decline, keep-in-ORYN privacy, quick-share reuse, tenant isolation across users and workspaces, role enforcement, event rules on live shares, station reassignment/pause, admin hidden, auth + session revocation, sign-in rate limit, hashed secrets, export + deletion lifecycle, plan gates, catalog-driven limits, input validation (script URLs)
 - `npm run build` — production build succeeds
 - `npm run test:e2e` — see results below
 
 ## E2E results
 
-23 of 23 passed (adds "who viewed you" and the app entry screen on phone and desktop). Earlier: 19 of 19 passed (Chromium: Pixel 7 phone, 1360×900 desktop, and an iPhone-size QA suite), against a production build. Full QA results: [MVP_QA_REPORT](MVP_QA_REPORT.md).
+28 of 28 passed (adds a two-phone Nearby project: real ORYN-to-ORYN exchange, discoverability off, location denied → event fallback, card-first Share/Present/QR/Wallet/share sheet, Card Studio propagation). Earlier: 23 of 23 passed (adds "who viewed you" and the app entry screen on phone and desktop). Earlier: 19 of 19 passed (Chromium: Pixel 7 phone, 1360×900 desktop, and an iPhone-size QA suite), against a production build. Full QA results: [MVP_QA_REPORT](MVP_QA_REPORT.md).
 
 | Test | Result |
 |---|---|

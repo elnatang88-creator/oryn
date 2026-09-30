@@ -2,21 +2,21 @@
 
 import type { CSSProperties } from 'react'
 import {
-  CARD_FONTS, CARD_LAYOUTS, FINISHES, FINISH_LABELS, FOILS, FOIL_SPECS, FONT_SPECS, LAYOUT_LABELS, MATERIALS, MATERIAL_SPECS, PRESETS,
+  BACK_LABELS, CARD_BACKS, CARD_FONTS, CARD_LAYOUTS, FINISHES, FINISH_LABELS, FOILS, FOIL_SPECS, FONT_SPECS, LAYOUT_LABELS, MATERIALS, MATERIAL_SPECS, PRESETS,
   designVars, type CardDesign,
 } from '@/lib/card-design'
 
-/** Everyone designs their own card: presets, then material, foil, finish, font and layout. */
+/** Everyone designs their own card: presets, then material, foil, finish, font, layout and what the back shows. */
 export function CardDesigner({ value, onChange, initialsText }: { value: CardDesign; onChange: (d: CardDesign) => void; initialsText: string }) {
   const set = (patch: Partial<CardDesign>) => onChange({ ...value, ...patch })
-  const same = (d: Omit<CardDesign, 'base'>) => (Object.keys(d) as (keyof typeof d)[]).every((k) => d[k] === value[k])
+  const same = (d: Omit<CardDesign, 'base' | 'back'>) => (Object.keys(d) as (keyof typeof d)[]).every((k) => d[k] === value[k])
   return (
     <div className="space-y-5" data-testid="card-designer">
       <div>
         <span className="label">Start from a design</span>
         <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
           {PRESETS.map((p) => {
-            const v = designVars({ ...p.design, base: value.base })
+            const v = designVars({ ...p.design, base: value.base, back: value.back })
             return (
               <button key={p.id} type="button" onClick={() => set(p.design)} aria-pressed={same(p.design)} data-testid={`preset-${p.id}`}
                 className={`rounded-xl border p-1.5 text-start text-[12px] font-semibold ${same(p.design) ? 'border-electric ring-2 ring-electric/25' : 'border-soft-300 bg-white'}`}>
@@ -40,6 +40,7 @@ export function CardDesigner({ value, onChange, initialsText }: { value: CardDes
       <Choice label="Finish" items={FINISHES.map((f) => [f, FINISH_LABELS[f]])} value={value.finish} onPick={(f) => set({ finish: f })} testid="finish" />
       <Choice label="Lettering" items={CARD_FONTS.map((f) => [f, FONT_SPECS[f].label])} value={value.font} onPick={(f) => set({ font: f })} font={(f) => FONT_SPECS[f].family} testid="font" />
       <Choice label="Layout" items={CARD_LAYOUTS.map((l) => [l, LAYOUT_LABELS[l]])} value={value.layout} onPick={(l) => set({ layout: l })} testid="layout" />
+      <Choice label="Back of the card" items={CARD_BACKS.map((b) => [b, BACK_LABELS[b]])} value={value.back} onPick={(b) => set({ back: b })} testid="back" />
     </div>
   )
 }

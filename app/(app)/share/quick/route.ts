@@ -14,5 +14,6 @@ export async function GET(req: NextRequest) {
   if (!(await defaultCapsuleId(user.id))) return relativeRedirect('/capsules/new')
   const via = req.nextUrl.searchParams.get('via') === 'shortcut' ? 'shortcut' : 'qr'
   const { id } = await quickShare(user.id, via as Channel)
-  return relativeRedirect(`/share/${id}`)
+  const then = req.nextUrl.searchParams.get('then')
+  return relativeRedirect(`/share/${id}${then === 'present' ? '/present' : then === 'qr' ? '/qr' : ''}`)
 }

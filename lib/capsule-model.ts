@@ -76,7 +76,7 @@ export const MODE_TEMPLATES: Record<Mode, { kind: FieldKind; label: string; laye
   custom: [],
 }
 
-export const CHANNELS = ['link', 'qr', 'web_share', 'nfc_tag', 'wallet_pass', 'shortcut', 'station'] as const
+export const CHANNELS = ['link', 'qr', 'web_share', 'nfc_tag', 'wallet_pass', 'shortcut', 'station', 'nearby'] as const
 export type Channel = (typeof CHANNELS)[number]
 
 export function hrefForField(f: { kind: FieldKind; value: string }): string | null {

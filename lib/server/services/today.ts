@@ -9,7 +9,7 @@ export async function todaySummary(userId: string) {
     db.query<{ id: string; name: string; headline: string; met_where: string; met_at: Date; source: string }>(
       `SELECT id, name, headline, met_where, met_at, source FROM connections WHERE owner_user_id = $1 AND status = 'active' AND met_at > now() - interval '7 days' ORDER BY met_at DESC LIMIT 6`, [userId]),
     db.query<{ id: string; from_name: string; message: string; created_at: Date; context_label: string }>(
-      `SELECT r.id, r.from_name, r.message, r.created_at, s.context_label FROM connection_requests r JOIN share_sessions s ON s.id = r.share_session_id
+      `SELECT r.id, r.from_name, r.message, r.created_at, CASE WHEN r.kind = 'member' THEN 'ORYN member · ' || coalesce(nullif(s.context_label, ''), 'Nearby') ELSE s.context_label END AS context_label FROM connection_requests r JOIN share_sessions s ON s.id = r.share_session_id
         WHERE r.owner_user_id = $1 AND r.status = 'pending' ORDER BY r.created_at DESC LIMIT 10`, [userId]),
     db.query<{ id: string; title: string; due_on: string; connection_id: string; name: string; overdue: boolean }>(
       `SELECT f.id, f.title, f.due_on, f.connection_id, c.name, (f.due_on < current_date) AS overdue FROM follow_ups f JOIN connections c ON c.id = f.connection_id

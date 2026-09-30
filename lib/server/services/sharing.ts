@@ -124,7 +124,7 @@ export async function listShares(userId: string, opts: { activeOnly?: boolean; l
   const db = await getDb()
   const rows = await db.query<ShareSession & { capsule_name: string; display_name: string }>(
     `SELECT s.*, c.name AS capsule_name, c.display_name FROM share_sessions s JOIN capsules c ON c.id = s.capsule_id
-      WHERE s.owner_user_id = $1 AND s.station_id IS NULL ${opts.activeOnly ? `AND s.revoked_at IS NULL AND (s.expires_at IS NULL OR s.expires_at > now()) AND NOT (s.one_time AND s.claim_hash IS NOT NULL AND s.view_count > 0 AND s.created_at < now() - interval '1 day')` : ''}
+      WHERE s.owner_user_id = $1 AND s.station_id IS NULL AND s.channel <> 'nearby' ${opts.activeOnly ? `AND s.revoked_at IS NULL AND (s.expires_at IS NULL OR s.expires_at > now()) AND NOT (s.one_time AND s.claim_hash IS NOT NULL AND s.view_count > 0 AND s.created_at < now() - interval '1 day')` : ''}
       ORDER BY s.created_at DESC LIMIT $2`,
     [userId, opts.limit ?? 50],
   )

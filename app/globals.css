@@ -73,6 +73,8 @@
   .lc-qr svg { width: 100%; height: 100%; display: block; border-radius: 2.2cqw; background: #fff; }
   .lc-back-text { display: grid; gap: 3cqw; justify-items: start; }
   .lc-hint { font-size: 4.2cqw; line-height: 1.3; }
+  .lc-back-brand { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 4cqw; font-family: var(--card-font); }
+  .lc-mark-lg { width: 16cqw; }
 
   .lc-stage { padding: clamp(14px, 5vw, 36px); border-radius: 28px;
     background: radial-gradient(80% 70% at 50% 18%, rgba(120,150,255,.16), transparent 70%), radial-gradient(60% 60% at 50% 110%, rgba(0,0,0,.8), transparent 70%), linear-gradient(180deg, #0A1022, #05080F);
@@ -106,3 +108,11 @@
 @keyframes entry-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 @keyframes entry-sheet { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .entry-glow, .entry-card, .entry-card-inner, .entry-sheet, .entry-logo { animation: none !important; } }
+
+/* Card rising out of the wallet when Share opens. */
+.lc-rise { animation: lc-rise .55s cubic-bezier(.2,.9,.25,1.05) both; }
+@keyframes lc-rise { from { opacity: 0; transform: translateY(28px) scale(.94) rotateX(14deg); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .lc-rise { animation: none; } }
+@keyframes sheet { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { [class*="animate-[sheet"], [class*="animate-[fade"] { animation: none !important; } }

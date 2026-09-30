@@ -177,6 +177,8 @@ Everything that runs ORYN must belong to the company, not to individuals.
 | A1–A14 | Part A decisions (approve / change each) | | | |
 | A2 (changed) | Who viewed you | Signed-in ORYN members who open a capsule are shown to the owner by profile (name, one line, field) unless they chose "view privately". They are told on the capsule page before the content, every time. People without an account stay anonymous counts. Names, fields and tap analytics are Pro (`insights.viewers`); Free sees counts. | 2026-09-30 | Founders (via chat): "מי שצפה בפרופיל והוא חלק מהאפליקציה אז רואים את הפרופיל שלו" |
 | 1 | Logo | Founders' symbol + reconstructed ORYN wordmark (interim) | 2026-09-30 | Founders (via chat) |
+| 6a | Phone-to-phone | #1 ORYN-to-ORYN Nearby first; #3 Apple/Google Wallet as part of the same identity. No physical NFC cards or native Android NFC now. See [NEARBY_AND_WALLET](NEARBY_AND_WALLET.md). | 2026-09-30 | Founders (via chat) |
+| — | Nearby location data | **Open for legal review:** coarse ~150 m cell computed on the phone, kept ≤2 minutes while Share/Nearby is open, opt-in. Confirm notice/consent wording and lawful basis per region before launch. | | |
 | 2 | Hosting & database | | | |
 | 3 | Email provider | | | |
 | 4 | Payment provider | | | |

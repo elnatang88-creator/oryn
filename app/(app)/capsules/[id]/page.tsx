@@ -8,6 +8,7 @@ import { getCapsule } from '@/lib/server/services/capsules'
 import { AppError } from '@/lib/server/errors'
 import { archiveCapsuleAction, updateCapsuleAction } from '@/app/actions/capsules'
 import { CapsuleEditor } from '@/components/CapsuleEditor'
+import { ExchangeCardsIcon } from '@/components/OrynIcons'
 import { PageHeader } from '@/components/ui'
 import { normalizeDesign } from '@/lib/card-design'
 
@@ -31,7 +32,7 @@ export default async function EditCapsulePage({ params, searchParams }: { params
       <PageHeader title={c.name} sub={`Version ${c.version}. Edits reach every open link right away.`} action={
         <div className="flex gap-2">
           <Link href={`/capsules/${c.id}/visibility`} className="btn-more"><SlidersHorizontal className="h-5 w-5" aria-hidden="true" /> Sharing rules</Link>
-          {!sp.created && <Link href={`/share?capsule=${c.id}`} className="btn-share"><QrCode className="h-5 w-5" aria-hidden="true" /> Share</Link>}
+          {!sp.created && <Link href={`/share?capsule=${c.id}`} className="btn-share"><ExchangeCardsIcon className="h-5 w-5" /> Share</Link>}
         </div>
       } />
       <CapsuleEditor

@@ -102,10 +102,19 @@ Every command that exited non-zero while this QA was being done (tool runs, not 
 | C5 | Ad-hoc download probe using `.tap()` | Error: page does not support tap | **Wrong command** (context created without touch) | Re-run with click and touch: file name correct. **Pass** |
 | C6 | Chromium download of a Hebrew file name | Saved as `download` | **Environment.** The container has no UTF-8 locale | With `LANG=C.UTF-8` (as on real phones): `נועה אדלר.vcf`. Test browser configured accordingly |
 | C7 | Test failures F1–F9 and T1–T4 (§3) | Test assertions | Real product bugs (F) and test-script errors (T) | All fixed and re-run; see §3 |
+| C8 | Nearby E2E (2 tests), 2026-09-30 | Never became visible | **Real bug:** our own `Permissions-Policy: geolocation=()` blocked location on every page | Changed to `geolocation=(self)`; 5/5 Nearby E2E pass |
+| C9 | Deletion scan after adding Nearby | `rate_limits` had 3 rows with the deleted id | **Real bug:** new Nearby limiter keys contain the user id and survived deletion | Deletion now removes every limiter key containing the id; scan passes |
+| C10 | Nearby unit test "Learn more fields exchanged" | Assertion | **Test error:** Free test users don't share the Learn-more layer (plan rule); website is stored with `https://` | Test uses Pro users and matches the stored URL; product behaviour was correct |
+| C11 | Card-design unit test | Deep-equal mismatch | **Expected:** the design gained a `back` field | Test covers `back: 'brand'` |
+| C12 | QA-01 on iPhone after the Share redesign | Timeout on "Where are you?" | **Test out of date:** the field moved into collapsed "Link settings" | Test opens Link settings; 9/9 pass |
+| C13 | Re-starting the local PostgreSQL 16 | `pg_ctl` wrong directory | **Wrong command** (cluster is in `/var/tmp/orynpg/data`) | Started from the right path; 52/52 on PostgreSQL 16 |
 
 The run of `npm run verify:env` against the local demo setup **exits 1 on purpose**: it reports 5 production failures (demo data on, superuser database role, no TLS, no `CRON_SECRET`, `DATABASE_SSL=disable`). That is the check doing its job. These are exactly the items staging must get right.
 
 ## 7. Final results and readiness
+
+**Latest run (2026-09-30, after Share / Nearby / Present / Wallet):** unit 53/53 on PGlite (52/52 on PostgreSQL 16 before the last added test); browser 28/28 (Android phone 7, desktop 7, two-phone Nearby 5, iPhone QA 9); typecheck, lint and production build clean. Measured: tap → my card ~0.25 s; Nearby A tap → B sees the request ~0.9–1.9 s; A sees "connected" ~2.4–3.5 s including B's tap. What is working, simulated or still needs integration: [NEARBY_AND_WALLET](NEARBY_AND_WALLET.md). The table below is the earlier baseline.
+
 
 | Suite | Database | Tests | Passed | Failed |
 |---|---|---|---|---|

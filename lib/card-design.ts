@@ -9,16 +9,20 @@ export const FOILS = ['gold', 'rosegold', 'champagne', 'silver', 'electric', 'gr
 export const FINISHES = ['matte', 'foil', 'holo'] as const
 export const CARD_FONTS = ['classic', 'editorial', 'modern', 'bold'] as const
 export const CARD_LAYOUTS = ['monogram', 'signature', 'minimal', 'photo'] as const
+/** What the back of the card shows: a code that opens the card, or the ORYN mark only (no code). */
+export const CARD_BACKS = ['qr', 'brand'] as const
 
 export type Material = (typeof MATERIALS)[number]
 export type Foil = (typeof FOILS)[number]
 export type Finish = (typeof FINISHES)[number]
 export type CardFont = (typeof CARD_FONTS)[number]
 export type CardLayout = (typeof CARD_LAYOUTS)[number]
+export type CardBackKind = (typeof CARD_BACKS)[number]
 
-export interface CardDesign { material: Material; foil: Foil; finish: Finish; font: CardFont; layout: CardLayout; base: string }
+export interface CardDesign { material: Material; foil: Foil; finish: Finish; font: CardFont; layout: CardLayout; base: string; back: CardBackKind }
 
-export const DEFAULT_DESIGN: CardDesign = { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram', base: '#0f3d2e' }
+export const DEFAULT_DESIGN: CardDesign = { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram', base: '#0f3d2e', back: 'qr' }
+export const BACK_LABELS: Record<CardBackKind, string> = { qr: 'Code to open my card', brand: 'ORYN mark only' }
 
 const svg = (body: string, w = 300, h = 300) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'>${body}</svg>`)}")`
 const noise = (freq: number, alpha: number) => svg(`<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='${freq}' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 ${alpha} 0'/></filter><rect width='100%' height='100%' filter='url(#n)'/>`)
@@ -56,7 +60,7 @@ export const FONT_SPECS: Record<CardFont, { label: string; family: string; weigh
 
 export const LAYOUT_LABELS: Record<CardLayout, string> = { monogram: 'Monogram', signature: 'Signature', minimal: 'Minimal', photo: 'Photo' }
 
-export const PRESETS: { id: string; label: string; design: Omit<CardDesign, 'base'> }[] = [
+export const PRESETS: { id: string; label: string; design: Omit<CardDesign, 'base' | 'back'> }[] = [
   { id: 'black', label: 'Black', design: { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram' } },
   { id: 'navy', label: 'Navy Signature', design: { material: 'midnight', foil: 'silver', finish: 'foil', font: 'editorial', layout: 'signature' } },
   { id: 'pearl', label: 'Pearl', design: { material: 'pearl', foil: 'gold', finish: 'holo', font: 'classic', layout: 'minimal' } },
@@ -78,6 +82,7 @@ export function normalizeDesign(input: unknown): CardDesign {
     font: pick(d.font, CARD_FONTS, DEFAULT_DESIGN.font),
     layout: pick(d.layout, CARD_LAYOUTS, DEFAULT_DESIGN.layout),
     base: typeof d.base === 'string' && HEX.test(d.base) ? d.base.toLowerCase() : DEFAULT_DESIGN.base,
+    back: pick(d.back, CARD_BACKS, DEFAULT_DESIGN.back),
   }
 }
 
@@ -86,6 +91,7 @@ export function isValidDesign(input: unknown): boolean {
   const d = input as Record<string, unknown>
   return MATERIALS.includes(d.material as Material) && FOILS.includes(d.foil as Foil) && FINISHES.includes(d.finish as Finish)
     && CARD_FONTS.includes(d.font as CardFont) && CARD_LAYOUTS.includes(d.layout as CardLayout) && (d.base === undefined || (typeof d.base === 'string' && HEX.test(d.base)))
+    && (d.back === undefined || CARD_BACKS.includes(d.back as CardBackKind))
 }
 
 function rgb(hex: string): [number, number, number] { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }

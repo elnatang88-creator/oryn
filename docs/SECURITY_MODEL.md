@@ -84,3 +84,14 @@ CSP (`default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`, `form-
 5. Nonce-based CSP; RLS policies; secret rotation runbook.
 6. Backup restore drill completed and documented.
 7. Incident response plan with named owners among the founders.
+
+## Nearby and Wallet (added 2026-09-30)
+
+| Threat | Control | Residual |
+|---|---|---|
+| Location tracking | Opt-in; phone sends only a 7-char geohash cell (~150 m), never coordinates; presence expires in 2 min and is deleted on Invisible/leave/deletion; `Permissions-Policy: geolocation=(self)` | Legal review of location notice (open) |
+| Member enumeration | Random per-activation handles; requests only to someone visible to the requester right now; rate limits (60/h, 3 per pair/day) | No block/report for members yet |
+| Bypassing visibility | Every query re-applies the target's rule (everyone / connections / event) on the server; lurkers must be visible to look | — |
+| Data leakage on exchange | Each side gets the other's share projection (first + permitted second layer); hidden fields and notes never leave; other people's card backs never show their QR | — |
+| Impersonation | Requests carry the signed-in user; answering is owner-checked; a person can't answer their own or someone else's request (tested) | — |
+| Wallet | Pass contains card-face data + one revocable link; Google save links are RS256-signed server-side; Apple is refused until a signing service exists | Key custody for wallet certificates (company-owned) |

@@ -8,7 +8,7 @@ import { Check, Copy, Nfc, Send, WifiOff } from 'lucide-react'
  * Client helpers on the active sharing screen: system share sheet, copy, NFC tag writing where the
  * browser supports it, and a light refresh so "Opened" counts update while the screen is up.
  */
-export function ShareLive({ url, name, nfcAllowed }: { url: string; name: string; nfcAllowed: boolean }) {
+export function ShareLive({ url, name, nfcAllowed, nfcOnly = false }: { url: string; name: string; nfcAllowed: boolean; nfcOnly?: boolean }) {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [nfc, setNfc] = useState<'unsupported' | 'ready' | 'waiting' | 'done' | 'error'>('unsupported')
@@ -22,9 +22,9 @@ export function ShareLive({ url, name, nfcAllowed }: { url: string; name: string
     on()
     window.addEventListener('online', on)
     window.addEventListener('offline', on)
-    const t = setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine) router.refresh() }, 8000)
+    const t = nfcOnly ? undefined : setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine) router.refresh() }, 8000)
     return () => { clearInterval(t); window.removeEventListener('online', on); window.removeEventListener('offline', on) }
-  }, [router])
+  }, [router, nfcOnly])
 
   async function share() {
     try { await navigator.share({ title: `${name} · ORYN`, url }) } catch { /* dismissed */ }
@@ -42,6 +42,15 @@ export function ShareLive({ url, name, nfcAllowed }: { url: string; name: string
     } catch { setNfc('error') }
   }
 
+  if (nfcOnly) {
+    if (!nfcAllowed || nfc === 'unsupported') return null
+    return (
+      <button type="button" onClick={writeTag} className="btn w-full border border-white/20 text-white hover:bg-white/10" disabled={nfc === 'waiting'}>
+        <Nfc className="h-5 w-5" aria-hidden="true" />
+        {nfc === 'waiting' ? 'Hold a tag to your phone…' : nfc === 'done' ? 'Written to tag' : nfc === 'error' ? 'Couldn’t write — try again' : 'Write this link to an NFC tag'}
+      </button>
+    )
+  }
   return (
     <div className="space-y-3">
       {!online && (

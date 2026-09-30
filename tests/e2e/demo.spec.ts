@@ -51,17 +51,22 @@ test('founder demo: create → share → recipient → workspace → revoke', as
   await page.getByRole('button', { name: 'Create capsule' }).click()
   await expect(page.getByTestId('created-banner')).toBeVisible()
 
-  // 3. Activate ORYN: from anywhere, one tap to a live QR. Measure it.
+  // 3. Activate ORYN: from anywhere, one tap opens MY CARD (the card is the product, not a QR). Measure it.
   await page.goto('/today')
   const t0 = Date.now()
   await page.getByTestId(info.project.name === 'phone' ? 'tab-share' : 'rail-share').click()
-  await expect(page.getByTestId('share-qr')).toBeVisible()
+  await expect(page.getByTestId('wallet-card-name')).toHaveText('Maya Stone')
   const activationMs = Date.now() - t0
-  console.log(`[${info.project.name}] tap → live QR: ${activationMs} ms`)
+  console.log(`[${info.project.name}] tap → my card: ${activationMs} ms`)
   expect(activationMs).toBeLessThan(3000)
+  await expect(page.getByTestId('share-qr')).toHaveCount(0) // QR is secondary: not on the main Share screen
   await shot(page, '02-active-share')
   const url = (await page.getByTestId('share-url').textContent())!.trim()
   const shareUrl = page.url()
+  // QR only on request.
+  await page.getByTestId('open-qr').click()
+  await expect(page.getByTestId('share-qr')).toBeVisible()
+  await page.getByTestId('qr-back').click()
 
   // 4–5. Recipient opens it with no account and sees only the selected fields.
   const r = await recipient(browser, info.project.name === 'phone')
@@ -110,6 +115,7 @@ test('founder demo: create → share → recipient → workspace → revoke', as
 
   // 11. Revoke.
   await page.goto(shareUrl)
+  await page.getByTestId('link-settings').locator('summary').click()
   await page.getByTestId('stop-sharing').click()
   await expect(page.getByTestId('share-stopped')).toBeVisible()
 

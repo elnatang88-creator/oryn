@@ -63,6 +63,7 @@ export default async function InstantView({ params }: { params: Promise<{ token:
         </div>
       </div>
       <p className="mt-6 text-center text-sm text-ink-muted">Not now? Just close this page. {first} won’t be told.</p>
+      {!me && <p className="mt-3 text-center text-sm text-ink-muted" data-testid="oryn-invite">Want a card like this? <Link href="/welcome" className="font-semibold text-electric-600">Make your own ORYN card</Link> — free, and people you share with never need the app.</p>}
       <details className="mt-4 text-center text-sm text-ink-muted">
         <summary className="cursor-pointer list-none underline-offset-2 hover:underline">Report a problem</summary>
         <ActionForm action={reportAction} className="mt-3 text-left">

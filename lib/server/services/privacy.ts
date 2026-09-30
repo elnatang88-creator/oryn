@@ -15,7 +15,7 @@ export async function privacyOverview(userId: string) {
   const db = await getDb()
   const [counts] = await db.query<{ capsules: number; live_shares: number; connections: number; notes: number; interactions: number }>(
     `SELECT (SELECT count(*)::int FROM capsules WHERE owner_user_id = $1 AND status='active') AS capsules,
-            (SELECT count(*)::int FROM share_sessions WHERE owner_user_id = $1 AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) AS live_shares,
+            (SELECT count(*)::int FROM share_sessions WHERE owner_user_id = $1 AND channel <> 'nearby' AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) AS live_shares,
             (SELECT count(*)::int FROM connections WHERE owner_user_id = $1) AS connections,
             (SELECT count(*)::int FROM private_notes WHERE owner_user_id = $1) AS notes,
             (SELECT count(*)::int FROM interactions WHERE owner_user_id = $1) AS interactions`, [userId])
@@ -43,11 +43,12 @@ export async function buildExport(db: Db, exportId: string, userId: string) {
   const payload = {
     format: 'oryn-export-v1',
     generatedAt: new Date().toISOString(),
-    account: (await q(`SELECT id, email, display_name, profile_headline, industry, view_visibility, plan_key, retention_days, created_at FROM users WHERE id = $1`))[0],
+    account: (await q(`SELECT id, email, display_name, profile_headline, industry, view_visibility, nearby_visibility, plan_key, retention_days, created_at FROM users WHERE id = $1`))[0],
     capsules: await q(`SELECT c.*, to_jsonb(p.*) AS policy FROM capsules c LEFT JOIN visibility_policies p ON p.capsule_id = c.id WHERE c.owner_user_id = $1`),
     shareSessions: await q(`SELECT id, capsule_id, channel, scope, context_label, one_time, interaction_level, view_count, expanded_count, saved_count, expires_at, revoked_at, created_at FROM share_sessions WHERE owner_user_id = $1`),
     interactions: await q(`SELECT share_session_id, kind, field_kind, created_at FROM interactions WHERE owner_user_id = $1`),
     membersWhoViewedMe: await q(`SELECT v.capsule_id, u.display_name AS viewer_name, v.view_count, v.expanded, v.first_viewed_at, v.last_viewed_at FROM capsule_views v JOIN users u ON u.id = v.viewer_user_id WHERE v.owner_user_id = $1`),
+    nearbyPresence: await q(`SELECT cell, event_id, visibility, started_at, expires_at FROM nearby_presence WHERE user_id = $1`),
     capsulesIViewed: await q(`SELECT c.name AS capsule_name, o.display_name AS owner_name, v.view_count, v.first_viewed_at, v.last_viewed_at FROM capsule_views v JOIN capsules c ON c.id = v.capsule_id JOIN users o ON o.id = v.owner_user_id WHERE v.viewer_user_id = $1`),
     connectionRequests: await q(`SELECT id, from_name, from_contact, message, status, created_at, responded_at FROM connection_requests WHERE owner_user_id = $1`),
     connections: await q(`SELECT * FROM connections WHERE owner_user_id = $1`),
@@ -150,6 +151,8 @@ export async function executeDeletion(db: Db, requestId: string, userId: string)
     await t.query(`UPDATE audit_events SET meta = meta - 'owner' WHERE meta->>'owner' = $1`, [userId])
     await t.query(`UPDATE analytics_events SET user_id = NULL WHERE user_id = $1`, [userId])
     await t.query(`DELETE FROM rate_limits WHERE key = ANY($1)`, [[`signin-fail:${hmac(`email:${u.email}`).slice(0, 24)}`, `delete-reauth:${userId}`, `share:${userId}`, `export:${userId}`, `pwchange:${userId}`]])
+    // Any other limiter bucket keyed by this person's id (Nearby heartbeat/connect/pair, etc.). Ids are random, so no collisions.
+    await t.query(`DELETE FROM rate_limits WHERE position($1 in key) > 0`, [userId])
     await t.query(`DELETE FROM jobs WHERE payload->>'userId' = $1`, [userId])
     await t.query(`DELETE FROM subscriptions WHERE subject_type = 'user' AND subject_id = $1`, [userId])
 

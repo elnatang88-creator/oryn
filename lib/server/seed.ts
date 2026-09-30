@@ -22,7 +22,13 @@ function demoPassword() {
 /** Local/demo data only. Never enabled in production unless ORYN_SEED_DEMO=true is set on purpose. */
 export async function ensureDemoData(db: Db) {
   const [any] = await db.query(`SELECT 1 FROM users LIMIT 1`)
-  if (any) return
+  if (any) {
+    // Databases seeded before Nearby existed get the demo members once, and only if they are demo databases.
+    const [demo] = await db.query(`SELECT 1 FROM users WHERE id = 'usr_demo' AND email = $1`, [DEMO_EMAIL])
+    const [has] = await db.query(`SELECT 1 FROM users WHERE id = 'usr_demo_daniel'`)
+    if (demo && !has) await seedDemoNearby(db)
+    return
+  }
   const demoId = 'usr_demo'
   const adminId = 'usr_admin'
   const password = demoPassword()
@@ -63,4 +69,33 @@ export async function ensureDemoData(db: Db) {
   await db.query(`INSERT INTO connections (id, owner_user_id, name, headline, contact, source, share_session_id, met_where, met_at) VALUES ('con_demo', $1, 'Sam Rivera', 'Design lead', '[{"kind":"email","label":"Shared with you","value":"sam@rivera.example"}]', 'request_accepted', 's_demopastsharexxxxxxxx', 'Harbor Summit — day 1', now() - interval '20 hours')`, [demoId])
   await db.query(`INSERT INTO private_notes (id, connection_id, owner_user_id, body) VALUES ('note_demo', 'con_demo', $1, 'Asked about our onboarding research. Send the deck.')`, [demoId])
   await db.query(`INSERT INTO follow_ups (id, connection_id, owner_user_id, title, due_on) VALUES ('fu_demo', 'con_demo', $1, 'Send the onboarding deck', current_date)`, [demoId])
+  await seedDemoNearby(db)
+}
+
+/**
+ * DEMO ONLY: three fictional members "standing nearby" so one person can try the Nearby exchange.
+ * They live on the reserved @oryn.local domain, can't sign in (random unusable password), sit in a special
+ * 'demo' presence cell that no real phone can produce, and are shown only to demo accounts, labelled "demo".
+ */
+export async function seedDemoNearby(db: Db) {
+  const people: [string, string, string, string, string, string, string][] = [
+    ['usr_demo_daniel', 'daniel.demo@oryn.local', 'Daniel Cohen', 'Founder', 'Harborline Ventures', 'finance', '{"material":"obsidian","foil":"gold","finish":"foil","font":"classic","layout":"monogram","base":"#0f3d2e","back":"brand"}'],
+    ['usr_demo_sarah', 'sarah.demo@oryn.local', 'Sarah Levi', 'Partner', 'Cedar & Stone Studio', 'design', '{"material":"pearl","foil":"rosegold","finish":"holo","font":"editorial","layout":"signature","base":"#0f3d2e","back":"brand"}'],
+    ['usr_demo_eli', 'eli.demo@oryn.local', 'Eli Ward', 'Head of partnerships', 'Pier Nine Events', 'hospitality', '{"material":"carbon","foil":"electric","finish":"foil","font":"modern","layout":"minimal","base":"#0f3d2e","back":"qr"}'],
+  ]
+  for (const [id, email, name, role, company, industry, design] of people) {
+    await db.query(`INSERT INTO users (id, email, password_hash, display_name, profile_headline, industry, nearby_visibility, plan_key, onboarded_at) VALUES ($1,$2,$3,$4,$5,$6,'everyone','pro',now()) ON CONFLICT (id) DO NOTHING`,
+      [id, email, await hashPassword(crypto.randomBytes(24).toString('base64url')), name, `${role} · ${company}`, industry])
+    const capId = `cap_${id.slice(4)}`
+    const f = JSON.stringify([
+      { id: newId('f', 6), kind: 'role', label: 'Role', value: role, layer: 'instant' },
+      { id: newId('f', 6), kind: 'company', label: 'Company', value: company, layer: 'instant' },
+      { id: newId('f', 6), kind: 'email', label: 'Email', value: `${name.split(' ')[0].toLowerCase()}@demo.example`, layer: 'instant' },
+      { id: newId('f', 6), kind: 'website', label: 'Website', value: 'https://demo.example', layer: 'expanded' },
+      { id: newId('f', 6), kind: 'phone', label: 'Phone', value: '+1 555 010 0000', layer: 'hidden' },
+    ])
+    await db.query(`INSERT INTO capsules (id, owner_user_id, name, mode, display_name, headline, message, fields, is_default, design) VALUES ($1,$2,'Work','professional',$3,$4,'Demo card — fictional person.',$5::jsonb,true,$6::jsonb) ON CONFLICT (id) DO NOTHING`, [capId, id, name, role, f, design])
+    await db.query(`INSERT INTO visibility_policies (capsule_id, duration_minutes, one_time, interaction_level, allow_expanded) VALUES ($1, NULL, false, 'connect', true) ON CONFLICT (capsule_id) DO NOTHING`, [capId])
+    await db.query(`INSERT INTO nearby_presence (user_id, handle, capsule_id, cell, visibility, expires_at) VALUES ($1,$2,$3,'demo','everyone', now() + interval '100 years') ON CONFLICT (user_id) DO NOTHING`, [id, newId('nb', 18), capId])
+  }
 }

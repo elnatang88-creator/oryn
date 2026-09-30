@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { CalendarCheck, CalendarDays, Home, Layers, LineChart, Settings, Users, UsersRound, QrCode } from 'lucide-react'
+import { CalendarCheck, CalendarDays, Home, Layers, LineChart, Settings, Users, UsersRound } from 'lucide-react'
+import { ExchangeCardsIcon } from './OrynIcons'
 import { Logo } from './Logo'
 import { NavLink } from './NavLink'
 import { signOutAction } from '@/app/actions/auth'
@@ -24,7 +25,7 @@ export function AppShell({ user, children }: { user: { display_name: string; pla
         <Link href="/today" className="px-2"><Logo /></Link>
         {/* Plain anchors: the share shortcut starts a share, so it must never be prefetched. */}
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- starts a share, so it must never be prefetched */}
-        <a href="/share/quick" className="btn-share mt-8 w-full" data-testid="rail-share"><QrCode className="h-5 w-5" aria-hidden="true" /> Share now</a>
+        <a href="/share/quick" className="btn-share mt-8 w-full" data-testid="rail-share"><ExchangeCardsIcon className="h-5 w-5" /> Share my card</a>
         <nav className="mt-6 flex-1 space-y-1" aria-label="Main">
           {NAV.map((n) => (
             <NavLink key={n.href} href={n.href} className="flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-medium text-ink-muted hover:bg-soft-100 hover:text-ink" activeClassName="!bg-soft-100 !text-navy-900 font-semibold">
@@ -54,7 +55,7 @@ export function AppShell({ user, children }: { user: { display_name: string; pla
           <Tab href="/capsules" label="Capsules" icon={Layers} />
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- starts a share, so it must never be prefetched */}
           <a href="/share/quick" className="-mt-6 flex flex-col items-center gap-1 pb-2" data-testid="tab-share">
-            <span className="grid h-16 w-16 place-items-center rounded-full bg-electric text-white shadow-lift ring-4 ring-white"><QrCode className="h-7 w-7" aria-hidden="true" /></span>
+            <span className="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[#1f6bff] to-[#0038b8] text-white shadow-lift ring-4 ring-white"><ExchangeCardsIcon className="h-8 w-8" /></span>
             <span className="text-[11px] font-semibold text-navy-900">Share</span>
           </a>
           <Tab href="/connections" label="People" icon={Users} />

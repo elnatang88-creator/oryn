@@ -167,3 +167,8 @@ Notation below: `count(e)` = number of events named `e` in the window; `users(e)
 - **Weekly:** activation, successful share rate, connection request rate, 7-day return %.
 - **Monthly:** follow-up completion, meaningful connections, privacy control usage, conversion, support confusion rate.
 - **Per event:** event connection rate, share rate by channel, for the organizer and for us.
+
+## Nearby (2026-09-30)
+- `connect_requested` / `connect_accepted` carry `props.via = 'nearby'` for member exchanges. No location, cell or handle is ever put in analytics.
+- `privacy_control_used` with `control: 'nearby_visibility'` when someone changes who can find them.
+- Success signal to watch: time from Share opened → connection accepted (target: seconds), and share of Nearby exchanges vs. link/QR.

@@ -33,7 +33,7 @@ export default async function ConnectionsPage({ searchParams }: { searchParams: 
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-navy-900 text-sm font-bold text-white" aria-hidden="true">{c.name.split(' ').map((p) => p[0]).slice(0, 2).join('')}</span>
                 <span className="min-w-0 flex-1">
                   <span dir="auto" className="block truncate font-semibold">{c.name}</span>
-                  <span className="block truncate text-sm text-ink-muted">{c.met_where || (c.source === 'kept_capsule' ? 'Kept from a capsule' : 'Connected')} · {relTime(c.met_at)}</span>
+                  <span className="block truncate text-sm text-ink-muted">{c.source === 'nearby' ? `Exchanged cards · ${c.met_where || 'Nearby'}` : c.met_where || (c.source === 'kept_capsule' ? 'Kept from a capsule' : 'Connected')} · {relTime(c.met_at)}</span>
                 </span>
                 {c.next_due && <span className="chip-public shrink-0">{fmtDate(c.next_due)}</span>}
               </Link>

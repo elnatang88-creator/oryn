@@ -77,3 +77,13 @@ The recipient always sees the **live** capsule, filtered at request time by: the
 ## Migrations
 
 Add a new numbered file in `db/migrations/` (e.g. `0002_*.sql`); never edit an applied one. `npm run db:migrate` (or app start) applies pending files in order inside a transaction and records them in `schema_migrations`.
+
+## Nearby (migration 0004)
+
+| Table / column | Purpose |
+|---|---|
+| `users.nearby_visibility` | `off` (default) · `everyone` · `connections` · `event` |
+| `nearby_presence` | One short-lived row per visible person: random `handle`, card (`capsule_id`), coarse `cell` or `event_id`, `expires_at` (2 min). Cascades on user/capsule/event deletion. |
+| `connection_requests.kind`, `.from_user_id` | `member` requests between ORYN members reuse the one request pipeline; one pending request per pair |
+| `connections.source = 'nearby'` | Both sides of an accepted Nearby exchange; `contact_user_id` links the member |
+| `capsules.design.back` | `qr` or `brand` — what the back of the card shows |

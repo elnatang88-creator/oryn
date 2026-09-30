@@ -7,7 +7,7 @@ import { designVars, normalizeDesign, DEFAULT_DESIGN } from '@/lib/card-design'
 describe('card design', () => {
   it('is saved per capsule and reaches the recipient, without exposing private data', async () => {
     const u = await makeUser('free', 'Noa Adler')
-    const design = { material: 'pearl', foil: 'rosegold', finish: 'holo', font: 'editorial', layout: 'signature', base: '#123456' }
+    const design = { material: 'pearl', foil: 'rosegold', finish: 'holo', font: 'editorial', layout: 'signature', base: '#123456', back: 'brand' }
     const id = await createCapsule(u.id, { name: 'C', mode: 'professional', display_name: 'Noa Adler', fields: fields(), private_note: 'SECRET', design })
     const { capsule } = await getCapsule(u.id, id)
     expect(capsule.design).toEqual(design)

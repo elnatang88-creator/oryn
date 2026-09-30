@@ -6,7 +6,9 @@ import { AppError, invalid, notFound } from '../errors'
 import { audit } from '../audit'
 import { track } from '../analytics'
 import { requireCapability, userPlan } from '../plans'
-import { resolveShare } from './sharing'
+import { project, resolveShare, startShare } from './sharing'
+import type { Db } from '../db'
+import type { Capsule } from './capsules'
 
 export interface Connection {
   id: string
@@ -14,7 +16,7 @@ export interface Connection {
   name: string
   headline: string
   contact: { kind: string; label: string; value: string }[]
-  source: 'request_accepted' | 'kept_capsule' | 'manual'
+  source: 'request_accepted' | 'kept_capsule' | 'manual' | 'nearby'
   share_session_id: string | null
   event_id: string | null
   met_where: string
@@ -49,6 +51,8 @@ export async function listRequests(userId: string, status: 'pending' | 'all' = '
 
 export async function respondToRequest(userId: string, requestId: string, accept: boolean) {
   const db = await getDb()
+  const [kind] = await db.query<{ kind: string }>(`SELECT kind FROM connection_requests WHERE id = $1 AND owner_user_id = $2`, [requestId, userId])
+  if (kind?.kind === 'member') return respondToMemberRequest(db, userId, requestId, accept)
   const [r] = await db.query<ConnectionRequest & { org_id: string | null; event_id: string | null }>(
     `SELECT r.*, s.context_label, s.org_id, s.event_id, e.name AS event_name FROM connection_requests r JOIN share_sessions s ON s.id = r.share_session_id LEFT JOIN events e ON e.id = s.event_id
       WHERE r.id = $1 AND r.owner_user_id = $2`,
@@ -193,4 +197,68 @@ export async function updateConnectionContext(userId: string, connectionId: stri
   const r = await db.query(`UPDATE connections SET met_where = $3 WHERE id = $1 AND owner_user_id = $2 RETURNING id`, [connectionId, userId, metWhere.trim().slice(0, 120)])
   if (!r.length) throw notFound('That connection')
   await audit(db, { actor: userId, action: 'connection.context_updated', targetType: 'connection', targetId: connectionId })
+}
+
+/** Snapshot of what a member's share permits: the same projection a recipient of their link would get. Null once stopped. */
+export async function memberSnapshot(db: Db, shareSessionId: string) {
+  const [row] = await db.query<{ capsule: Capsule; allow_expanded: boolean; interaction_level: 'view' | 'save' | 'connect'; expires_at: Date | null; one_time: boolean; context_label: string }>(
+    `SELECT to_jsonb(c.*) AS capsule, s.allow_expanded, s.interaction_level, s.expires_at, s.one_time, s.context_label FROM share_sessions s JOIN capsules c ON c.id = s.capsule_id AND c.status = 'active' WHERE s.id = $1 AND s.revoked_at IS NULL`, [shareSessionId])
+  if (!row) return null
+  const v = project(row.capsule, row, 'expanded')
+  return { name: v.displayName, headline: v.headline, contact: v.fields.map(({ kind, label, value }) => ({ kind, label, value })) }
+}
+
+
+/**
+ * ORYN-to-ORYN: B accepts A. Each side receives what the OTHER side's card permits (the same projection a link
+ * recipient would get — never hidden details or private notes), and both land in People. "Not now" stays silent.
+ */
+async function respondToMemberRequest(db: Db, userId: string, requestId: string, accept: boolean) {
+  const [r] = await db.query<{ id: string; status: string; from_user_id: string; share_session_id: string; event_id: string | null; event_name: string | null; context_label: string }>(
+    `SELECT r.id, r.status, r.from_user_id, r.share_session_id, s.event_id, e.name AS event_name, s.context_label
+       FROM connection_requests r JOIN share_sessions s ON s.id = r.share_session_id LEFT JOIN events e ON e.id = s.event_id
+      WHERE r.id = $1 AND r.owner_user_id = $2 AND r.kind = 'member'`, [requestId, userId])
+  if (!r) throw notFound('That request')
+  if (r.status !== 'pending') {
+    const [c] = await db.query<{ id: string }>(`SELECT id FROM connections WHERE owner_user_id = $1 AND contact_user_id = $2 AND status = 'active'`, [userId, r.from_user_id])
+    return { connectionId: c?.id ?? null }
+  }
+  if (!accept) {
+    await db.query(`UPDATE connection_requests SET status = 'declined', responded_at = now() WHERE id = $1`, [requestId])
+    await audit(db, { actor: userId, action: 'connection_request.declined', targetType: 'connection_request', targetId: requestId })
+    await track(db, 'connect_declined', { userId })
+    return { connectionId: null }
+  }
+  const theirCard = await memberSnapshot(db, r.share_session_id)
+  if (!theirCard) throw new AppError('not_found', 'This request is no longer available.')
+  // What I give back: a share of my own default card, with my own disclosure rules.
+  const mine = await startShare(userId, { channel: 'nearby', contextLabel: r.context_label || 'Nearby', durationMinutes: null, oneTime: false })
+  const myCard = await memberSnapshot(db, mine.id)
+  const where = r.event_name ?? 'Nearby'
+  let connectionId: string | null = null
+  await db.tx(async (t) => {
+    const won = await t.query(`UPDATE connection_requests SET status = 'accepted', responded_at = now() WHERE id = $1 AND status = 'pending' RETURNING id`, [requestId])
+    if (!won.length) return
+    const upsert = async (owner: string, contactUser: string, card: NonNullable<typeof theirCard>, shareId: string) => {
+      const [had] = await t.query<{ id: string }>(`SELECT id FROM connections WHERE owner_user_id = $1 AND contact_user_id = $2 AND status = 'active'`, [owner, contactUser])
+      if (had) {
+        await t.query(`UPDATE connections SET name = $2, headline = $3, contact = $4::jsonb, met_at = now() WHERE id = $1`, [had.id, card.name, card.headline, JSON.stringify(card.contact)])
+        return had.id
+      }
+      const id = newId('con')
+      await t.query(
+        `INSERT INTO connections (id, owner_user_id, contact_user_id, name, headline, contact, source, share_session_id, event_id, met_where)
+         VALUES ($1,$2,$3,$4,$5,$6::jsonb,'nearby',$7,$8,$9)`,
+        [id, owner, contactUser, card.name, card.headline, JSON.stringify(card.contact), shareId, r.event_id, where],
+      )
+      return id
+    }
+    connectionId = await upsert(userId, r.from_user_id, theirCard, r.share_session_id)
+    const theirConnection = await upsert(r.from_user_id, userId, myCard!, mine.id)
+    await t.query(`INSERT INTO notifications (id, user_id, kind, body, link) VALUES ($1,$2,'connect_accepted',$3,$4)`,
+      [newId('ntf'), r.from_user_id, `${myCard!.name} accepted — you’re connected.`, `/connections/${theirConnection}`])
+    await audit(t, { actor: userId, action: 'connection_request.accepted', targetType: 'connection_request', targetId: requestId, meta: { via: 'nearby' } })
+  })
+  await track(db, 'connect_accepted', { userId, props: { via: 'nearby' } })
+  return { connectionId }
 }
