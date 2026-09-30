@@ -7,7 +7,7 @@
 | Build tested | Production build (`next build` + `next start`), fresh embedded Postgres per run, demo data seeded and labelled |
 | Devices | **iPhone profile:** 390×844 px, 3× pixel density, touch, iPhone user agent, rendered by Chromium. **Android phone:** Pixel 7 profile. **Desktop:** 1360×900. WebKit (Safari's engine) is not installed in this environment. |
 | Final result | **48 tests (29 unit/integration + 19 end-to-end), each run on two databases = 96 runs: 96 passed, 0 failed.** Typecheck, lint and production build clean. Deployment smoke check: 13/13 against a local production-mode server. See §7. |
-| Verdict | **Ready for a local demo only** (a laptop, or two phones once there's an online link). **Not verified for staging, and not production-ready.** No isolated staging environment has been checked yet (environment variables, database permissions, TLS, deployment protection). See §8. |
+| Verdict | **Ready for a local demo only** (a laptop, or two phones once there's an online link). **Not verified for staging, and not production-ready.** No isolated staging environment has been checked yet (environment variables, database permissions, TLS, deployment protection). See §7. |
 
 Screenshots: `docs/screenshots/qa-*.png` (iPhone), `phone-*.png`, `desktop-*.png`. Tests: `tests/e2e/qa.spec.ts`, `tests/e2e/demo.spec.ts`, `tests/unit/*`.
 
