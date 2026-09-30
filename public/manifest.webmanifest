@@ -2,7 +2,7 @@
   "name": "ORYN",
   "short_name": "ORYN",
   "description": "Share only what you choose. Let them decide what happens next.",
-  "start_url": "/today",
+  "start_url": "/welcome",
   "display": "standalone",
   "background_color": "#011441",
   "theme_color": "#011441",

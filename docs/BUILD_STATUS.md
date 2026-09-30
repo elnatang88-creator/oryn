@@ -85,7 +85,7 @@ Also built: Teams (workspace, members, roles, teams, org audit log), Insights, F
 
 ## E2E results
 
-21 of 21 passed (adds "who viewed you" on phone and desktop). Earlier: 19 of 19 passed (Chromium: Pixel 7 phone, 1360×900 desktop, and an iPhone-size QA suite), against a production build. Full QA results: [MVP_QA_REPORT](MVP_QA_REPORT.md).
+23 of 23 passed (adds "who viewed you" and the app entry screen on phone and desktop). Earlier: 19 of 19 passed (Chromium: Pixel 7 phone, 1360×900 desktop, and an iPhone-size QA suite), against a production build. Full QA results: [MVP_QA_REPORT](MVP_QA_REPORT.md).
 
 | Test | Result |
 |---|---|
