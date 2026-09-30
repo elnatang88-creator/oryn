@@ -19,7 +19,7 @@ export default async function StationsPage({ searchParams }: { searchParams: Pro
   const org = orgs.find((o) => o.id === sp.org) ?? orgs[0]
   const canManage = ['owner', 'admin', 'manager'].includes(org.role)
   const [stations, capsules, events, origin] = await Promise.all([listStations(user.id, org.id), listCapsules(user.id), listEvents(user.id), appOrigin()])
-  const qrs = await Promise.all(stations.map((s) => QRCode.toString(`${origin}/q/${s.code}`, { type: 'svg', margin: 1, color: { dark: '#0A1433', light: '#FFFFFF' } })))
+  const qrs = await Promise.all(stations.map((s) => QRCode.toString(`${origin}/q/${s.code}`, { type: 'svg', margin: 1, color: { dark: '#011441', light: '#FFFFFF' } })))
 
   return (
     <>

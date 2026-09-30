@@ -56,7 +56,7 @@ Also built: Teams (workspace, members, roles, teams, org audit log), Insights, F
 | Email (verification, reset, invites, reminders) | Not sent. Reminders appear in-app | Choose provider; add templates |
 | Wallet passes | Channel defined; flag `share.wallet_pass` off | Company Apple Developer + Google Wallet issuer accounts and signing certificates |
 | Error reporting | `console.error` hook points | Company-owned error monitoring project |
-| Logo | Placeholder wordmark (`public/brand/oryn-wordmark.svg`, `components/Logo.tsx`) | Founders supply the ORYN logo asset — the repo did not contain one |
+| Logo | In place (`public/brand/`). The symbol is vectorised from the founders' file; the wordmark uses that file's letterforms, with a **reconstructed Y** (the supplied file reads "ORIAN") | The designer's original vector files and confirmation of the Y (see PRODUCT_DECISIONS B1) |
 
 ## What requires credentials (company-owned)
 

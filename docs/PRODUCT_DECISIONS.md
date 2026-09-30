@@ -36,14 +36,18 @@
 
 ## 1. Final logo asset
 
-**Context.** No logo file was supplied in the repository. v1 uses a **placeholder text wordmark** ("ORYN") in the app and on recipient pages.
+**Status (2026-09-30): partly resolved.** The founders supplied a logo file. Its symbol (two interlocking blue shapes) is used as ORYN's mark. The file's wordmark reads **"ORIAN", not "ORYN"**, so, by founder instruction, the app uses:
 
-**Options.**
-- A. Keep the wordmark for launch.
-- B. Commission a logo from a designer (company holds full rights via written assignment).
-- C. Design in-house.
+- **Symbol:** vectorised from the supplied PNG (`public/brand/oryn-mark.svg`), colour `#0053FD`.
+- **Wordmark:** "ORYN" built from the same file's letterforms. O, R and N are traced from it; **Y was constructed** to match the stroke width and cap height, because the source has no Y. Colour `#011441`.
+- **Files:** `oryn-logo.svg` (navy text), `oryn-logo-white.svg` (for dark backgrounds), `oryn-mark.svg`; app icons `icon-192/512.png` and `app/apple-icon.png`. The UI palette now matches the logo exactly (electric `#0053FD`, navy `#011441`).
+- The "ORIAN" source file is **not** committed to the repository, to avoid confusion about the product name.
 
-**Recommendation.** B, with a written IP assignment to the company. Deliver SVG + PNG in light/dark variants, a square app icon (512px, maskable), and a favicon. Keep the wordmark until then.
+**Still needed.**
+- The designer's original vector files (SVG/AI/Figma) and font name, so the tracing is replaced with the source artwork.
+- Confirm or redraw the Y.
+- A written assignment of the logo's IP to the company.
+- Check that the name and mark are free to use (trademark search, with counsel).
 
 ## 2. Production hosting and database provider
 
@@ -161,7 +165,7 @@ Everything that runs ORYN must belong to the company, not to individuals.
 | # | Decision | Chosen option | Date | Decided by |
 |---|---|---|---|---|
 | A1–A14 | Part A decisions (approve / change each) | | | |
-| 1 | Logo | | | |
+| 1 | Logo | Founders' symbol + reconstructed ORYN wordmark (interim) | 2026-09-30 | Founders (via chat) |
 | 2 | Hosting & database | | | |
 | 3 | Email provider | | | |
 | 4 | Payment provider | | | |

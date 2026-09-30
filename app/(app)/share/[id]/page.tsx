@@ -25,7 +25,7 @@ export default async function ActiveSharePage({ params }: { params: Promise<{ id
   if (!share) notFound()
   const { capsule } = await getCapsule(user.id, share.capsule_id)
   const url = `${await appOrigin()}/c/${share.token}`
-  const svg = await QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#0A1433', light: '#FFFFFF' } })
+  const svg = await QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#011441', light: '#FFFFFF' } })
   const plan = await userPlan(await getDb(), user.id)
   const nfcAllowed = has(plan, 'share.nfc') && (await isFlagOn('share.nfc_tag'))
   const live = share.state === 'live' || share.state === 'opened_once'

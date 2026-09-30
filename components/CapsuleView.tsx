@@ -1,6 +1,7 @@
 import { hrefForField, type PublicCapsuleView } from '@/lib/capsule-model'
 import { FieldIcon } from './FieldIcon'
 import { ArrowUpRight, Clock, Eye, Lock } from 'lucide-react'
+import { Logo } from './Logo'
 
 function initials(name: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join('') || '•'
@@ -59,9 +60,8 @@ export function CapsuleView({ view, preview = false, now }: { view: PublicCapsul
           </div>
         </div>
         {view.message && <p className="mt-5 rounded-2xl bg-white/[0.07] px-4 py-3 text-[15px] leading-relaxed text-white/95">“{view.message}”</p>}
-        <svg className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 text-electric-400/25" viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="10" />
-        </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/oryn-mark.svg" alt="" aria-hidden="true" className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 opacity-[0.12]" />
       </header>
 
       <div className="space-y-2 p-4">
@@ -71,7 +71,7 @@ export function CapsuleView({ view, preview = false, now }: { view: PublicCapsul
       </div>
       <footer className="flex items-center justify-between border-t border-soft-100 px-5 py-3 text-[12px] text-ink-muted">
         <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" aria-hidden="true" /> Shared on purpose. Only what they chose.</span>
-        <span className="font-bold tracking-[0.2em] text-navy-900">ORYN</span>
+        <Logo height={14} />
       </footer>
     </article>
   )

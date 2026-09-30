@@ -92,7 +92,7 @@ test('founder demo: create → share → recipient → workspace → revoke', as
 
   // 8. Sender sees the interaction in the workspace.
   await page.goto('/today')
-  await expect(page.getByText('1 opens')).toBeVisible()
+  await expect(page.getByText('This week: opened 1 time')).toBeVisible()
   await expect(page.getByTestId('pending-request')).toContainText('Sam Rivera')
   await shot(page, '05-today')
   await page.getByTestId('pending-request').getByRole('button', { name: 'Connect' }).click()

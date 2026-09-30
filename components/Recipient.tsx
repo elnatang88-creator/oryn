@@ -7,7 +7,7 @@ export function RecipientFrame({ children }: { children: React.ReactNode }) {
       <main id="main" className="mx-auto max-w-md px-4 pb-16 pt-5">
         {children}
         <p className="mt-10 text-center text-xs text-ink-muted">
-          <Logo className="scale-75" /> <br />
+          <Logo height={18} className="mx-auto mb-2" />
           You don’t need an account to view this. <Link href="/privacy" className="underline">How ORYN handles privacy</Link>
         </p>
       </main>

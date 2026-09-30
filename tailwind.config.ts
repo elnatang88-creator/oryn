@@ -6,8 +6,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        navy: { 950: '#050B1F', 900: '#0A1433', 800: '#12204A', 700: '#1C2E63', 600: '#2A3F7E' },
-        electric: { DEFAULT: '#1F5BFF', 600: '#1A4FE6', 400: '#4D84FF', 300: '#86AAFF' },
+        navy: { 950: '#000A24', 900: '#011441', 800: '#0B2157', 700: '#1C2E63', 600: '#2A3F7E' },
+        electric: { DEFAULT: '#0053FD', 600: '#0046D6', 400: '#4D84FF', 300: '#86AAFF' },
         soft: { 50: '#F6F8FE', 100: '#EDF2FF', 200: '#DCE6FF', 300: '#C3D3FB' },
         ink: { DEFAULT: '#0B1530', muted: '#5B6785', faint: '#8A94AD' },
         signal: { ok: '#0F8A5F', warn: '#A35A00', stop: '#C4283A' },

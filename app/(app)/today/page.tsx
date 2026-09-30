@@ -39,7 +39,7 @@ export default async function TodayPage() {
 
   return (
     <>
-      <PageHeader title="Today" sub={`${t.counts.opened} opens · ${t.counts.expanded} “learn more” · ${t.counts.saved} saves this week`} />
+      <PageHeader title="Today" sub={`This week: opened ${t.counts.opened} ${t.counts.opened === 1 ? 'time' : 'times'} · ${t.counts.expanded} chose “learn more” · ${t.counts.saved} saved`} />
 
       {t.notifications.length > 0 && (
         <div className="card mb-6 flex items-start gap-3 px-4 py-3">
