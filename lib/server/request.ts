@@ -61,7 +61,7 @@ export async function writeClaim(token: string) {
 
 /** Absolute origin for links and QR codes. Prefer the configured public URL (company-owned domain). */
 export async function appOrigin() {
-  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
+  const configured = (process.env.ORYN_PUBLIC_URL ?? process.env.NEXT_PUBLIC_APP_URL)?.replace(/\/$/, '')
   if (configured) return configured
   const h = await headers()
   const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'localhost:3000'

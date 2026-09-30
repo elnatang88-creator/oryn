@@ -5,7 +5,7 @@ import { FlatCompat } from '@eslint/eslintrc'
 const compat = new FlatCompat({ baseDirectory: dirname(fileURLToPath(import.meta.url)) })
 
 const config = [
-  { ignores: ['legacy/**', '.next/**', 'node_modules/**', '.data/**', 'next-env.d.ts'] },
+  { ignores: ['legacy/**', 'docs/prototypes/**', '.next/**', 'node_modules/**', '.data/**', 'next-env.d.ts'] },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   { rules: { '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }] } },
 ]

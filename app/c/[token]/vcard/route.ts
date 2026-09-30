@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { recipientVcard } from '@/lib/server/services/sharing'
+import { relativeRedirect } from '@/lib/server/redirect'
 
 export const dynamic = 'force-dynamic'
 
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   const r = await recipientVcard(token, req.cookies.get('oryn_claim')?.value ?? null)
-  if (r.status !== 'ok') return NextResponse.redirect(new URL(`/c/${token}`, req.url), 303)
+  if (r.status !== 'ok') return relativeRedirect(`/c/${encodeURIComponent(token)}`)
   return new NextResponse(r.vcard, {
     headers: {
       'Content-Type': 'text/vcard; charset=utf-8',

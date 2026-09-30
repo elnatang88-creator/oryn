@@ -1,0 +1,83 @@
+# ORYN on one company-owned server. Everything here is open source and runs on your own machine:
+#   caddy     — HTTPS in front (free certificates from Let's Encrypt, renewed automatically)
+#   app       — ORYN (Next.js), not exposed to the internet directly
+#   scheduler — background jobs (deletions, reminders, exports), same image as the app
+#   db        — PostgreSQL 16, private network only, data in a local volume
+#   backup    — nightly pg_dump into ./backups (copy these off the server too)
+# Start:  cd deploy && ./gen-env.sh && docker compose up -d --build
+name: oryn
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      ORYN_DOMAIN: ${ORYN_DOMAIN:?set ORYN_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app: { condition: service_healthy }
+
+  app:
+    build: { context: .., dockerfile: Dockerfile }
+    image: oryn-app:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://oryn_app:${ORYN_DB_PASSWORD}@db:5432/oryn
+      DATABASE_SSL: disable            # traffic stays on the private Docker network
+      ORYN_DB_PRIVATE_NETWORK: "true"
+      ORYN_PUBLIC_URL: https://${ORYN_DOMAIN}
+    depends_on:
+      db: { condition: service_healthy }
+    expose: ["3000"]
+
+  scheduler:
+    image: oryn-app:latest
+    restart: unless-stopped
+    command: ["node", "scripts/scheduler.mjs"]
+    healthcheck: { disable: true }   # no web server in this container
+    environment:
+      CRON_SECRET: ${CRON_SECRET:?set CRON_SECRET in .env}
+      ORYN_INTERNAL_URL: http://app:3000
+    depends_on:
+      app: { condition: service_healthy }
+
+  db:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?set POSTGRES_ADMIN_PASSWORD in .env}
+      ORYN_DB_PASSWORD: ${ORYN_DB_PASSWORD:?set ORYN_DB_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d oryn"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backup:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    entrypoint: ["bash", "/backup/backup.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: postgres
+      PGPASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+      KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backup:/backup:ro
+      - ./backups:/backups
+    depends_on:
+      db: { condition: service_healthy }
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:

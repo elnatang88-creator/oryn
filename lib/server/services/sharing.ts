@@ -57,7 +57,8 @@ const startInput = z.object({
 })
 
 export function shareUrl(token: string) {
-  const base = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? ''
+  // Read at runtime (not a NEXT_PUBLIC_ build-time value) so one image serves any domain.
+  const base = (process.env.ORYN_PUBLIC_URL ?? process.env.NEXT_PUBLIC_APP_URL)?.replace(/\/$/, '') ?? ''
   return `${base}/c/${token}`
 }
 

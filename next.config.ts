@@ -17,6 +17,8 @@ const csp = [
 ].join('; ')
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle (.next/standalone) for our own container image — no hosting platform required.
+  output: 'standalone',
   serverExternalPackages: ['@electric-sql/pglite', 'pg'],
   poweredByHeader: false,
   async headers() {

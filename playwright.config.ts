@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const PORT = Number(process.env.E2E_PORT ?? 3100)
+// E2E_BASE_URL runs the suite against an already-running deployment (e.g. the Docker stack) instead of starting one.
+const EXTERNAL = process.env.E2E_BASE_URL
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -9,7 +11,8 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    baseURL: EXTERNAL ?? `http://localhost:${PORT}`,
+    ignoreHTTPSErrors: !!EXTERNAL, // local stacks use Caddy's internal certificate
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     // Phones run with a UTF-8 locale; without it Chromium on this Linux container can't name a Hebrew download.
@@ -26,7 +29,7 @@ export default defineConfig({
       use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, userAgent: devices['iPhone 13'].userAgent },
     },
   ],
-  webServer: {
+  webServer: EXTERNAL ? undefined : {
     command: `rm -rf .data/e2e && npx next start -p ${PORT}`,
     url: `http://localhost:${PORT}/api/health`,
     timeout: 120_000,

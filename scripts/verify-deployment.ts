@@ -25,11 +25,15 @@ async function checkEnv() {
   else fail('DATABASE_URL is set', 'required; the embedded database must not be used on a server')
   if ((e.ORYN_SECRET ?? '').length >= 32) pass('ORYN_SECRET is set and ≥ 32 characters')
   else fail('ORYN_SECRET is set and ≥ 32 characters')
-  if (e.NEXT_PUBLIC_APP_URL?.startsWith('https://')) pass('NEXT_PUBLIC_APP_URL uses https')
-  else warn('NEXT_PUBLIC_APP_URL uses https', e.NEXT_PUBLIC_APP_URL ? 'not https' : 'unset: links use the request host (acceptable for previews only)')
+  const publicUrl = e.ORYN_PUBLIC_URL ?? e.NEXT_PUBLIC_APP_URL
+  if (publicUrl?.startsWith('https://')) pass('Public URL (ORYN_PUBLIC_URL) uses https')
+  else warn('Public URL (ORYN_PUBLIC_URL) uses https', publicUrl ? 'not https' : 'unset: links use the request host')
   if (e.CRON_SECRET && e.CRON_SECRET.length >= 20) pass('CRON_SECRET is set')
   else fail('CRON_SECRET is set', 'background jobs (deletion, reminders) will not run')
-  for (const [k, bad] of [['ORYN_ALLOW_EMBEDDED_DB', 'true'], ['ORYN_INSECURE_COOKIES', 'true'], ['DATABASE_SSL', 'disable']] as const) {
+  const privateNet = e.ORYN_DB_PRIVATE_NETWORK === 'true'
+  if (e.DATABASE_SSL === 'disable') (privateNet ? warn : fail)('Database TLS is required', privateNet ? 'disabled, but the database is on a private network only (ORYN_DB_PRIVATE_NETWORK=true)' : 'DATABASE_SSL=disable')
+  else pass('Database TLS is required')
+  for (const [k, bad] of [['ORYN_ALLOW_EMBEDDED_DB', 'true'], ['ORYN_INSECURE_COOKIES', 'true']] as const) {
     if (e[k] === bad) fail(`${k} is not "${bad}"`, 'test-only setting')
     else pass(`${k} is not "${bad}"`)
   }
@@ -50,7 +54,7 @@ async function checkEnv() {
     else pass('App database user cannot create roles')
     const ssl = (await client.query(`SELECT ssl FROM pg_stat_ssl WHERE pid = pg_backend_pid()`).catch(() => ({ rows: [] }))).rows[0]
     if (ssl?.ssl) pass('Database connection uses TLS')
-    else (e.DATABASE_SSL === 'disable' ? fail : warn)('Database connection uses TLS')
+    else (e.DATABASE_SSL === 'disable' && e.ORYN_DB_PRIVATE_NETWORK !== 'true' ? fail : warn)('Database connection uses TLS', e.ORYN_DB_PRIVATE_NETWORK === 'true' ? 'private network only' : undefined)
     const files = fs.readdirSync(path.join(process.cwd(), 'db', 'migrations')).filter((f) => f.endsWith('.sql'))
     const applied = await client.query(`SELECT name FROM schema_migrations`).then((r) => r.rows.map((x) => x.name)).catch(() => null)
     if (!applied) warn('Migrations applied', 'schema_migrations missing: run `npm run db:migrate` before traffic')
