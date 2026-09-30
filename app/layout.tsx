@@ -1,41 +1,27 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  display: 'swap',
-})
-
 export const metadata: Metadata = {
-  title: { default: 'ORYN — Your Identity, Perfected', template: '%s | ORYN' },
-  description: 'The luxury digital business card platform. Share your identity effortlessly with Apple Wallet, Google Wallet, and real-time analytics.',
-  keywords: ['digital business card', 'NFC card', 'Apple Wallet', 'networking', 'luxury'],
-  authors: [{ name: 'ORYN' }],
-  openGraph: {
-    title: 'ORYN — Your Identity, Perfected',
-    description: 'The luxury digital business card platform.',
-    type: 'website',
-  },
+  title: { default: 'ORYN', template: '%s · ORYN' },
+  description: 'Share only what you choose. Let the other person decide what happens next.',
+  manifest: '/manifest.webmanifest',
+  robots: { index: true, follow: true },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0A0A0A',
+  themeColor: '#0A1433',
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="min-h-screen bg-obsidian antialiased">{children}</body>
+    <html lang="en">
+      <body className="min-h-dvh">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">Skip to content</a>
+        {children}
+      </body>
     </html>
   )
 }

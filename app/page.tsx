@@ -1,317 +1,89 @@
 import Link from 'next/link'
-import { BusinessCard } from '@/components/card/BusinessCard'
-import { ArrowRight, Wallet, QrCode, BarChart3, Users, Zap, Shield } from 'lucide-react'
+import { ArrowRight, Hand, Layers, ShieldCheck, Store, Users } from 'lucide-react'
+import { Logo } from '@/components/Logo'
+import { CapsuleView } from '@/components/CapsuleView'
+import type { PublicCapsuleView } from '@/lib/capsule-model'
 
-const DEMO_PROFILE = {
-  full_name: 'Alexandra Chen',
-  title: 'Managing Director',
-  company: 'Meridian Capital',
-  email: 'a.chen@meridiancap.com',
-  phone: '+1 (212) 555-0191',
-  website: 'https://meridiancap.com',
-  card_style: 'noir' as const,
+const SAMPLE: PublicCapsuleView = {
+  layer: 'instant', mode: 'personal', modeLabel: 'Personal', displayName: 'Noa', headline: '',
+  message: 'Didn’t want to hold up the line. If you’d like to talk, here’s how.', avatarUrl: null, accent: 'blue',
+  fields: [{ id: 'f1', kind: 'social', label: 'Instagram', value: 'https://instagram.com/example' }],
+  primaryFieldId: 'f1', hasMore: false, canSave: true, canConnect: true, expiresAt: null, oneTime: true, contextLabel: null, eventName: null,
 }
 
-const features = [
-  {
-    icon: Wallet,
-    title: 'Apple & Google Wallet',
-    desc: 'Add your card to any wallet with a single tap. Always accessible, even offline.',
-  },
-  {
-    icon: QrCode,
-    title: 'Instant QR Sharing',
-    desc: 'Generate a QR code that shares your full digital identity in seconds.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Real-time Analytics',
-    desc: 'See who viewed your card, when, and from where — in real time.',
-  },
-  {
-    icon: Users,
-    title: 'Lead Capture',
-    desc: 'Turn every card view into a potential connection with built-in contact forms.',
-  },
-  {
-    icon: Zap,
-    title: 'Instant Updates',
-    desc: 'Change your details once. Everyone with your card sees the update immediately.',
-  },
-  {
-    icon: Shield,
-    title: 'Privacy First',
-    desc: "You control what's visible and who can reach you. Always.",
-  },
-]
-
-const plans = [
-  {
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    desc: 'Start building your presence.',
-    features: ['1 digital card', 'QR sharing', 'Basic analytics (30 days)', 'Public profile page'],
-    cta: 'Get Started',
-    highlight: false,
-  },
-  {
-    name: 'Pro',
-    price: '$12',
-    period: '/month',
-    desc: 'For serious networkers.',
-    features: ['5 digital cards', 'Apple & Google Wallet', 'Full analytics', 'Lead capture & tracking', 'Email support'],
-    cta: 'Start Pro',
-    highlight: true,
-  },
-  {
-    name: 'Elite',
-    price: '$49',
-    period: '/month',
-    desc: 'The complete identity platform.',
-    features: ['Unlimited cards', 'Everything in Pro', 'Custom domain', 'API access', 'Priority support', 'Team management'],
-    cta: 'Go Elite',
-    highlight: false,
-  },
-]
-
-export default function LandingPage() {
+export default function Landing() {
   return (
-    <div className="min-h-screen bg-obsidian overflow-x-hidden">
-      {/* Nav */}
-      <header className="fixed top-0 inset-x-0 z-50 glass-panel border-b border-obsidian-border/30">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <span className="font-display text-lg tracking-[0.25em] gold-text">ORYN</span>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-cream/50">
-            <a href="#features" className="hover:text-cream transition-colors">Features</a>
-            <a href="#card" className="hover:text-cream transition-colors">The Card</a>
-            <a href="#pricing" className="hover:text-cream transition-colors">Pricing</a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="btn-ghost text-sm px-4 py-2">Sign in</Link>
-            <Link href="/signup" className="btn-primary text-sm px-5 py-2">
-              Get Started <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
+    <div className="bg-white">
+      <header className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <Logo />
+        <nav className="flex items-center gap-1">
+          <Link href="/signin" className="btn-quiet">Sign in</Link>
+          <Link href="/signup" className="btn-share min-h-[44px] px-4">Get started</Link>
+        </nav>
       </header>
 
-      {/* Hero */}
-      <section className="relative min-h-screen flex items-center pt-16 bg-hero-radial">
-        {/* Grid overlay */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-100 pointer-events-none" />
-
-        <div className="relative max-w-6xl mx-auto px-6 w-full">
-          <div className="grid lg:grid-cols-2 gap-16 items-center py-24">
-            {/* Left — copy */}
-            <div className="space-y-8 animate-slide-up">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/8 border border-gold/15 text-gold text-xs tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse-gold" />
-                Now available — Apple & Google Wallet
+      <main id="main">
+        <section className="bg-navy-900 text-white">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:py-24">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-electric-300">For the moments you can’t stop</p>
+              <h1 className="mt-4 text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl">Leave a way in.<br />Let them decide.</h1>
+              <p className="mt-5 max-w-lg text-lg text-soft-200">ORYN lets you share a small, chosen part of who you are in seconds — at a conference, a counter, or a crowded line — and hands the next step to the other person.</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/signup" className="btn-share px-6">Create your first capsule <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>
+                <Link href="/signin" className="btn border border-white/20 px-6 text-white hover:bg-white/10">Try the demo</Link>
               </div>
-
-              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] text-cream">
-                Your identity,{' '}
-                <span className="gold-text">perfected.</span>
-              </h1>
-
-              <p className="text-lg text-cream/50 leading-relaxed max-w-md">
-                The luxury digital business card that opens doors, tracks opportunities,
-                and makes every introduction unforgettable.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-4">
-                <Link href="/create" className="btn-primary px-7 py-3.5 text-base">
-                  Create Your Card <ArrowRight size={16} />
-                </Link>
-                <Link href="/signup" className="btn-secondary px-7 py-3.5 text-base">
-                  View Demo
-                </Link>
-              </div>
-
-              <div className="flex items-center gap-6 pt-4 text-xs text-cream/30 tracking-wider">
-                <span>NO CREDIT CARD REQUIRED</span>
-                <span className="w-1 h-1 rounded-full bg-cream/20" />
-                <span>SETUP IN 2 MINUTES</span>
-                <span className="w-1 h-1 rounded-full bg-cream/20" />
-                <span>FREE FOREVER PLAN</span>
-              </div>
+              <p className="mt-4 text-sm text-soft-300">The person you share with never needs an account or an app.</p>
             </div>
-
-            {/* Right — card preview */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-[420px]">
-                {/* Glow behind card */}
-                <div className="absolute inset-0 blur-3xl bg-gold/8 rounded-full scale-90" />
-                {/* Floating card with CSS animation */}
-                <div className="animate-card-float" style={{ perspective: '1200px' }}>
-                  <BusinessCard profile={DEMO_PROFILE} size="full" />
-                </div>
-                {/* Floating stat chips */}
-                <div className="absolute -top-4 -right-4 glass-panel px-3 py-2 rounded-chip text-xs text-cream/70 border border-gold/10 animate-fade-in">
-                  <span className="text-gold font-semibold">↑ 2,847</span> views this month
-                </div>
-                <div className="absolute -bottom-4 -left-4 glass-panel px-3 py-2 rounded-chip text-xs text-cream/70 border border-gold/10 animate-fade-in">
-                  <span className="text-gold font-semibold">12</span> new leads today
-                </div>
-              </div>
-            </div>
+            <div className="mx-auto w-full max-w-sm"><CapsuleView view={SAMPLE} preview /></div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Features */}
-      <section id="features" className="py-28 relative">
-        <div className="section-divider mb-28" />
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16 space-y-4">
-            <p className="text-xs text-gold tracking-[0.3em] uppercase">Everything you need</p>
-            <h2 className="font-display text-4xl font-semibold text-cream">
-              Built for those who mean business
-            </h2>
-            <p className="text-cream/40 max-w-lg mx-auto">
-              Every feature designed with the same obsessive attention to detail
-              as the world's finest luxury brands.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map(({ icon: Icon, title, desc }) => (
-              <div key={title}
-                className="stat-card group hover:border-gold/15 transition-all duration-300 space-y-4"
-              >
-                <div className="w-10 h-10 rounded-chip bg-gold/8 border border-gold/15 flex items-center justify-center group-hover:bg-gold/12 transition-colors">
-                  <Icon size={18} className="text-gold" />
-                </div>
-                <div>
-                  <h3 className="text-cream font-medium mb-2">{title}</h3>
-                  <p className="text-sm text-cream/40 leading-relaxed">{desc}</p>
-                </div>
+        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <h2 className="text-2xl font-bold text-navy-900 sm:text-3xl">Not a card. A capsule.</h2>
+          <p className="mt-2 max-w-2xl text-lg text-ink-muted">An Identity Capsule is a small package you control: which details, for how long, and what the other person may do with it. Make one for each part of your life.</p>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {[
+              { icon: Layers, t: 'Three layers', b: 'A first glance. More, only if they ask. A relationship, only if you both want one.' },
+              { icon: Hand, t: 'Their choice', b: 'Save, ask to connect, or simply close the page. Passing is silent. Nobody is chased.' },
+              { icon: ShieldCheck, t: 'Yours to stop', b: 'Links can expire, open once, or be closed instantly — even after they were opened.' },
+            ].map((f) => (
+              <div key={f.t} className="rounded-3xl bg-soft-50 p-6">
+                <f.icon className="h-7 w-7 text-electric" aria-hidden="true" />
+                <h3 className="mt-4 text-lg font-bold text-navy-900">{f.t}</h3>
+                <p className="mt-1 text-ink-muted">{f.b}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Card showcase */}
-      <section id="card" className="py-28 bg-obsidian-soft/30">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-6">
-              <p className="text-xs text-gold tracking-[0.3em] uppercase">The Card</p>
-              <h2 className="font-display text-4xl font-semibold text-cream leading-tight">
-                Crafted with the precision of a Centurion card
-              </h2>
-              <p className="text-cream/40 leading-relaxed">
-                Your ORYN card carries the weight of intent. Deep matte black, gold accents,
-                and every detail calibrated to make the right impression — every time.
-              </p>
-              <ul className="space-y-3 text-sm text-cream/60">
-                {['Custom name & title', 'Company branding', 'Contact details', 'Social links', 'Multiple card styles'].map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/create" className="btn-primary inline-flex">
-                Design Your Card <ArrowRight size={14} />
-              </Link>
-            </div>
-            <div className="flex justify-center">
-              <div className="relative w-full max-w-[440px]">
-                <div className="absolute inset-0 blur-3xl bg-olive/10 rounded-full" />
-                <BusinessCard profile={DEMO_PROFILE} size="full" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="py-28">
-        <div className="section-divider mb-28" />
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-16 space-y-4">
-            <p className="text-xs text-gold tracking-[0.3em] uppercase">Pricing</p>
-            <h2 className="font-display text-4xl font-semibold text-cream">
-              Choose your tier
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {plans.map((plan) => (
-              <div key={plan.name}
-                className={`relative rounded-panel p-7 flex flex-col ${
-                  plan.highlight
-                    ? 'bg-obsidian-card border border-gold/25 shadow-glow-sm'
-                    : 'bg-obsidian-soft/50 border border-obsidian-border'
-                }`}
-              >
-                {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="px-3 py-1 bg-gold text-obsidian text-xs font-medium rounded-full tracking-wider">
-                      MOST POPULAR
-                    </span>
-                  </div>
-                )}
-
-                <div className="mb-6">
-                  <h3 className="font-display text-lg text-cream mb-1">{plan.name}</h3>
-                  <p className="text-xs text-cream/40 mb-4">{plan.desc}</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className={`font-display text-4xl font-semibold ${plan.highlight ? 'gold-text' : 'text-cream'}`}>
-                      {plan.price}
-                    </span>
-                    <span className="text-sm text-cream/40">{plan.period}</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm text-cream/60">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gold/60 shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <Link href="/signup"
-                  className={plan.highlight ? 'btn-primary text-center' : 'btn-secondary text-center'}
-                >
-                  {plan.cta}
-                </Link>
+        <section className="bg-soft-50">
+          <div className="mx-auto grid max-w-6xl gap-5 px-4 py-16 sm:px-6 md:grid-cols-3">
+            {[
+              { icon: Users, t: 'A thousand people in a hall', b: 'Share with the few who matter. They keep what you chose; you keep where you met and what to do next.' },
+              { icon: Store, t: 'A line you can’t hold up', b: 'Leave a first name and one way to say hi. They open it later, or never. Either is fine.' },
+              { icon: Layers, t: 'A booth, a desk, a counter', b: 'A station code that stays printed while the person or team behind it changes.' },
+            ].map((f) => (
+              <div key={f.t} className="card p-6">
+                <f.icon className="h-6 w-6 text-electric" aria-hidden="true" />
+                <h3 className="mt-3 font-bold text-navy-900">{f.t}</h3>
+                <p className="mt-1 text-[15px] text-ink-muted">{f.b}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Final CTA */}
-      <section className="py-28 text-center relative">
-        <div className="section-divider mb-28" />
-        <div className="max-w-2xl mx-auto px-6 space-y-8">
-          <h2 className="font-display text-5xl font-semibold text-cream leading-tight">
-            Every great connection<br />starts with an introduction.
-          </h2>
-          <p className="text-cream/40">
-            Join thousands of executives, founders, and professionals who've elevated their identity with ORYN.
-          </p>
-          <Link href="/create" className="btn-primary px-10 py-4 text-base inline-flex">
-            Create Your Card — Free <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
+        <section className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
+          <h2 className="text-2xl font-bold text-navy-900 sm:text-3xl">For teams and events</h2>
+          <p className="mt-2 text-lg text-ink-muted">Give everyone a controlled identity under one brand. Set event-wide sharing rules. Own the workspace and its data.</p>
+          <Link href="/signup" className="btn-share mt-8 px-6">Start free</Link>
+        </section>
+      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-obsidian-border/50 py-10">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-cream/30">
-          <span className="font-display tracking-[0.25em] gold-text">ORYN</span>
-          <span>© {new Date().getFullYear()} ORYN. All rights reserved.</span>
-          <nav className="flex items-center gap-6">
-            <Link href="/login" className="hover:text-cream/60 transition-colors">Sign In</Link>
-            <Link href="/signup" className="hover:text-cream/60 transition-colors">Get Started</Link>
-          </nav>
+      <footer className="border-t border-soft-200">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-sm text-ink-muted sm:px-6">
+          <Logo />
+          <nav className="flex gap-4"><Link href="/privacy">Privacy</Link><Link href="/signin">Sign in</Link></nav>
         </div>
       </footer>
     </div>
