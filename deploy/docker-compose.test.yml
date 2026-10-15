@@ -1,0 +1,7 @@
+# Test overlay: demo data + settings the automated end-to-end suite needs. Never use on a real server.
+services:
+  app:
+    environment:
+      ORYN_SEED_DEMO: "true"
+      ORYN_DEMO_PASSWORD: e2e-only-demo-password
+      ORYN_DELETION_GRACE_DAYS: "0"

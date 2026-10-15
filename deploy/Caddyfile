@@ -1,0 +1,7 @@
+# HTTPS for ORYN. Caddy obtains and renews the certificate automatically.
+# It also sets X-Forwarded-For to the real client address (client-sent values are not trusted),
+# which ORYN's rate limits rely on.
+{$ORYN_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}

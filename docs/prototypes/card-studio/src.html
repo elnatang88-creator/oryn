@@ -1,0 +1,574 @@
+<title>ORYN Card Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bellefair&family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700;800&family=Secular+One&display=swap">
+<style>
+/* Layout: a dark "atelier" — the card on a lit stage at the top, the controls below it; two columns on wide screens. */
+:root {
+  --bg: #04070F;
+  --panel: #0B1224;
+  --panel-2: #111B35;
+  --line: #1E2A4D;
+  --ink: #EEF2FF;
+  --muted: #9AA7CB;
+  --brand: #3D7BFF;
+  --brand-ink: #FFFFFF;
+  --ok: #6FE3B0;
+  --ui: "Heebo", "Arial Hebrew", system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--ui); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 10px; }
+
+.app { min-height: 100%; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.top-inner { max-width: 1100px; margin-inline: auto; padding-block: 10px; padding-inline: 16px; display: flex; align-items: center; gap: 14px; justify-content: space-between; flex-wrap: wrap; }
+.top img { height: 22px; width: auto; display: block; }
+.tabs { display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 4px; }
+.tabs button { border: 0; background: transparent; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 14px; color: var(--muted); min-height: 40px; }
+.tabs button[aria-selected="true"] { background: var(--brand); color: var(--brand-ink); }
+
+.layout { max-width: 1100px; margin-inline: auto; padding-block: 18px 60px; padding-inline: 16px; display: grid; gap: 22px; }
+@media (min-width: 900px) { .layout.designing { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; } .stage-wrap { position: sticky; top: 84px; } }
+
+/* ---------- Stage + card ---------- */
+.stage-wrap { display: grid; gap: 12px; min-width: 0; }
+.stage { position: relative; padding: clamp(18px, 6vw, 44px); border-radius: 28px; background:
+  radial-gradient(80% 70% at 50% 18%, rgba(120,150,255,.16), transparent 70%),
+  radial-gradient(60% 60% at 50% 110%, rgba(0,0,0,.8), transparent 70%),
+  linear-gradient(180deg, #0A1022, #05080F);
+  border: 1px solid var(--line); overflow: hidden; touch-action: pan-y; }
+.stage-caption { text-align: center; color: var(--muted); font-size: 13px; }
+.perspective { perspective: 1400px; }
+.tilt { transition: transform .5s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; will-change: transform; }
+.flipper { position: relative; transform-style: preserve-3d; transition: transform .9s cubic-bezier(.2,.8,.2,1); }
+.flipper.flipped { transform: rotateY(180deg); }
+.face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.face.back { position: absolute; inset: 0; transform: rotateY(180deg); }
+.idle .tilt { animation: float 7s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform: rotateX(8deg) rotateY(-12deg) translateY(0) } 50% { transform: rotateX(5deg) rotateY(-6deg) translateY(-6px) } }
+
+.card { position: relative; width: 100%; aspect-ratio: 1.586; border-radius: 4.6cqw; overflow: hidden; container-type: inline-size;
+  background: var(--mat); color: var(--ink-card);
+  box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 -1px 0 rgba(0,0,0,.4) inset, 0 40px 70px -30px rgba(0,0,0,.85), 0 18px 30px -18px rgba(0,0,0,.7); }
+.card-holder { container-type: inline-size; }
+.card .texture { position: absolute; inset: 0; background: var(--texture, none); opacity: var(--texture-o, .5); mix-blend-mode: var(--texture-blend, overlay); pointer-events: none; }
+.card .sheen { position: absolute; inset: -20%; background: radial-gradient(40% 40% at var(--mx, 30%) var(--my, 20%), rgba(255,255,255,var(--sheen, .28)), transparent 60%); mix-blend-mode: soft-light; pointer-events: none; transition: background-position .2s; }
+.card .holo { position: absolute; inset: -30%; background: conic-gradient(from calc(var(--hx, 0) * 1deg) at var(--mx, 50%) var(--my, 50%), #ff8fd6, #8fd3ff, #b6ff9e, #ffe58f, #ff8fd6); mix-blend-mode: color-dodge; opacity: 0; pointer-events: none; }
+.card.finish-holo .holo { opacity: .22; }
+.card .edge { position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset; pointer-events: none; }
+
+.foil { filter: var(--foil-shadow, none); background: var(--foil); background-size: 220% 100%; background-position: var(--foil-pos, 30%) 0; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.card.finish-foil .foil, .card.finish-holo .foil { animation: shimmer 6s ease-in-out infinite; }
+.card.finish-matte .foil { background-size: 100% 100%; }
+@keyframes shimmer { 0%,100% { background-position: 10% 0 } 50% { background-position: 90% 0 } }
+.foil-bg { background: var(--foil); background-size: 220% 100%; }
+.mark { width: 7cqw; aspect-ratio: 1; background: var(--foil); background-size: 220% 100%; -webkit-mask: url(oryn-mark.svg) center / contain no-repeat; mask: url(oryn-mark.svg) center / contain no-repeat; }
+.rule { height: .35cqw; min-height: 1px; background: var(--foil); background-size: 220% 100%; border-radius: 2px; }
+
+.cf { position: absolute; inset: 0; padding: 7cqw 7.5cqw; display: flex; flex-direction: column; font-family: var(--card-font); }
+.cf .name { font-size: var(--name-size, 7.4cqw); line-height: 1.1; letter-spacing: var(--name-track, .01em); font-weight: var(--name-weight, 400); }
+.cf .title { font-size: 3.1cqw; letter-spacing: .08em; color: var(--ink-card); opacity: .85; font-family: var(--ui); font-weight: 500; }
+.cf .company { font-size: 2.8cqw; letter-spacing: .22em; text-transform: uppercase; font-family: var(--ui); font-weight: 700; }
+.cf .mono { font-size: 21cqw; line-height: 1; letter-spacing: .02em; font-family: var(--card-font); }
+.cf .top-row { display: flex; justify-content: space-between; align-items: center; }
+.cf .photo { width: 24cqw; aspect-ratio: 1; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 .6cqw rgba(255,255,255,.12), 0 1.4cqw 3cqw rgba(0,0,0,.35); background: var(--foil); background-size: 220% 100%; display: grid; place-items: center; font-size: 9cqw; color: rgba(0,0,0,.55); font-family: var(--card-font); }
+.l-monogram { align-items: center; justify-content: center; text-align: center; gap: 1.6cqw; }
+.l-monogram .mark { position: absolute; top: 6cqw; inset-inline-start: 6.5cqw; width: 5.2cqw; }
+.l-signature { justify-content: space-between; }
+.l-signature .bottom { display: grid; gap: 1.4cqw; }
+.l-minimal { align-items: center; justify-content: center; text-align: center; gap: 2.4cqw; }
+.l-minimal .rule { width: 18cqw; }
+.l-minimal .mark { position: absolute; bottom: 6cqw; width: 4.6cqw; }
+.l-photo { flex-direction: row; align-items: center; gap: 5cqw; }
+.l-photo .mark { position: absolute; top: 6cqw; inset-inline-end: 6.5cqw; width: 5.2cqw; }
+.l-photo .who { display: grid; gap: 1.4cqw; min-width: 0; }
+
+.cb { position: absolute; inset: 0; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6cqw; padding: 7cqw; font-family: var(--card-font); }
+.qr-frame { width: 40cqw; aspect-ratio: 1; padding: 2.2cqw; border-radius: 4cqw; background: var(--foil); background-size: 220% 100%; box-shadow: 0 1.5cqw 4cqw rgba(0,0,0,.35); }
+.qr-frame canvas { width: 100%; height: 100%; display: block; border-radius: 2.4cqw; background: #fff; }
+.cb .hint { font-size: 3.4cqw; line-height: 1.35; }
+.cb .small { font-size: 2.6cqw; color: var(--ink-card); opacity: .8; font-family: var(--ui); margin-top: 1.5cqw; }
+
+/* ---------- Panels ---------- */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: grid; gap: 16px; min-width: 0; }
+.panel h2 { font-size: 16px; margin: 0; font-weight: 800; letter-spacing: .01em; }
+.panel h3 { font-size: 13px; margin: 0 0 8px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.sec { display: grid; gap: 4px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--panel-2); border-radius: 14px; padding: 8px 12px; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+.chip[aria-pressed="true"] { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+.swatch { width: 26px; height: 26px; border-radius: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.18) inset; flex: none; }
+.swatch.round { border-radius: 50%; }
+.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.preset { border: 1px solid var(--line); background: var(--panel-2); border-radius: 16px; padding: 8px; display: grid; gap: 6px; text-align: start; font-weight: 700; font-size: 13px; }
+.preset[aria-pressed="true"] { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+.preset .mini { aspect-ratio: 1.586; border-radius: 10px; box-shadow: 0 8px 16px -10px rgba(0,0,0,.8); position: relative; overflow: hidden; }
+.preset .mini span { position: absolute; bottom: 8px; inset-inline-start: 10px; font-family: "Bellefair", serif; font-size: 15px; }
+
+label.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+input[type=text], input[type=email], input[type=tel], input[type=url], textarea { width: 100%; background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 46px; color: var(--ink); font-size: 16px; }
+textarea { min-height: 70px; resize: vertical; }
+input:focus, textarea:focus { outline: none; border-color: var(--brand); }
+.grid2 { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } }
+
+.detail { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); }
+.detail-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; background: var(--bg); border-radius: 11px; padding: 3px; }
+.seg button { border: 0; background: transparent; border-radius: 8px; min-height: 36px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"].l-i { background: var(--brand); color: #fff; }
+.seg button[aria-pressed="true"].l-e { background: #2A3E78; color: #fff; }
+.seg button[aria-pressed="true"].l-h { background: #3A1A28; color: #FFC4D6; }
+.counts { font-size: 13px; color: var(--muted); }
+.counts b { color: var(--ink); }
+.btn { border: 0; border-radius: 14px; min-height: 48px; padding: 0 18px; font-weight: 800; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.primary { background: var(--brand); color: #fff; }
+.btn.ghost { background: var(--panel-2); border: 1px solid var(--line); }
+.btn.gold { background: linear-gradient(115deg,#8a6a1f,#e9d18a 30%,#b8913a 55%,#fff1c1 70%,#a67c2d); color: #1a1204; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btns .btn { flex: 1 1 140px; }
+.upload { position: relative; overflow: hidden; }
+.upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.big-qr { background: #fff; border-radius: 22px; padding: 14px; width: min(100%, 320px); justify-self: center; box-shadow: 0 0 0 4px rgba(233,209,138,.35); }
+.big-qr canvas { width: 100%; height: auto; display: block; }
+.note { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+/* ---------- Recipient ---------- */
+.recipient { max-width: 460px; margin-inline: auto; display: grid; gap: 14px; width: 100%; }
+.banner { background: #2A1F05; color: #FFE3A3; border: 1px solid #5A4410; border-radius: 14px; padding: 10px 12px; font-size: 13.5px; }
+.info { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 8px; display: grid; gap: 6px; }
+.info-row { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 14px; background: var(--panel-2); min-height: 58px; }
+.info-row .ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: #16244A; color: #9DB9FF; flex: none; }
+.info-row .t { display: grid; min-width: 0; }
+.info-row .t small { color: var(--muted); font-size: 12px; font-weight: 600; }
+.info-row .t span { font-weight: 700; overflow-wrap: anywhere; }
+.message { font-family: var(--card-font); font-size: 18px; line-height: 1.5; padding: 14px 16px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); }
+.quiet { text-align: center; color: var(--muted); font-size: 13.5px; }
+.toast { position: fixed; inset-inline: 16px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); margin-inline: auto; max-width: 420px; background: #EEF2FF; color: #0B1530; border-radius: 14px; padding: 12px 14px; font-weight: 700; box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); z-index: 50; text-align: center; }
+.connect-form { display: grid; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .idle .tilt, .card .foil, .card .rule, .card .mark { animation: none !important; }
+  .flipper, .tilt { transition: none; }
+}
+</style>
+
+<div class="app" dir="rtl" lang="he">
+  <header class="top">
+    <div class="top-inner">
+      <img src="oryn-logo-white.svg" alt="ORYN">
+      <div class="tabs" role="tablist" aria-label="מצב">
+        <button role="tab" id="tab-design" aria-selected="true">עיצוב</button>
+        <button role="tab" id="tab-share" aria-selected="false">שיתוף</button>
+        <button role="tab" id="tab-recipient" aria-selected="false">מה הצד השני רואה</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout designing" id="layout">
+    <section class="stage-wrap" id="stage-wrap" aria-label="הכרטיס">
+      <div class="stage idle" id="stage">
+        <div class="perspective">
+          <div class="tilt" id="tilt">
+            <div class="flipper" id="flipper">
+              <div class="face front card-holder"><div class="card" id="card-front"></div></div>
+              <div class="face back card-holder"><div class="card" id="card-back"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="stage-caption" id="stage-caption">גררו על הכרטיס כדי להטות אותו לאור</p>
+    </section>
+
+    <section id="view-design" class="panel" aria-label="עיצוב הכרטיס">
+      <div class="sec">
+        <h2>עיצובים מוכנים</h2>
+        <div class="presets" id="presets"></div>
+      </div>
+      <div class="sec"><h3>חומר</h3><div class="row" id="materials"></div>
+        <div class="row" id="custom-color-row" hidden><label class="chip" for="base-color">בחרו צבע <input id="base-color" type="color" value="#0f3d2e" style="width:36px;height:28px;border:0;background:none;padding:0"></label></div>
+      </div>
+      <div class="sec"><h3>הדפסה (פויל)</h3><div class="row" id="foils"></div></div>
+      <div class="sec"><h3>גימור</h3><div class="row" id="finishes"></div></div>
+      <div class="sec"><h3>גופן</h3><div class="row" id="fonts"></div></div>
+      <div class="sec"><h3>פריסה</h3><div class="row" id="layouts"></div></div>
+
+      <div class="sec">
+        <h2>הפרטים שלך</h2>
+        <div class="grid2">
+          <label class="field">שם<input id="f-name" type="text" dir="auto" maxlength="40"></label>
+          <label class="field">תפקיד<input id="f-title" type="text" dir="auto" maxlength="50"></label>
+          <label class="field">חברה<input id="f-company" type="text" dir="auto" maxlength="40"></label>
+          <div class="field" style="align-content:end"><span>תמונה או לוגו</span>
+            <div class="btns"><span class="btn ghost upload">העלאה<input id="f-photo" type="file" accept="image/*" aria-label="העלאת תמונה או לוגו"></span><button class="btn ghost" id="photo-clear" type="button">הסרה</button></div>
+          </div>
+        </div>
+        <label class="field">משפט אישי לצד השני<textarea id="f-message" dir="auto" maxlength="140"></textarea></label>
+      </div>
+
+      <div class="sec">
+        <h2>מה משותף</h2>
+        <p class="note">לכל פרט בוחרים: <b>מיד</b> — מופיע כשפותחים. <b>לפי בקשה</b> — רק אם בוחרים "עוד פרטים". <b>פרטי</b> — נשמר אצלך ולא נשלח לעולם.</p>
+        <div id="details" style="display:grid;gap:8px"></div>
+        <p class="counts" id="counts"></p>
+      </div>
+
+      <div class="btns">
+        <button class="btn gold" id="surprise" type="button">הפתיעו אותי</button>
+        <button class="btn primary" id="go-share" type="button">מוכן — לשתף</button>
+      </div>
+      <p class="note">העיצוב נשמר אוטומטית בדפדפן שלך. זה דמו חי של עיצוב הכרטיס; הנתונים לא נשלחים לשום שרת.</p>
+    </section>
+
+    <section id="view-share" class="panel" aria-label="שיתוף" hidden>
+      <h2>הצד השני של הכרטיס</h2>
+      <div class="big-qr"><canvas id="qr-big" width="720" height="720" aria-label="קוד QR גדול לסריקה"></canvas></div>
+      <p class="note">הקוד מקודד את הקפסולה שעיצבת — עם הפרטים ש"מיד" ו"לפי בקשה" בלבד. פרטים שסימנת "פרטי" לא נכנסים לקוד בכלל.</p>
+      <div class="btns">
+        <button class="btn gold" id="flip" type="button">הפיכת הכרטיס</button>
+        <button class="btn ghost" id="copy" type="button">העתקת קישור</button>
+        <button class="btn primary" id="as-recipient" type="button">לראות כמו הצד השני</button>
+      </div>
+      <p class="note">סריקה מטלפון שני תפתח את תצוגת הנמען עם העיצוב שלך, אם לטלפון השני יש גישה לדף הזה (דרך תפריט Share של הדף). בגרסה החיה של ORYN הקישור נפתח לכל אחד, בלי הרשמה.</p>
+      <input id="link-out" type="text" readonly dir="ltr" aria-label="הקישור" hidden>
+    </section>
+
+    <section id="view-recipient" class="recipient" aria-label="תצוגת הנמען" hidden>
+      <p class="banner" id="rec-banner" hidden>כך נראית קפסולה שמישהו שיתף איתך. זה דמו — אנשים ופרטים בדויים אלא אם מי ששלח הזין אחרת.</p>
+      <div class="message" id="rec-message" dir="auto" hidden></div>
+      <div class="info" id="rec-instant"></div>
+      <div class="info" id="rec-expanded" hidden></div>
+      <div class="btns">
+        <button class="btn ghost" id="rec-more" type="button">עוד פרטים</button>
+        <button class="btn gold" id="rec-save" type="button">שמירה</button>
+        <button class="btn primary" id="rec-connect" type="button">להתחבר</button>
+      </div>
+      <form class="connect-form" id="connect-form" hidden>
+        <label class="field">השם שלך<input id="c-name" type="text" dir="auto" required></label>
+        <label class="field">דרך אחת ליצור איתך קשר<input id="c-contact" type="text" dir="auto" required></label>
+        <button class="btn primary" type="submit">שליחה</button>
+      </form>
+      <p class="quiet">לא עכשיו? פשוט סוגרים את הדף. <span id="rec-first"></span> לא יידע.</p>
+      <button class="btn ghost" id="make-own" type="button" hidden>עצבו כרטיס משלכם</button>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>/*QR_LIB*/</script>
+<script>
+(() => {
+  const PUBLIC_URL = '/*PUBLIC_URL*/'
+  const $ = (id) => document.getElementById(id)
+  const noise = (freq, alpha) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='${freq}' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 ${alpha} 0'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>`)}")`
+  const marble = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='640' height='404'><filter id='m' x='0' y='0'><feTurbulence type='turbulence' baseFrequency='0.0045 0.016' numOctaves='6' seed='23'/><feColorMatrix type='matrix' values='0 0 0 0 0.32  0 0 0 0 0.31  0 0 0 0 0.30  -6 0 0 0 1.35'/></filter><rect width='100%' height='100%' fill='#f5f3ef'/><rect width='100%' height='100%' filter='url(#m)' opacity='0.55'/></svg>`)}") center / cover`
+
+  const MATERIALS = {
+    obsidian: { label: 'אובסידיאן', bg: 'radial-gradient(120% 90% at 18% 0%, #2a2a31 0%, #0d0d10 55%, #050506 100%)', texture: noise(0.9, 0.09), tBlend: 'overlay', ink: 'rgba(255,255,255,.74)', foil: 'gold', sheen: .22 },
+    midnight: { label: 'חצות', bg: 'radial-gradient(120% 100% at 15% 0%, #1a3a92 0%, #011441 55%, #000a24 100%)', texture: noise(0.9, 0.08), tBlend: 'overlay', ink: 'rgba(222,231,255,.78)', foil: 'silver', sheen: .24 },
+    pearl: { label: 'פנינה', bg: 'linear-gradient(125deg,#fdfcf9 0%,#efe8dc 32%,#fbf9f4 52%,#e7ded0 78%,#f7f3ec 100%)', texture: 'linear-gradient(115deg, rgba(255,210,230,.35), rgba(190,225,255,.35) 40%, rgba(255,240,200,.35) 70%, rgba(210,200,255,.35))', tBlend: 'soft-light', ink: 'rgba(52,44,32,.72)', foil: 'gold', sheen: .5, shadow: 'drop-shadow(0 .12cqw 0 rgba(90,70,30,.35))' },
+    carbon: { label: 'קרבון', bg: 'repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 2px, transparent 2px 7px), repeating-linear-gradient(-45deg, rgba(0,0,0,.45) 0 2px, transparent 2px 7px), linear-gradient(135deg,#23252a,#0e0f12)', texture: noise(1.2, 0.06), tBlend: 'overlay', ink: 'rgba(235,240,255,.72)', foil: 'electric', sheen: .2 },
+    marble: { label: 'שיש', bg: marble, texture: 'linear-gradient(120deg, rgba(255,255,255,.4), transparent 60%)', tBlend: 'soft-light', ink: 'rgba(25,22,20,.72)', foil: 'gold', sheen: .45, shadow: 'drop-shadow(0 .12cqw 0 rgba(60,45,20,.4))' },
+    titanium: { label: 'טיטניום', bg: 'repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 1px, rgba(0,0,0,.05) 1px 2px, transparent 2px 4px), linear-gradient(135deg,#676b72 0%,#c9ccd1 42%,#8b8f96 70%,#55595f 100%)', texture: noise(0.7, 0.06), tBlend: 'overlay', ink: 'rgba(18,20,24,.8)', foil: 'graphite', sheen: .4, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,255,255,.35))' },
+    custom: { label: 'צבע משלך', custom: true, texture: noise(0.9, 0.07), tBlend: 'overlay', foil: 'gold', sheen: .28 },
+  }
+  const FOILS = {
+    gold: { label: 'זהב', g: 'linear-gradient(115deg,#7a5a17 0%,#e9d18a 20%,#b8913a 38%,#fff1c1 50%,#a67c2d 64%,#e6c877 82%,#7a5a17 100%)' },
+    rosegold: { label: 'רוז גולד', g: 'linear-gradient(115deg,#7a433e 0%,#f2c6b6 20%,#b5776c 38%,#ffe3d8 50%,#9d5e57 64%,#e8b3a3 82%,#7a433e 100%)' },
+    champagne: { label: 'שמפניה', g: 'linear-gradient(115deg,#8a7148 0%,#f3e6c4 20%,#c4a878 38%,#fff7e2 50%,#a88b5c 64%,#ead8b0 82%,#8a7148 100%)' },
+    silver: { label: 'כסף', g: 'linear-gradient(115deg,#6f747a 0%,#eef1f4 20%,#a9aeb4 38%,#ffffff 50%,#8c9197 64%,#dfe3e7 82%,#6f747a 100%)' },
+    electric: { label: 'כחול ORYN', g: 'linear-gradient(115deg,#002a8a 0%,#86aaff 20%,#0053fd 38%,#d6e2ff 50%,#0046d6 64%,#5c8dff 82%,#002a8a 100%)' },
+    graphite: { label: 'גרפיט', g: 'linear-gradient(115deg,#0a0b0d 0%,#44474d 25%,#15171a 45%,#5a5e65 55%,#101114 75%,#2d3035 100%)' },
+    ivory: { label: 'לבן', g: 'linear-gradient(115deg,#d8dbe0 0%,#ffffff 30%,#eceef2 55%,#ffffff 75%,#d8dbe0 100%)' },
+  }
+  const FINISHES = { matte: 'מט', foil: 'פויל מבריק', holo: 'הולוגרפי' }
+  const FONTS = {
+    classic: { label: 'קלאסי', f: '"Bellefair", "Frank Ruhl Libre", Georgia, serif', w: 400, track: '.04em' },
+    editorial: { label: 'עריכה', f: '"Frank Ruhl Libre", "Bellefair", Georgia, serif', w: 700, track: '0' },
+    modern: { label: 'מודרני', f: '"Heebo", "Arial Hebrew", sans-serif', w: 800, track: '-.01em' },
+    bold: { label: 'נועז', f: '"Secular One", "Heebo", sans-serif', w: 400, track: '.01em' },
+  }
+  const LAYOUTS = { monogram: 'מונוגרמה', signature: 'חתימה', minimal: 'מינימלי', photo: 'תמונה' }
+  const PRESETS = [
+    { id: 'black', label: 'Black', material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram' },
+    { id: 'navy', label: 'Navy Signature', material: 'midnight', foil: 'silver', finish: 'foil', font: 'editorial', layout: 'signature' },
+    { id: 'pearl', label: 'Pearl', material: 'pearl', foil: 'gold', finish: 'holo', font: 'classic', layout: 'minimal' },
+    { id: 'carbon', label: 'Carbon', material: 'carbon', foil: 'electric', finish: 'foil', font: 'modern', layout: 'signature' },
+    { id: 'marble', label: 'Marble', material: 'marble', foil: 'gold', finish: 'matte', font: 'editorial', layout: 'monogram' },
+    { id: 'titanium', label: 'Titanium', material: 'titanium', foil: 'graphite', finish: 'matte', font: 'modern', layout: 'minimal' },
+  ]
+  const DETAIL_DEFS = [
+    { k: 'phone', label: 'טלפון', type: 'tel', icon: 'phone' },
+    { k: 'email', label: 'אימייל', type: 'email', icon: 'mail' },
+    { k: 'website', label: 'אתר', type: 'url', icon: 'globe' },
+    { k: 'instagram', label: 'אינסטגרם', type: 'text', icon: 'at' },
+    { k: 'linkedin', label: 'פרופיל מקצועי', type: 'url', icon: 'link' },
+  ]
+  const ICONS = {
+    phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    at: '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    brief: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  }
+  const icon = (n) => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`
+
+  const DEFAULT = {
+    preset: 'black', material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram', base: '#0f3d2e',
+    name: 'נועה אדלר', title: 'מנהלת מוצר', company: 'Harbor Labs', message: 'היה נעים להכיר. אם בא לך להמשיך את השיחה — הפרטים כאן.', photo: null,
+    details: { phone: { v: '050-000-0000', l: 'h' }, email: { v: 'noa@harbor.example', l: 'e' }, website: { v: 'harbor.example', l: 'i' }, instagram: { v: '@noa.example', l: 'i' }, linkedin: { v: 'linkedin.com/in/example', l: 'e' } },
+  }
+  let state = load() || structuredClone(DEFAULT)
+  let recipientMode = false
+
+  function load() { try { const s = JSON.parse(localStorage.getItem('oryn-card-v1')); return s && s.details ? s : null } catch { return null } }
+  function save() { try { localStorage.setItem('oryn-card-v1', JSON.stringify(state)) } catch {} }
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+  const initials = (n) => (n || '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('') || 'O'
+
+  function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }
+  function shade([r, g, b], f) { const t = f < 0 ? 0 : 255, p = Math.abs(f); return `rgb(${Math.round((t - r) * p + r)},${Math.round((t - g) * p + g)},${Math.round((t - b) * p + b)})` }
+  function lum([r, g, b]) { return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 }
+
+  function lumCustom(s) { return lum(hexToRgb(s.base || '#0f3d2e')) }
+  function cardVars(s) {
+    const m = MATERIALS[s.material] || MATERIALS.obsidian
+    let bg = m.bg, ink = m.ink
+    if (m.custom) {
+      const rgb = hexToRgb(s.base || '#0f3d2e')
+      bg = `radial-gradient(120% 100% at 15% 0%, ${shade(rgb, .28)} 0%, ${s.base} 52%, ${shade(rgb, -.55)} 100%)`
+      ink = lum(rgb) > .6 ? 'rgba(20,20,24,.75)' : 'rgba(255,255,255,.78)'
+    }
+    const font = FONTS[s.font] || FONTS.classic
+    return { '--mat': bg, '--texture': m.texture || 'none', '--texture-blend': m.tBlend || 'overlay', '--ink-card': ink, '--foil': (FOILS[s.foil] || FOILS.gold).g, '--card-font': font.f, '--name-weight': font.w, '--name-track': font.track, '--sheen': m.sheen ?? .28, '--foil-shadow': m.shadow || (m.custom && lumCustom(s) > .6 ? 'drop-shadow(0 .12cqw 0 rgba(0,0,0,.3))' : 'none') }
+  }
+  function applyVars(el, vars) { for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v) }
+
+  function frontHTML(s) {
+    const name = esc(s.name), title = esc(s.title), company = esc(s.company)
+    const photo = s.photo ? `<img class="photo" src="${s.photo}" alt="">` : `<div class="photo">${esc(initials(s.name))}</div>`
+    const overlays = '<div class="texture"></div><div class="holo"></div><div class="sheen"></div><div class="edge"></div>'
+    let body = ''
+    if (s.layout === 'monogram') body = `<div class="cf l-monogram"><div class="mark"></div><div class="mono foil" dir="auto">${esc(initials(s.name))}</div><div class="rule" style="width:14cqw"></div><div class="name foil" dir="auto" style="--name-size:5.4cqw">${name}</div><div class="title" dir="auto">${title}${company ? ' · ' + company : ''}</div></div>`
+    else if (s.layout === 'signature') body = `<div class="cf l-signature"><div class="top-row"><div class="company foil" dir="auto">${company}</div><div class="mark"></div></div><div class="bottom"><div class="name foil" dir="auto" style="--name-size:8.2cqw">${name}</div><div class="rule" style="width:22cqw"></div><div class="title" dir="auto">${title}</div></div></div>`
+    else if (s.layout === 'minimal') body = `<div class="cf l-minimal"><div class="name foil" dir="auto" style="--name-size:8.6cqw">${name}</div><div class="rule"></div><div class="title" dir="auto">${title}</div><div class="mark"></div></div>`
+    else body = `<div class="cf l-photo"><div class="mark"></div>${photo}<div class="who"><div class="name foil" dir="auto" style="--name-size:7cqw">${name}</div><div class="title" dir="auto">${title}</div><div class="company foil" dir="auto">${company}</div></div></div>`
+    return overlays + body
+  }
+  function backHTML(s) {
+    return `<div class="texture"></div><div class="holo"></div><div class="sheen"></div><div class="edge"></div><div class="cb"><div class="qr-frame"><canvas id="qr" width="600" height="600" aria-label="קוד QR לקפסולה"></canvas></div><div><div class="hint foil" dir="auto">סרקו כדי לפתוח</div><div class="small" dir="auto">${esc(s.name)} · שיתוף דרך ORYN</div><div class="mark" style="margin-top:3cqw;width:6cqw"></div></div></div>`
+  }
+
+  // ---- Share payload: only "instant" and "on request" details; never private ones, never the photo. ----
+  function payload(s) {
+    const d = {}
+    for (const def of DETAIL_DEFS) { const x = s.details[def.k]; if (x && x.v && x.l !== 'h') d[def.k] = [x.v, x.l] }
+    const p = { m: s.material, o: s.foil, f: s.finish, t: s.font, y: s.layout, n: s.name, ti: s.title, c: s.company, ms: s.message, d }
+    if (s.material === 'custom') p.b = s.base
+    return p
+  }
+  const b64u = (str) => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  const unb64u = (t) => decodeURIComponent(escape(atob(t.replace(/-/g, '+').replace(/_/g, '/'))))
+  const bytesToB64u = (bytes) => { let bin = ''; for (const b of bytes) bin += String.fromCharCode(b); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') }
+  const b64uToBytes = (t) => Uint8Array.from(atob(t.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0))
+  async function pipe(bytes, stream) { return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()) }
+  // Compact link: JSON → deflate → base64url. Falls back to plain base64url where compression isn't available.
+  async function shareLink() {
+    const base = PUBLIC_URL || location.href.split('#')[0]
+    const json = JSON.stringify(payload(state))
+    if (typeof CompressionStream === 'function') { try { return `${base}#z.${bytesToB64u(await pipe(new TextEncoder().encode(json), new CompressionStream('deflate-raw')))}` } catch {} }
+    return `${base}#r.${b64u(json)}`
+  }
+  async function readHash(h) {
+    if (h.startsWith('#z.')) return JSON.parse(new TextDecoder().decode(await pipe(b64uToBytes(h.slice(3)), new DecompressionStream('deflate-raw'))))
+    if (h.startsWith('#r.')) return JSON.parse(unb64u(h.slice(3)))
+    return null
+  }
+  function fromPayload(p) {
+    const details = {}
+    for (const def of DETAIL_DEFS) details[def.k] = p.d && p.d[def.k] ? { v: String(p.d[def.k][0]).slice(0, 120), l: p.d[def.k][1] === 'e' ? 'e' : 'i' } : { v: '', l: 'h' }
+    const pick = (v, obj, def) => (obj[v] ? v : def)
+    return { material: pick(p.m, MATERIALS, 'obsidian'), foil: pick(p.o, FOILS, 'gold'), finish: pick(p.f, FINISHES, 'foil'), font: pick(p.t, FONTS, 'classic'), layout: pick(p.y, LAYOUTS, 'monogram'), base: /^#[0-9a-f]{6}$/i.test(p.b) ? p.b : '#0f3d2e', name: String(p.n || '').slice(0, 40), title: String(p.ti || '').slice(0, 50), company: String(p.c || '').slice(0, 40), message: String(p.ms || '').slice(0, 140), photo: null, details }
+  }
+
+  let qrSeq = 0
+  async function drawQR() {
+    const seq = ++qrSeq, link = await shareLink()
+    if (!window.QRMatrix || seq !== qrSeq) return
+    const matrix = window.QRMatrix(link, 'L')
+    for (const canvas of [$('qr'), $('qr-big')]) { if (canvas) { canvas.dataset.link = link; paintQR(canvas, matrix) } }
+  }
+  function paintQR(canvas, { size, data }) {
+    const ctx = canvas.getContext('2d'), W = canvas.width, q = 2, cell = W / (size + q * 2)
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, W)
+    ctx.fillStyle = '#0B1024'
+    const finder = (x, y) => x < 7 && y < 7 || x >= size - 7 && y < 7 || x < 7 && y >= size - 7
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      if (!data[y * size + x] || finder(x, y)) continue
+      // Near-square modules with softened corners: elegant, and reliably readable by phone cameras.
+      const cx = (x + q) * cell, cy = (y + q) * cell, inset = cell * 0.04
+      round(ctx, cx + inset, cy + inset, cell - inset * 2, cell * 0.28); ctx.fill()
+    }
+    for (const [fx, fy] of [[0, 0], [size - 7, 0], [0, size - 7]]) {
+      const x = (fx + q) * cell, y = (fy + q) * cell
+      round(ctx, x, y, cell * 7, cell * 1.6); ctx.fill()
+      ctx.fillStyle = '#fff'; round(ctx, x + cell, y + cell, cell * 5, cell * 1.1); ctx.fill()
+      ctx.fillStyle = '#0053FD'; round(ctx, x + cell * 2, y + cell * 2, cell * 3, cell * .8); ctx.fill()
+      ctx.fillStyle = '#0B1024'
+    }
+  }
+  function round(ctx, x, y, s, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + s, y, x + s, y + s, r); ctx.arcTo(x + s, y + s, x, y + s, r); ctx.arcTo(x, y + s, x, y, r); ctx.arcTo(x, y, x + s, y, r); ctx.closePath() }
+
+  function renderCard(s = state) {
+    for (const el of [$('card-front'), $('card-back')]) {
+      applyVars(el, cardVars(s))
+      el.classList.remove('finish-matte', 'finish-foil', 'finish-holo'); el.classList.add('finish-' + s.finish)
+    }
+    $('card-front').innerHTML = frontHTML(s)
+    $('card-back').innerHTML = backHTML(s)
+    drawQR()
+  }
+
+  // ---- Controls ----
+  function chips(containerId, entries, key, swatch) {
+    const box = $(containerId); box.innerHTML = ''
+    for (const [id, label] of entries) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', String(state[key] === id))
+      b.innerHTML = (swatch ? `<span class="swatch ${key === 'foil' ? 'round' : ''}" style="background:${swatch(id)}"></span>` : '') + esc(label)
+      b.onclick = () => { state[key] = id; state.preset = null; commit() }
+      box.appendChild(b)
+    }
+  }
+  function renderControls() {
+    const pbox = $('presets'); pbox.innerHTML = ''
+    for (const p of PRESETS) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'preset'; b.setAttribute('aria-pressed', String(state.preset === p.id))
+      const v = cardVars({ ...state, ...p })
+      b.innerHTML = `<div class="mini" style="background:${v['--mat']}"><span class="foil" style="--foil:${v['--foil']};font-family:${v['--card-font']}">${esc(initials(state.name))}</span></div>${esc(p.label)}`
+      b.onclick = () => { Object.assign(state, { material: p.material, foil: p.foil, finish: p.finish, font: p.font, layout: p.layout, preset: p.id }); commit() }
+      pbox.appendChild(b)
+    }
+    chips('materials', Object.entries(MATERIALS).map(([k, m]) => [k, m.label]), 'material', (k) => (MATERIALS[k].custom ? state.base : MATERIALS[k].bg))
+    $('custom-color-row').hidden = state.material !== 'custom'
+    chips('foils', Object.entries(FOILS).map(([k, f]) => [k, f.label]), 'foil', (k) => FOILS[k].g)
+    chips('finishes', Object.entries(FINISHES), 'finish')
+    chips('fonts', Object.entries(FONTS).map(([k, f]) => [k, f.label]), 'font')
+    chips('layouts', Object.entries(LAYOUTS), 'layout')
+
+    const dbox = $('details'); dbox.innerHTML = ''
+    for (const def of DETAIL_DEFS) {
+      const d = state.details[def.k]
+      const wrap = document.createElement('div'); wrap.className = 'detail'
+      wrap.innerHTML = `<div class="detail-head"><span>${esc(def.label)}</span></div><input type="${def.type === 'url' ? 'text' : def.type}" dir="auto" value="${esc(d.v)}" aria-label="${esc(def.label)}"><div class="seg" role="group" aria-label="מי רואה את ${esc(def.label)}"><button type="button" class="l-i" aria-pressed="${d.l === 'i'}">מיד</button><button type="button" class="l-e" aria-pressed="${d.l === 'e'}">לפי בקשה</button><button type="button" class="l-h" aria-pressed="${d.l === 'h'}">פרטי</button></div>`
+      wrap.querySelector('input').oninput = (e) => { d.v = e.target.value; save(); renderCard(); renderCounts() }
+      const [bi, be, bh] = wrap.querySelectorAll('.seg button')
+      bi.onclick = () => { d.l = 'i'; commit() }; be.onclick = () => { d.l = 'e'; commit() }; bh.onclick = () => { d.l = 'h'; commit() }
+      dbox.appendChild(wrap)
+    }
+    renderCounts()
+  }
+  function renderCounts() {
+    const vals = DETAIL_DEFS.map((d) => state.details[d.k]).filter((d) => d.v)
+    const i = vals.filter((d) => d.l === 'i').length, e = vals.filter((d) => d.l === 'e').length, h = vals.filter((d) => d.l === 'h').length
+    $('counts').innerHTML = `הצד השני רואה <b>${i}</b> פרטים מיד, <b>${e}</b> לפי בקשה · <b>${h}</b> נשארים פרטיים`
+  }
+  function commit() { save(); renderControls(); renderCard(); if (!$('view-recipient').hidden) renderRecipient(recipientMode ? recState : state) }
+
+  for (const [id, key] of [['f-name', 'name'], ['f-title', 'title'], ['f-company', 'company'], ['f-message', 'message']]) {
+    $(id).oninput = (e) => { state[key] = e.target.value; save(); renderCard(); if (key === 'name') renderControls() }
+  }
+  $('base-color').oninput = (e) => { state.base = e.target.value; state.material = 'custom'; state.preset = null; commit() }
+  $('f-photo').onchange = (e) => {
+    const file = e.target.files && e.target.files[0]; if (!file) return
+    const img = new Image(), reader = new FileReader()
+    reader.onload = () => { img.onload = () => { const c = document.createElement('canvas'), s = 360; c.width = c.height = s; const k = Math.max(s / img.width, s / img.height); const w = img.width * k, h = img.height * k; c.getContext('2d').drawImage(img, (s - w) / 2, (s - h) / 2, w, h); state.photo = c.toDataURL('image/jpeg', .86); state.layout = 'photo'; state.preset = null; commit() }; img.src = reader.result }
+    reader.readAsDataURL(file)
+  }
+  $('photo-clear').onclick = () => { state.photo = null; commit() }
+  $('surprise').onclick = () => {
+    const pick = (o) => { const k = Object.keys(o); return k[Math.floor(Math.random() * k.length)] }
+    Object.assign(state, { material: pick(MATERIALS), foil: pick(FOILS), finish: pick(FINISHES), font: pick(FONTS), layout: state.photo ? pick(LAYOUTS) : ['monogram', 'signature', 'minimal'][Math.floor(Math.random() * 3)], preset: null })
+    if (state.material === 'custom') state.base = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')
+    commit()
+  }
+
+  // ---- Tilt + light ----
+  const stage = $('stage'), tilt = $('tilt')
+  let idleTimer
+  function setLight(px, py) {
+    for (const el of [$('card-front'), $('card-back')]) { el.style.setProperty('--mx', px * 100 + '%'); el.style.setProperty('--my', py * 100 + '%'); el.style.setProperty('--hx', Math.round(px * 360)); el.style.setProperty('--foil-pos', Math.round(px * 100) + '%') }
+  }
+  stage.addEventListener('pointermove', (e) => {
+    const r = tilt.getBoundingClientRect(), px = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), py = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))
+    stage.classList.remove('idle'); tilt.style.transform = `rotateX(${(0.5 - py) * 18}deg) rotateY(${(px - 0.5) * 22}deg)`; setLight(px, py)
+    clearTimeout(idleTimer); idleTimer = setTimeout(() => { tilt.style.transform = ''; stage.classList.add('idle') }, 2500)
+  })
+  stage.addEventListener('pointerleave', () => { clearTimeout(idleTimer); idleTimer = setTimeout(() => { tilt.style.transform = ''; stage.classList.add('idle') }, 600) })
+  stage.addEventListener('click', () => { if (!$('view-share').hidden) $('flipper').classList.toggle('flipped') })
+
+  // ---- Views ----
+  function show(view) {
+    for (const v of ['design', 'share', 'recipient']) { $('view-' + v).hidden = v !== view; $('tab-' + v).setAttribute('aria-selected', String(v === view)) }
+    $('layout').classList.toggle('designing', view === 'design')
+    $('flipper').classList.toggle('flipped', view === 'share')
+    $('stage-caption').textContent = view === 'share' ? 'הקישו על הכרטיס כדי להפוך אותו' : view === 'recipient' ? 'כך הכרטיס מגיע לצד השני' : 'גררו על הכרטיס כדי להטות אותו לאור'
+    if (view === 'recipient') renderRecipient(recipientMode ? recState : state)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  $('tab-design').onclick = () => { recipientMode = false; $('rec-banner').hidden = true; $('make-own').hidden = true; renderCard(); show('design') }
+  $('tab-share').onclick = () => { recipientMode = false; renderCard(); show('share') }
+  $('tab-recipient').onclick = () => { show('recipient') }
+  $('go-share').onclick = () => show('share')
+  $('flip').onclick = () => $('flipper').classList.toggle('flipped')
+  $('as-recipient').onclick = () => show('recipient')
+  $('copy').onclick = async () => {
+    const link = await shareLink()
+    try { await navigator.clipboard.writeText(link); toast('הקישור הועתק') } catch { const i = $('link-out'); i.hidden = false; i.value = link; i.select(); toast('סמנו והעתיקו את הקישור') }
+  }
+
+  let recState = null
+  function renderRecipient(s) {
+    const row = (def, d) => `<div class="info-row"><span class="ic">${icon(def.icon)}</span><span class="t"><small>${esc(def.label)}</small><span dir="auto">${esc(d.v)}</span></span></div>`
+    const top = [s.title && `<div class="info-row"><span class="ic">${icon('user')}</span><span class="t"><small>תפקיד</small><span dir="auto">${esc(s.title)}</span></span></div>`, s.company && `<div class="info-row"><span class="ic">${icon('brief')}</span><span class="t"><small>חברה</small><span dir="auto">${esc(s.company)}</span></span></div>`].filter(Boolean)
+    const inst = DETAIL_DEFS.filter((d) => s.details[d.k].v && s.details[d.k].l === 'i').map((d) => row(d, s.details[d.k]))
+    const exp = DETAIL_DEFS.filter((d) => s.details[d.k].v && s.details[d.k].l === 'e').map((d) => row(d, s.details[d.k]))
+    $('rec-instant').innerHTML = [...top, ...inst].join('') || '<p class="quiet">רק שלום — שום פרט לא שותף.</p>'
+    $('rec-expanded').innerHTML = exp.join(''); $('rec-expanded').hidden = true
+    $('rec-more').hidden = exp.length === 0; $('rec-more').textContent = 'עוד פרטים'
+    $('rec-message').hidden = !s.message; $('rec-message').textContent = s.message || ''
+    $('rec-first').textContent = (s.name || '').split(/\s+/)[0] || 'השולח'
+    $('connect-form').hidden = true
+  }
+  $('rec-more').onclick = () => { const e = $('rec-expanded'); e.hidden = !e.hidden; $('rec-more').textContent = e.hidden ? 'עוד פרטים' : 'פחות פרטים' }
+  $('rec-save').onclick = () => toast('בגרסה החיה: נשמר כאיש קשר בטלפון — רק הפרטים שאושרו')
+  $('rec-connect').onclick = () => { const f = $('connect-form'); f.hidden = !f.hidden; if (!f.hidden) $('c-name').focus() }
+  $('connect-form').onsubmit = (e) => { e.preventDefault(); if (!$('c-name').value.trim() || !$('c-contact').value.trim()) { toast('חסר שם או דרך ליצור קשר'); return } $('connect-form').hidden = true; toast('נשלח. ההחלטה עכשיו בידיים שלהם — בלי לחץ.') }
+  $('make-own').onclick = () => { recipientMode = false; $('rec-banner').hidden = true; $('make-own').hidden = true; try { history.replaceState(null, '', location.pathname + location.search) } catch {} renderCard(); show('design') }
+
+  let toastTimer
+  function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (el.hidden = true), 2600) }
+
+  // ---- Boot ----
+  function fillInputs() { $('f-name').value = state.name; $('f-title').value = state.title; $('f-company').value = state.company; $('f-message').value = state.message; $('base-color').value = state.base || '#0f3d2e' }
+  async function boot() {
+    const h = location.hash
+    if (h.startsWith('#r.') || h.startsWith('#z.')) {
+      try { recState = fromPayload(await readHash(h)); recipientMode = true } catch { recState = null; recipientMode = false }
+    }
+    fillInputs(); renderControls()
+    if (recipientMode && recState) { renderCard(recState); $('rec-banner').hidden = false; $('make-own').hidden = false; show('recipient') }
+    else { renderCard(); if (h === '#share') show('share'); else if (h === '#recipient') show('recipient') }
+  }
+  window.addEventListener('hashchange', () => { if (/^#[rz]\./.test(location.hash)) boot() })
+  boot()
+})()
+</script>

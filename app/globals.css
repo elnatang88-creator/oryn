@@ -3,182 +3,155 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --font-inter: 'Inter', system-ui, sans-serif;
-    --font-playfair: 'Playfair Display', Georgia, serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  }
-
-  * {
-    @apply border-obsidian-border;
-    box-sizing: border-box;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body {
-    @apply bg-obsidian text-cream font-sans;
-    text-rendering: optimizeLegibility;
-  }
-
-  ::selection {
-    @apply bg-gold/30 text-cream;
-  }
-
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    @apply bg-obsidian-soft;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-obsidian-muted rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gold/40;
+  html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overflow-x: clip; }
+  body { @apply bg-soft-50 text-ink antialiased; }
+  :focus-visible { outline: 3px solid #4D84FF; outline-offset: 2px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 }
 
 @layer components {
-  .oryn-card {
-    @apply relative overflow-hidden rounded-card;
-    background: linear-gradient(135deg, #1C1C1E 0%, #252523 40%, #1C1C1E 100%);
-    border: 1px solid rgba(201, 168, 76, 0.12);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6),
-      0 0 0 1px rgba(201, 168, 76, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
+  /* Four verbs, four looks: Share (solid electric), Learn more (quiet outline), Save (white on navy), Connect (soft blue fill). */
+  .btn { @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold transition active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none; }
+  .btn-share { @apply btn bg-electric text-white shadow-lift hover:bg-electric-600; }
+  .btn-more { @apply btn border border-soft-300 bg-white text-navy-900 hover:border-electric-400; }
+  .btn-save { @apply btn bg-navy-900 text-white hover:bg-navy-800; }
+  .btn-connect { @apply btn bg-soft-200 text-navy-900 hover:bg-soft-300; }
+  .btn-quiet { @apply btn min-h-[44px] px-3 text-ink-muted hover:text-ink hover:bg-soft-100; }
+  .btn-stop { @apply btn border border-signal-stop/30 bg-white text-signal-stop hover:bg-red-50; }
 
-  .oryn-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-      ellipse at 20% 20%,
-      rgba(201, 168, 76, 0.04) 0%,
-      transparent 60%
-    );
-    pointer-events: none;
-  }
-
-  .gold-text {
-    background: linear-gradient(135deg, #C9A84C 0%, #F5E6A3 50%, #C9A84C 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .gold-border {
-    border-color: rgba(201, 168, 76, 0.3);
-  }
-
-  .glass-panel {
-    background: rgba(28, 28, 30, 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(201, 168, 76, 0.08);
-  }
-
-  .stat-card {
-    @apply rounded-panel p-6;
-    background: rgba(28, 28, 30, 0.8);
-    border: 1px solid rgba(44, 44, 46, 0.8);
-  }
-
-  .nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-chip text-sm text-cream/60
-           transition-all duration-200 cursor-pointer;
-  }
-
-  .nav-item:hover {
-    @apply text-cream/90 bg-obsidian-raised;
-  }
-
-  .nav-item.active {
-    @apply text-gold bg-gold/8;
-    border: 1px solid rgba(201, 168, 76, 0.12);
-  }
-
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-chip
-           text-sm font-medium text-obsidian transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-gold/50 focus:ring-offset-2 focus:ring-offset-obsidian;
-    background: linear-gradient(135deg, #C9A84C 0%, #D4AF37 100%);
-    box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-
-  .btn-primary:hover {
-    background: linear-gradient(135deg, #D4AF37 0%, #F5E6A3 100%);
-    box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    transform: translateY(-1px);
-  }
-
-  .btn-primary:active {
-    transform: translateY(0);
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-chip
-           text-sm font-medium text-cream transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-gold/30;
-    background: rgba(44, 44, 46, 0.8);
-    border: 1px solid rgba(201, 168, 76, 0.15);
-  }
-
-  .btn-secondary:hover {
-    background: rgba(58, 58, 60, 0.9);
-    border-color: rgba(201, 168, 76, 0.3);
-  }
-
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-chip
-           text-sm font-medium text-cream/60 transition-all duration-200
-           hover:text-cream hover:bg-obsidian-raised focus:outline-none;
-  }
-
-  .input-field {
-    @apply w-full px-4 py-3 rounded-chip text-sm text-cream placeholder-cream/30
-           transition-all duration-200 focus:outline-none;
-    background: rgba(28, 28, 30, 0.8);
-    border: 1px solid rgba(44, 44, 46, 0.8);
-  }
-
-  .input-field:focus {
-    border-color: rgba(201, 168, 76, 0.4);
-    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08);
-  }
-
-  .section-divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.15), transparent);
-  }
+  .card { @apply rounded-xl2 border border-soft-200 bg-white shadow-lift; transition: box-shadow .25s ease, transform .25s ease; }
+  .tab-active .tab-icon { @apply bg-soft-100 text-electric-600; }
+  .tab:active .tab-icon { transform: scale(.92); }
+  .label { @apply block text-sm font-semibold text-ink; }
+  .hint { @apply text-sm text-ink-muted; }
+  .input { @apply mt-1.5 block w-full min-h-[48px] rounded-xl border border-soft-300 bg-white px-4 text-[16px] text-ink placeholder:text-ink-faint focus:border-electric focus:outline-none focus:ring-4 focus:ring-electric/15; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold; }
+  .chip-public { @apply chip bg-soft-100 text-electric-600; }
+  .chip-private { @apply chip bg-navy-900 text-white; }
+  .chip-muted { @apply chip bg-soft-100 text-ink-muted; }
+  .h1 { @apply text-[24px] font-bold leading-tight tracking-tight text-navy-900 sm:text-3xl; }
+  .h2 { @apply text-lg font-bold text-navy-900; }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* ───────────── ORYN card (materials, foil, light) — see lib/card-design.ts ───────────── */
+@layer components {
+  .lc-holder { container-type: inline-size; width: 100%; }
+  .lc-card { position: relative; width: 100%; aspect-ratio: 1.586; border-radius: 4.6cqw; overflow: hidden; container-type: inline-size;
+    background: var(--mat); color: var(--ink-card);
+    box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 -1px 0 rgba(0,0,0,.4) inset, 0 40px 70px -30px rgba(0,0,0,.85), 0 18px 30px -18px rgba(0,0,0,.6); }
+  .lc-texture { position: absolute; inset: 0; background: var(--texture, none); opacity: .5; mix-blend-mode: var(--texture-blend, overlay); pointer-events: none; }
+  .lc-sheen { position: absolute; inset: -20%; background: radial-gradient(40% 40% at var(--mx, 30%) var(--my, 20%), rgba(255,255,255,var(--sheen, .28)), transparent 60%); mix-blend-mode: soft-light; pointer-events: none; }
+  .lc-holo { position: absolute; inset: -30%; background: conic-gradient(from calc(var(--hx, 0) * 1deg) at var(--mx, 50%) var(--my, 50%), #ff8fd6, #8fd3ff, #b6ff9e, #ffe58f, #ff8fd6); mix-blend-mode: color-dodge; opacity: 0; pointer-events: none; }
+  .lc-finish-holo .lc-holo { opacity: .22; }
+  /* Specular band: a soft light that travels with the tilt (pointer or device motion) — the "metal" cue. */
+  .lc-gloss { position: absolute; inset: -40%; pointer-events: none; mix-blend-mode: screen; opacity: .9;
+    background: linear-gradient(calc(100deg + (var(--hx, 0) * .08deg)), transparent 38%, rgba(255,255,255,calc(var(--sheen, .28) * .55)) 47%, rgba(255,255,255,calc(var(--sheen, .28) * .9)) 50%, rgba(255,255,255,calc(var(--sheen, .28) * .55)) 53%, transparent 62%);
+    transform: translateX(calc((var(--gx, 0.3) - .5) * 60%)); transition: transform .35s ease-out; }
+  .lc-edge { position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.1) inset, 0 0 0 2px rgba(0,0,0,.25) inset, 0 .5cqw 1.2cqw rgba(255,255,255,.05) inset; }
+  /* Engraved: lettering cut into the metal — a lit top edge, a shadow below, no shimmer. */
+  .lc-finish-engraved .lc-foil { animation: none; background-size: 100% 100%; filter: var(--foil-shadow, none) drop-shadow(0 -.1cqw 0 rgba(255,255,255,.22)) drop-shadow(0 .18cqw .12cqw rgba(0,0,0,.55)); }
+  .lc-finish-engraved .lc-name, .lc-finish-engraved .lc-mono, .lc-finish-engraved .lc-back-name { letter-spacing: calc(var(--name-track, .01em) + .05em); }
+  .lc-finish-engraved .lc-rule { box-shadow: 0 -.1cqw 0 rgba(255,255,255,.2), 0 .15cqw .1cqw rgba(0,0,0,.5); }
+  .lc-logo { object-fit: contain; background: none !important; -webkit-mask: none !important; mask: none !important; filter: drop-shadow(0 .3cqw .6cqw rgba(0,0,0,.35)); }
+  .lc-foil { filter: var(--foil-shadow, none); background: var(--foil); background-size: 220% 100%; background-position: var(--foil-pos, 30%) 0;
+    -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+  .lc-finish-foil .lc-foil, .lc-finish-holo .lc-foil { animation: lc-shimmer 6s ease-in-out infinite; }
+  .lc-finish-matte .lc-foil { background-size: 100% 100%; }
+  .lc-mark { width: 7cqw; aspect-ratio: 1; background: var(--foil); background-size: 220% 100%;
+    -webkit-mask: url(/brand/oryn-mark.svg) center / contain no-repeat; mask: url(/brand/oryn-mark.svg) center / contain no-repeat; }
+  .lc-rule { height: .35cqw; min-height: 1px; background: var(--foil); background-size: 220% 100%; border-radius: 2px; }
+  .lc-face { position: absolute; inset: 0; padding: 7cqw 7.5cqw; display: flex; flex-direction: column; font-family: var(--card-font); }
+  .lc-name { font-size: var(--name-size, 7.4cqw); line-height: 1.12; letter-spacing: var(--name-track, .01em); font-weight: var(--name-weight, 400); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lc-title { font-family: "Heebo", system-ui, sans-serif; font-size: 3.1cqw; letter-spacing: .06em; font-weight: 500; opacity: .88; }
+  .lc-company { font-family: "Heebo", system-ui, sans-serif; font-size: 2.8cqw; letter-spacing: .22em; text-transform: uppercase; font-weight: 700; }
+  .lc-mono { font-size: 21cqw; line-height: 1; font-family: var(--card-font); }
+  .lc-top { display: flex; justify-content: space-between; align-items: center; }
+  .lc-photo { width: 24cqw; aspect-ratio: 1; flex: none; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 .6cqw rgba(255,255,255,.12), 0 1.4cqw 3cqw rgba(0,0,0,.35); }
+  .lc-photo-initials { display: grid; place-items: center; background: var(--foil); background-size: 220% 100%; color: rgba(0,0,0,.55); font-size: 9cqw; font-family: var(--card-font); }
+  .lc-l-monogram { align-items: center; justify-content: center; text-align: center; gap: 1.6cqw; }
+  .lc-l-monogram .lc-mark { position: absolute; top: 6cqw; inset-inline-start: 6.5cqw; width: 5.2cqw; }
+  .lc-l-signature { justify-content: space-between; }
+  .lc-bottom { display: grid; gap: 1.4cqw; }
+  .lc-l-minimal { align-items: center; justify-content: center; text-align: center; gap: 2.4cqw; }
+  .lc-l-minimal .lc-mark { position: absolute; bottom: 6cqw; width: 4.6cqw; }
+  .lc-l-photo { flex-direction: row; align-items: center; gap: 5cqw; }
+  .lc-l-photo .lc-mark { position: absolute; top: 6cqw; inset-inline-end: 6.5cqw; width: 5.2cqw; }
+  .lc-who { display: grid; gap: 1.4cqw; min-width: 0; }
+  .lc-back { position: absolute; inset: 0; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 5cqw; padding: 5.5cqw; font-family: var(--card-font); }
+  .lc-qr { width: 50cqw; aspect-ratio: 1; padding: 1.8cqw; border-radius: 3.6cqw; background: var(--foil); background-size: 220% 100%; box-shadow: 0 1.5cqw 4cqw rgba(0,0,0,.35); }
+  .lc-qr svg { width: 100%; height: 100%; display: block; border-radius: 2.2cqw; background: #fff; }
+  .lc-back-text { display: grid; gap: 3cqw; justify-items: start; }
+  .lc-hint { font-size: 4.2cqw; line-height: 1.3; }
+  .lc-back-details { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr; align-items: center; padding: 6.5cqw 7cqw; font-family: var(--card-font); }
+  .lc-back-details.has-qr { grid-template-columns: 1fr auto; gap: 4cqw; }
+  .lc-back-info { min-width: 0; display: grid; gap: 3.4cqw; }
+  .lc-back-name { font-size: 5.2cqw; line-height: 1.1; font-weight: var(--name-weight); letter-spacing: var(--name-track); }
+  .lc-back-rows { display: grid; gap: 2.4cqw; font-family: "Heebo", system-ui, sans-serif; font-size: 3.5cqw; line-height: 1.25; color: var(--ink-card); }
+  .lc-back-rows li { display: flex; align-items: center; gap: 2.2cqw; min-width: 0; }
+  .lc-back-rows span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lc-back-icon { width: 3.8cqw; height: 3.8cqw; flex: none; opacity: .8; }
+  .lc-back-empty { font-size: 3.4cqw; color: var(--ink-card); }
+  .lc-qr-sm { width: 27cqw; padding: 1.2cqw; border-radius: 2.6cqw; }
+  .lc-back-mark { position: absolute; top: 6cqw; inset-inline-end: 6.5cqw; width: 4.6cqw; }
+  .lc-back-details.has-qr .lc-back-mark { display: none; }
+  .lc-back-brand { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 4cqw; font-family: var(--card-font); }
+  .lc-mark-lg { width: 16cqw; }
 
-  .scrollbar-none {
-    scrollbar-width: none;
-  }
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-
-  .card-aspect {
-    aspect-ratio: 1.586 / 1;
-  }
-
-  .bg-gold\/8 {
-    background-color: rgba(201, 168, 76, 0.08);
-  }
+  /* The card floats on the page — no panel behind it. Padding leaves room for its shadow and tilt. */
+  .lc-stage { padding: 10px 6px 18px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  .lc-stage-light .lc-card { box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 -1px 0 rgba(0,0,0,.25) inset, 0 28px 50px -26px rgba(5,11,31,.55), 0 10px 20px -14px rgba(5,11,31,.35); }
+  .lc-perspective { perspective: 1400px; }
+  .lc-tilt { transition: transform .5s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
+  .lc-flipper { position: relative; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.75,.2,1); }
+  .lc-flipper.is-flipped { transform: rotateY(180deg); }
+  .lc-side { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .lc-side-back { position: absolute; inset: 0; transform: rotateY(180deg); }
 }
+@keyframes lc-shimmer { 0%, 100% { background-position: 10% 0 } 50% { background-position: 90% 0 } }
+/* Reveal: the card turns toward the viewer out of the dark, with the light sweeping across once. */
+.lc-reveal { animation: lc-reveal 1.1s cubic-bezier(.2,.8,.2,1) both; }
+.lc-reveal .lc-gloss { animation: lc-sweep 1.4s ease-out .15s both; }
+@keyframes lc-reveal { from { opacity: 0; transform: perspective(1200px) rotateY(-28deg) rotateX(8deg) translateY(24px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes lc-sweep { from { transform: translateX(-70%); } to { transform: translateX(calc((var(--gx, 0.3) - .5) * 60%)); } }
+@media (prefers-reduced-motion: reduce) { .lc-reveal, .lc-reveal .lc-gloss { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .lc-foil { animation: none !important; } .lc-tilt, .lc-flipper { transition: none; } }
+
+/* ── Entry screen (welcome / sign in / sign up) ─────────────────────────────── */
+.entry-stage { background: radial-gradient(120% 80% at 50% 0%, #0f2a5e 0%, #07132B 55%, #08090D 100%); }
+.entry-glow { position: absolute; inset: -20% -20% auto; height: 70%; background: radial-gradient(50% 50% at 50% 50%, rgba(216,181,106,0.22), transparent 70%); filter: blur(10px); animation: entry-breathe 6s ease-in-out infinite; }
+.entry-logo { animation: entry-in .9s cubic-bezier(.2,.8,.2,1) both; }
+.entry-fan { position: absolute; left: 50%; top: 50%; width: min(60vw, 280px); aspect-ratio: 1.586; transform: translate(-50%, -50%); perspective: 1400px; }
+.entry-fan-compact { width: min(48vw, 210px); }
+.entry-card { position: absolute; inset: 0; transform-origin: 50% 130%;
+  --rot: calc((var(--i) - 1) * 9deg); --dx: calc((var(--i) - 1) * 15%); --dy: calc((var(--i) - 1) * (var(--i) - 1) * 7%);
+  transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); z-index: 1;
+  animation: entry-deal 1.1s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(0.15s + var(--i) * 0.12s); }
+.entry-card:nth-child(2) { z-index: 3; }
+.entry-card-inner { filter: drop-shadow(0 30px 40px rgba(0,0,0,0.55)); animation: entry-float 7s ease-in-out infinite; animation-delay: calc(var(--i) * -2.3s); }
+.entry-sheet { animation: entry-sheet .7s cubic-bezier(.2,.8,.2,1) .35s both; }
+@keyframes entry-deal { from { opacity: 0; transform: translate(0, 18%) rotate(0deg) scale(.85); } to { opacity: 1; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); } }
+@keyframes entry-float { 0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); } 50% { transform: translateY(-8px) rotateX(4deg) rotateY(-6deg); } }
+@keyframes entry-breathe { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+@keyframes entry-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes entry-sheet { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .entry-glow, .entry-card, .entry-card-inner, .entry-sheet, .entry-logo { animation: none !important; } }
+
+/* Card rising out of the wallet when Share opens. */
+.lc-rise { animation: lc-rise .55s cubic-bezier(.2,.9,.25,1.05) both; }
+@keyframes lc-rise { from { opacity: 0; transform: translateY(28px) scale(.94) rotateX(14deg); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .lc-rise { animation: none; } }
+@keyframes sheet { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { [class*="animate-[sheet"], [class*="animate-[fade"] { animation: none !important; } }
+
+/* Connection moment: two cards meet, the ORYN seal lands. ~0.9 s total. */
+.oryn-merge-left { animation: merge-left .55s cubic-bezier(.2,.9,.25,1) both; }
+.oryn-merge-right { animation: merge-right .55s cubic-bezier(.2,.9,.25,1) both; }
+.oryn-merge-seal { animation: merge-seal .35s cubic-bezier(.2,1.3,.4,1) .5s both; }
+@keyframes merge-left { from { transform: translateX(-70px) rotate(-10deg); opacity: 0; } to { transform: translateX(22px) rotate(-5deg); opacity: 1; } }
+@keyframes merge-right { from { transform: translateX(70px) rotate(10deg); opacity: 0; } to { transform: translateX(-22px) rotate(5deg); opacity: 1; } }
+@keyframes merge-seal { from { transform: translate(-50%, -50%) scale(.3); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .oryn-merge-left, .oryn-merge-right, .oryn-merge-seal { animation: none; } .oryn-merge-left { transform: translateX(22px) rotate(-5deg); } .oryn-merge-right { transform: translateX(-22px) rotate(5deg); } }
