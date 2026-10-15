@@ -166,9 +166,10 @@ export function CapsuleEditor({
           <textarea dir="auto" id="private_note" name="private_note" disabled={!canNotes} className="input min-h-[80px] border-white/20 bg-navy-800 py-3 text-white placeholder:text-soft-300/60" value={v.private_note} onChange={(e) => set('private_note', e.target.value)} maxLength={2000} placeholder={canNotes ? 'When to use this capsule, what to keep hidden…' : 'Private notes are part of Pro.'} />
         </fieldset>
 
-        <div className="sticky bottom-24 z-10 rounded-2xl bg-soft-50/90 py-2 backdrop-blur lg:bottom-4">
-          {hiddenCount > 0 && <p className="mb-2 text-center text-sm text-ink-muted">{hiddenCount} detail{hiddenCount === 1 ? '' : 's'} saved but not shared.</p>}
-          <Submit>{submitLabel}</Submit>
+        {hiddenCount > 0 && <p className="text-center text-sm text-ink-muted">{hiddenCount} detail{hiddenCount === 1 ? '' : 's'} saved but not shared.</p>}
+        {/* Floating save: a compact pill above the tab bar on phones (never a full-width bar covering the controls); inline on desktop. */}
+        <div className="pointer-events-none sticky bottom-[calc(env(safe-area-inset-bottom)+5.75rem)] z-10 -mx-1 flex justify-end lg:static lg:mx-0 lg:block" data-testid="save-bar">
+          <Submit className="btn-share pointer-events-auto min-h-[48px] rounded-full px-6 shadow-[0_12px_30px_-10px_rgba(36,107,253,.7)] lg:w-full lg:rounded-2xl">{submitLabel}</Submit>
         </div>
       </ActionForm>
 

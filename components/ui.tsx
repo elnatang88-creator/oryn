@@ -15,8 +15,8 @@ export function PageHeader({ title, sub, action }: { title: string; sub?: string
 
 export function Section({ title, children, aside }: { title: string; children: React.ReactNode; aside?: React.ReactNode }) {
   return (
-    <section className="mb-8">
-      <div className="mb-3 flex items-center justify-between">
+    <section className="mb-7 animate-rise sm:mb-8">
+      <div className="mb-2.5 flex items-center justify-between sm:mb-3">
         <h2 className="h2">{title}</h2>
         {aside}
       </div>

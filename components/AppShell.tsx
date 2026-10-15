@@ -46,7 +46,7 @@ export function AppShell({ user, unread = 0, children }: { user: { display_name:
       </aside>
 
       <div className="pb-28 lg:pb-10">
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-soft-200 bg-white/90 px-4 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-soft-200/80 bg-white/85 px-4 shadow-[0_1px_0_rgba(255,255,255,.6)_inset] backdrop-blur-xl lg:hidden">
           <Link href="/today"><Logo /></Link>
           <span className="flex items-center gap-1"><SearchButton compact /><NotificationBell initial={unread} compact /><Link href="/settings" className="btn-quiet" aria-label="Settings"><Settings className="h-5 w-5" /></Link></span>
         </header>
@@ -56,7 +56,7 @@ export function AppShell({ user, unread = 0, children }: { user: { display_name:
       </div>
 
       <CommandMenu />
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-soft-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden" aria-label="Main">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-soft-200/80 bg-white/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_30px_-24px_rgba(7,19,43,.5)] backdrop-blur-xl lg:hidden" aria-label="Main">
         <div className="mx-auto grid max-w-md grid-cols-5 items-end px-2 pt-1.5">
           <Tab href="/today" label="Today" icon={Home} />
           <Tab href="/capsules" label="Cards" icon={Layers} />
@@ -75,8 +75,8 @@ export function AppShell({ user, unread = 0, children }: { user: { display_name:
 
 function Tab({ href, label, icon: Icon }: { href: string; label: string; icon: typeof Home }) {
   return (
-    <NavLink href={href} className="flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium text-ink-muted" activeClassName="!text-electric-600 font-semibold">
-      <Icon className="h-6 w-6" aria-hidden="true" />
+    <NavLink href={href} className="tab group flex min-h-[56px] flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-medium text-ink-muted transition-colors" activeClassName="tab-active !text-navy-900 font-semibold">
+      <span className="tab-icon grid h-8 w-12 place-items-center rounded-full transition-all"><Icon className="h-[22px] w-[22px]" aria-hidden="true" /></span>
       {label}
     </NavLink>
   )

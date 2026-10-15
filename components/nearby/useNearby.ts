@@ -115,7 +115,8 @@ export function useNearby({ initialVisibility, promptForLocation, pollMs = 2500 
   const live = useLive(['nearby'], { onEvent: (name) => { if (name === 'nearby') refresh() } })
   const [hurryUntil, setHurryUntil] = useState(0)
   const waiting = !!data?.outgoing.some((o) => o.status === 'waiting') && Date.now() < hurryUntil
-  const every = live ? Math.max(pollMs * 6, 15_000) : waiting ? 1000 : pollMs
+  // Waiting on an answer always polls fast (the moment must land instantly even if a stream event is missed).
+  const every = waiting ? 1000 : live ? Math.max(pollMs * 2, 4000) : pollMs
   useEffect(() => {
     refresh()
     const t = setInterval(() => { if (document.visibilityState === 'visible') refresh() }, every)

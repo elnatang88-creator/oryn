@@ -14,7 +14,8 @@
     "db:migrate": "tsx --conditions=react-server scripts/migrate.ts",
     "db:reset": "rm -rf .data/pglite",
     "verify:env": "tsx --conditions=react-server scripts/verify-deployment.ts env",
-    "verify:http": "tsx --conditions=react-server scripts/verify-deployment.ts http"
+    "verify:http": "tsx --conditions=react-server scripts/verify-deployment.ts http",
+    "demo:iphone": "node scripts/iphone-demo.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.134.0",

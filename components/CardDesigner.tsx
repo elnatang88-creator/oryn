@@ -21,11 +21,11 @@ export function CardDesigner({ value, onChange, initialsText }: { value: CardDes
             const v = designVars({ ...p.design, base: value.base, back: value.back })
             return (
               <button key={p.id} type="button" onClick={() => set(p.design)} aria-pressed={same(p.design)} data-testid={`preset-${p.id}`}
-                className={`rounded-xl border p-1.5 text-start text-[12px] font-semibold ${same(p.design) ? 'border-electric ring-2 ring-electric/25' : 'border-soft-300 bg-white'}`}>
+                className={`rounded-xl border p-1.5 text-start text-[11.5px] font-semibold ${same(p.design) ? 'border-electric ring-2 ring-electric/25' : 'border-soft-300 bg-white'}`}>
                 <span className="relative block aspect-[1.586] overflow-hidden rounded-lg" style={{ background: v['--mat'] }}>
                   <span className="lc-foil absolute bottom-1 start-2 text-[15px]" style={{ '--foil': v['--foil'], fontFamily: v['--card-font'], filter: v['--foil-shadow'] } as CSSProperties}>{initialsText}</span>
                 </span>
-                <span className="mt-1 block truncate"><span className="text-ink-faint">{p.letter}</span> · {p.label}</span>
+                <span className="mt-1 block leading-tight"><span className="text-ink-faint">{p.letter}</span> · {p.label}</span>
               </button>
             )
           })}

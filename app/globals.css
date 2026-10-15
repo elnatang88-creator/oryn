@@ -21,7 +21,9 @@
   .btn-quiet { @apply btn min-h-[44px] px-3 text-ink-muted hover:text-ink hover:bg-soft-100; }
   .btn-stop { @apply btn border border-signal-stop/30 bg-white text-signal-stop hover:bg-red-50; }
 
-  .card { @apply rounded-xl2 border border-soft-200 bg-white shadow-lift; }
+  .card { @apply rounded-xl2 border border-soft-200 bg-white shadow-lift; transition: box-shadow .25s ease, transform .25s ease; }
+  .tab-active .tab-icon { @apply bg-soft-100 text-electric-600; }
+  .tab:active .tab-icon { transform: scale(.92); }
   .label { @apply block text-sm font-semibold text-ink; }
   .hint { @apply text-sm text-ink-muted; }
   .input { @apply mt-1.5 block w-full min-h-[48px] rounded-xl border border-soft-300 bg-white px-4 text-[16px] text-ink placeholder:text-ink-faint focus:border-electric focus:outline-none focus:ring-4 focus:ring-electric/15; }

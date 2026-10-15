@@ -65,7 +65,11 @@ test('login → onboarding (5 steps with progress) → dashboard → card → ed
   await page.getByTestId('duplicate-card').first().click()
   await expect(page.getByTestId('duplicated-banner')).toBeVisible()
   await expect(page.getByTestId('collections')).toBeVisible()
+  // Every collection stays tappable with the floating Save pill on screen (it used to cover the grid on phones).
+  await page.getByTestId('preset-custom').click()
+  await expect(page.getByTestId('preset-custom')).toHaveAttribute('aria-pressed', 'true')
   await page.getByTestId('preset-gold').click()
+  await expect(page.getByTestId('preset-gold')).toHaveAttribute('aria-pressed', 'true')
   await shot(page, '04b-studio-collections')
   // Logo upload: resized on the device into the design, persisted, shown on the card.
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAQklEQVR42u3OMQEAAAgDoGn/zjOGDxBJOkk5cuTIkSNHjhw5cuTIkSNHjhw5cuTIkSNHjhw5cuTIkSNHjhw5cuTI0bsBTnkA/ZQ3Qe0AAAAASUVORK5CYII=', 'base64')
