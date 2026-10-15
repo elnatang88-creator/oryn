@@ -1,6 +1,7 @@
 import { requireUser } from '@/lib/server/request'
 import { listDevices, listSessions } from '@/lib/server/services/auth'
 import { changePasswordAction, revokeOthersAction, revokeSessionAction, signOutEverywhereAction } from '@/app/actions/settings'
+import { resendVerificationAction } from '@/app/actions/auth'
 import { ActionForm, Submit } from '@/components/Forms'
 import { PageHeader, relTime } from '@/components/ui'
 
@@ -12,6 +13,11 @@ export default async function SecurityPage() {
   return (
     <>
       <PageHeader title="Security" sub="Where you’re signed in, and how to lock things down." />
+      <section className="card mb-6 p-5" data-testid="email-status">
+        <h2 className="h2">Email</h2>
+        <p className="mt-2 text-[15px]">{user.email} · {user.email_verified_at ? <span className="font-semibold text-signal-ok">confirmed</span> : <span className="font-semibold text-signal-warn">not confirmed yet</span>}</p>
+        {!user.email_verified_at && <ActionForm action={resendVerificationAction} className="mt-3"><Submit className="btn-more">Send confirmation link</Submit></ActionForm>}
+      </section>
       <section className="card mb-6 p-5">
         <h2 className="h2">Signed-in sessions</h2>
         <ul className="mt-3 divide-y divide-soft-100">

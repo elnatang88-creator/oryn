@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { CalendarCheck, CalendarDays, Home, Layers, LineChart, Settings, Users, UsersRound } from 'lucide-react'
+import { Briefcase, CalendarCheck, CalendarDays, Home, Layers, LineChart, Settings, Users, UsersRound } from 'lucide-react'
 import { ExchangeCardsIcon } from './OrynIcons'
+import { CommandMenu, SearchButton } from './CommandMenu'
 import { Logo } from './Logo'
 import { NavLink } from './NavLink'
 import { signOutAction } from '@/app/actions/auth'
@@ -10,6 +11,7 @@ const NAV = [
   { href: '/capsules', label: 'My cards', icon: Layers },
   { href: '/connections', label: 'People', icon: Users },
   { href: '/follow-ups', label: 'Follow-ups', icon: CalendarCheck },
+  { href: '/business', label: 'Business', icon: Briefcase },
   { href: '/events', label: 'Events', icon: CalendarDays },
   { href: '/teams', label: 'Teams', icon: UsersRound },
   { href: '/insights', label: 'Insights', icon: LineChart },
@@ -17,7 +19,7 @@ const NAV = [
 ]
 
 /** Calm workspace frame. Desktop: left rail. Phone: bottom bar with Share in the thumb zone. */
-export function AppShell({ user, children }: { user: { display_name: string; plan_key: string; email: string }; children: React.ReactNode }) {
+export function AppShell({ user, children }: { user: { display_name: string; plan_key: string; email: string; email_verified_at?: Date | null }; children: React.ReactNode }) {
   const demo = user.email.endsWith('@oryn.local')
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[248px_1fr]">
@@ -26,7 +28,8 @@ export function AppShell({ user, children }: { user: { display_name: string; pla
         {/* Plain anchors: the share shortcut starts a share, so it must never be prefetched. */}
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- starts a share, so it must never be prefetched */}
         <a href="/share/quick" className="btn-share mt-8 w-full" data-testid="rail-share"><ExchangeCardsIcon className="h-5 w-5" /> Share my card</a>
-        <nav className="mt-6 flex-1 space-y-1" aria-label="Main">
+        <div className="mt-4"><SearchButton /></div>
+        <nav className="mt-4 flex-1 space-y-1" aria-label="Main">
           {NAV.map((n) => (
             <NavLink key={n.href} href={n.href} className="flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-medium text-ink-muted hover:bg-soft-100 hover:text-ink" activeClassName="!bg-soft-100 !text-navy-900 font-semibold">
               <n.icon className="h-5 w-5" aria-hidden="true" /> {n.label}
@@ -43,12 +46,14 @@ export function AppShell({ user, children }: { user: { display_name: string; pla
       <div className="pb-28 lg:pb-10">
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-soft-200 bg-white/90 px-4 backdrop-blur lg:hidden">
           <Link href="/today"><Logo /></Link>
-          <Link href="/settings" className="btn-quiet" aria-label="Settings"><Settings className="h-5 w-5" /></Link>
+          <span className="flex items-center gap-1"><SearchButton compact /><Link href="/settings" className="btn-quiet" aria-label="Settings"><Settings className="h-5 w-5" /></Link></span>
         </header>
         {demo && <p className="bg-navy-900 px-4 py-2 text-center text-xs font-semibold text-soft-200" role="note" data-testid="demo-banner">Demo account · all people, requests and numbers here are fictional sample data</p>}
+        {!demo && user.email_verified_at === null && <p className="bg-amber-50 px-4 py-2 text-center text-xs font-semibold text-amber-900" role="note" data-testid="verify-banner">Confirm your email to secure your account. <Link href="/settings/security" className="underline">Resend the link</Link></p>}
         <main id="main" className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:py-10">{children}</main>
       </div>
 
+      <CommandMenu />
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-soft-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden" aria-label="Main">
         <div className="mx-auto grid max-w-md grid-cols-5 items-end px-2 pt-1.5">
           <Tab href="/today" label="Today" icon={Home} />

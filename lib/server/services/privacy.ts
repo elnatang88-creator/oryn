@@ -153,6 +153,10 @@ export async function executeDeletion(db: Db, requestId: string, userId: string)
     await t.query(`DELETE FROM rate_limits WHERE key = ANY($1)`, [[`signin-fail:${hmac(`email:${u.email}`).slice(0, 24)}`, `delete-reauth:${userId}`, `share:${userId}`, `export:${userId}`, `pwchange:${userId}`]])
     // Any other limiter bucket keyed by this person's id (Nearby heartbeat/connect/pair, etc.). Ids are random, so no collisions.
     await t.query(`DELETE FROM rate_limits WHERE position($1 in key) > 0`, [userId])
+    // Mail we sent them, their one-time tokens, their lead notes' authorship and tasks: gone or de-identified.
+    await t.query(`DELETE FROM email_outbox WHERE user_id = $1 OR to_email = $2`, [userId, u.email])
+    await t.query(`DELETE FROM auth_tokens WHERE user_id = $1`, [userId])
+    await t.query(`UPDATE registrations SET user_id = NULL WHERE user_id = $1`, [userId])
     await t.query(`DELETE FROM jobs WHERE payload->>'userId' = $1`, [userId])
     await t.query(`DELETE FROM subscriptions WHERE subject_type = 'user' AND subject_id = $1`, [userId])
 

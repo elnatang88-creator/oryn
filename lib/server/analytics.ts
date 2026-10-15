@@ -11,6 +11,7 @@ export type AnalyticsEvent =
   | 'connect_requested' | 'connect_accepted' | 'connect_declined' | 'note_added' | 'followup_created'
   | 'followup_completed' | 'share_revoked' | 'privacy_control_used' | 'event_created' | 'participant_added'
   | 'station_created' | 'plan_gate_hit' | 'plan_changed' | 'export_requested' | 'deletion_requested'
+  | 'event_registered' | 'event_checked_in' | 'lead_created' | 'lead_stage_changed' | 'station_scanned' | 'automation_ran' | 'ai_used'
   | ServerEvent
 
 /**

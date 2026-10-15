@@ -23,6 +23,8 @@ export interface User {
   retention_days: number | null
   created_at: Date
   view_visibility: 'visible' | 'private'
+  email_verified_at: Date | null
+  username: string | null
 }
 
 export async function hashPassword(pw: string): Promise<string> {
@@ -81,6 +83,7 @@ export async function signUp(input: { email: string; password: string; displayNa
   await db.query(`INSERT INTO users (id, email, password_hash, display_name) VALUES ($1,$2,$3,$4)`, [id, email, await hashPassword(password), displayName])
   await audit(db, { actor: id, action: 'user.created', targetType: 'user', targetId: id })
   await track(db, 'signup_completed', { userId: id })
+  await sendVerificationEmail(id).catch((e) => console.error('[auth] verification email', (e as Error).message))
   return { userId: id, ...(await createSession(db, id, ctx.deviceId, ctx.userAgent)) }
 }
 
@@ -108,7 +111,7 @@ export async function userForSessionToken(token: string | undefined | null): Pro
   if (!token || token.length > 100) return null
   const db = await getDb()
   const [row] = await db.query<User & { session_id: string; last_seen_at: Date }>(
-    `SELECT u.id, u.email, u.display_name, u.plan_key, u.is_platform_admin, u.retention_days, u.created_at, u.view_visibility, s.id AS session_id, s.last_seen_at
+    `SELECT u.id, u.email, u.display_name, u.plan_key, u.is_platform_admin, u.retention_days, u.created_at, u.view_visibility, u.email_verified_at, u.username, s.id AS session_id, s.last_seen_at
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND s.revoked_at IS NULL AND s.expires_at > now() AND u.deleted_at IS NULL`,
     [sha256(token)],
@@ -164,4 +167,91 @@ export async function changePassword(userId: string, currentSessionId: string, c
   await db.query(`UPDATE users SET password_hash = $1 WHERE id = $2`, [await hashPassword(next), userId])
   await db.query(`UPDATE sessions SET revoked_at = now() WHERE user_id = $1 AND id <> $2 AND revoked_at IS NULL`, [userId, currentSessionId])
   await audit(db, { actor: userId, action: 'user.password_changed', targetType: 'user', targetId: userId })
+}
+
+// ─── Email verification and password reset ───────────────────────────────────────────────────────
+// One-time tokens: random 32 bytes, only the SHA-256 is stored; verification lasts 2 days, reset 1 hour.
+
+async function issueToken(db: Db, userId: string, kind: 'verify_email' | 'reset_password', ttlSeconds: number) {
+  const token = crypto.randomBytes(32).toString('base64url')
+  await db.query(`UPDATE auth_tokens SET used_at = now() WHERE user_id = $1 AND kind = $2 AND used_at IS NULL`, [userId, kind])
+  await db.query(`INSERT INTO auth_tokens (id, user_id, kind, token_hash, expires_at) VALUES ($1,$2,$3,$4, now() + make_interval(secs => $5))`, [newId('tok'), userId, kind, sha256(token), ttlSeconds])
+  return token
+}
+
+function publicBase() {
+  return (process.env.ORYN_PUBLIC_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? '').replace(/\/$/, '')
+}
+
+export async function sendVerificationEmail(userId: string) {
+  const db = await getDb()
+  const [u] = await db.query<{ email: string; display_name: string; email_verified_at: Date | null }>(`SELECT email, display_name, email_verified_at FROM users WHERE id = $1 AND deleted_at IS NULL`, [userId])
+  if (!u || u.email_verified_at) return
+  await rateLimit(db, `verify-send:${userId}`, 5, 3600)
+  const token = await issueToken(db, userId, 'verify_email', 2 * 86400)
+  const { queueEmail } = await import('../email')
+  await queueEmail(db, { to: u.email, userId, kind: 'verify_email', subject: 'Confirm your ORYN email', text: `Hi ${u.display_name.split(' ')[0]},\n\nConfirm this email address to secure your ORYN account:\n${publicBase()}/verify?token=${token}\n\nThe link works for two days. If you didn’t create an ORYN account, ignore this message.` })
+}
+
+export async function verifyEmailToken(token: string) {
+  const db = await getDb()
+  if (!/^[A-Za-z0-9_-]{30,60}$/.test(token)) return { ok: false as const }
+  const [t] = await db.query<{ id: string; user_id: string }>(`SELECT id, user_id FROM auth_tokens WHERE token_hash = $1 AND kind = 'verify_email' AND used_at IS NULL AND expires_at > now()`, [sha256(token)])
+  if (!t) return { ok: false as const }
+  await db.tx(async (x) => {
+    await x.query(`UPDATE auth_tokens SET used_at = now() WHERE id = $1`, [t.id])
+    await x.query(`UPDATE users SET email_verified_at = coalesce(email_verified_at, now()) WHERE id = $1`, [t.user_id])
+    await audit(x, { actor: t.user_id, action: 'user.email_verified', targetType: 'user', targetId: t.user_id })
+  })
+  return { ok: true as const, userId: t.user_id }
+}
+
+/** Always answers the same way, so it never reveals whether an email has an account. */
+export async function requestPasswordReset(emailInput: string, ctx: { ipKey: string }) {
+  const db = await getDb()
+  await rateLimit(db, `reset-req:${ctx.ipKey}`, 20, 3600)
+  const email = String(emailInput ?? '').trim().toLowerCase()
+  const [u] = await db.query<{ id: string; display_name: string }>(`SELECT id, display_name FROM users WHERE email = $1 AND deleted_at IS NULL`, [email])
+  if (!u) return
+  await rateLimit(db, `reset-user:${u.id}`, 3, 3600)
+  const token = await issueToken(db, u.id, 'reset_password', 3600)
+  const { queueEmail } = await import('../email')
+  await queueEmail(db, { to: email, userId: u.id, kind: 'reset_password', subject: 'Reset your ORYN password', text: `Hi ${u.display_name.split(' ')[0]},\n\nSet a new password here (the link works for one hour):\n${publicBase()}/reset?token=${token}\n\nIf you didn’t ask for this, you can ignore it — your password stays the same.` })
+  await audit(db, { actor: u.id, action: 'user.password_reset_requested', targetType: 'user', targetId: u.id })
+}
+
+export async function resetPasswordWithToken(token: string, next: string) {
+  const db = await getDb()
+  if (!/^[A-Za-z0-9_-]{30,60}$/.test(token)) throw invalid('This reset link is not valid. Ask for a new one.')
+  if (next.length < 10) throw invalid('Use at least 10 characters.')
+  const [t] = await db.query<{ id: string; user_id: string }>(`SELECT id, user_id FROM auth_tokens WHERE token_hash = $1 AND kind = 'reset_password' AND used_at IS NULL AND expires_at > now()`, [sha256(token)])
+  if (!t) throw invalid('This reset link has expired or was already used. Ask for a new one.')
+  await db.tx(async (x) => {
+    await x.query(`UPDATE auth_tokens SET used_at = now() WHERE id = $1`, [t.id])
+    await x.query(`UPDATE users SET password_hash = $2, email_verified_at = coalesce(email_verified_at, now()) WHERE id = $1`, [t.user_id, await hashPassword(next)])
+    // Every existing session is signed out: whoever held the old password is out.
+    await x.query(`UPDATE sessions SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL`, [t.user_id])
+    await audit(x, { actor: t.user_id, action: 'user.password_reset', targetType: 'user', targetId: t.user_id })
+  })
+  const [u] = await db.query<{ email: string }>(`SELECT email FROM users WHERE id = $1`, [t.user_id])
+  const { queueEmail } = await import('../email')
+  await queueEmail(db, { to: u.email, userId: t.user_id, kind: 'security', subject: 'Your ORYN password was changed', text: 'Your password was just reset and every other session was signed out. If this wasn’t you, reset it again right away.' })
+  return t.user_id
+}
+
+export async function setNotificationPrefs(userId: string, prefs: { notifyEmail: boolean; aiConsent: boolean }) {
+  const db = await getDb()
+  await db.query(`UPDATE users SET notify_email = $2, ai_consent_at = CASE WHEN $3 THEN coalesce(ai_consent_at, now()) ELSE NULL END WHERE id = $1`, [userId, prefs.notifyEmail, prefs.aiConsent])
+  await audit(db, { actor: userId, action: 'user.preferences_changed', targetType: 'user', targetId: userId, meta: prefs })
+}
+
+export async function setUsername(userId: string, raw: string) {
+  const username = raw.trim().toLowerCase()
+  if (username && !/^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])?$/.test(username)) throw invalid('Use 3–30 letters, numbers or dashes.')
+  if (['admin', 'oryn', 'support', 'help', 'api', 'www', 'u', 'c', 'e', 's', 'q'].includes(username)) throw invalid('That name is reserved.')
+  const db = await getDb()
+  const r = await db.query(`UPDATE users SET username = $2 WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM users x WHERE x.username = $2 AND x.id <> $1) RETURNING id`, [userId, username || null])
+  if (!r.length) throw new AppError('conflict', 'That name is already taken.')
+  await audit(db, { actor: userId, action: 'user.username_changed', targetType: 'user', targetId: userId })
+  return username || null
 }

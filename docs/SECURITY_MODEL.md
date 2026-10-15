@@ -107,3 +107,18 @@ CSP (`default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`, `form-
 | Wallet permanent link | One revocable `wallet_pass` share per person, `follow_default` → always the current active card; stopping it closes the pass |
 | Offline Present (service worker) | Caches only static assets and the **last Present screen** (your own card); never API data or other pages; cleared on sign-in/sign-out pages. Shared devices: sign out clears it. |
 | Google Wallet errors | Return to the Wallet screen with an error state; only same-site `/share/<id>/wallet` paths are accepted as the return path |
+
+## Platform slice (2026-10-15)
+
+| Area | Control |
+|---|---|
+| Email verification / reset | Random 32-byte tokens, SHA-256 stored, single use, 2 d / 1 h expiry; reset signs out every session and emails a security notice; reset requests never reveal whether an account exists; per-IP and per-account limits |
+| Tickets | `reg_<id>.<HMAC>`; signature checked before any DB read; hash stored; check-in is one atomic UPDATE (`checked_in_at IS NULL`) so a ticket admits once even with concurrent scanners (tested) |
+| Registration | Capacity enforced in a transaction holding the event row; one registration per (event, email); re-registering re-sends the same ticket instead of minting another |
+| Check-in / registrations | Staff = workspace role with `checkin.perform` or an active staff participant; anonymous → 401; other workspaces → 404 |
+| Stations | Modes stored server-side; external destinations must be `https://`, no credentials, no private hosts, validated on save and on resolve; never auto-redirect to an external site (branded hand-off page); transfer needs a one-time code issued by the owning workspace |
+| Leads | Public capture requires consent and a contact method, rate-limited per IP; all CRM reads/writes check workspace permission; export is owner/admin and audited; CSV cells are formula-escaped |
+| Automations | Only members can be assignees; email actions go to in-flow people only (lead who consented, registrant, assignee); runs are idempotent per (automation, trigger, subject) |
+| Search | Every branch scoped by ownership or membership (tested: a lead in another workspace never appears) |
+| AI | Provider + explicit user consent required; only task-relevant fields are sent; audited; template fallback otherwise |
+| Command Center | `requirePlatformAdmin`; non-admins get 404; every module view is audited |

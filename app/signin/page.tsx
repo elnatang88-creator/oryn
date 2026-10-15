@@ -7,18 +7,20 @@ import { EntryShell } from '@/components/EntryShell'
 
 export const metadata = { title: 'Sign in' }
 
-export default async function SignIn({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next = '' } = await searchParams
+export default async function SignIn({ searchParams }: { searchParams: Promise<{ next?: string; reset?: string }> }) {
+  const { next = '', reset = '' } = await searchParams
   if (await currentUser()) redirect('/today')
   const demo = process.env.NODE_ENV !== 'production' || process.env.ORYN_SEED_DEMO === 'true'
   return (
     <EntryShell compact>
       <h1 className="text-2xl font-bold text-navy-900">Welcome back</h1>
+      {reset && <p className="mt-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-signal-ok">Password saved. Sign in with it.</p>}
       <ActionForm action={signInAction} className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next} />
         <div><label className="label" htmlFor="email">Email</label><input dir="auto" id="email" name="email" type="email" autoComplete="email" className="input" required /></div>
         <div><label className="label" htmlFor="password">Password</label><input dir="auto" id="password" name="password" type="password" autoComplete="current-password" className="input" required /></div>
         <Submit pendingText="Signing in…">Sign in</Submit>
+        <p className="text-center text-sm"><Link href="/forgot" className="font-semibold text-electric-600">Forgot your password?</Link></p>
       </ActionForm>
       <p className="mt-6 text-center text-[15px]">New to ORYN? <Link href={`/signup${next ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-semibold text-electric-600">Create an account</Link></p>
       {demo && <p className="mt-8 rounded-2xl bg-soft-100 px-4 py-3 text-sm text-navy-900" data-testid="demo-credentials">Local demo (fictional data): <code>demo@oryn.local</code>. The password is <code>ORYN_DEMO_PASSWORD</code>, or the one printed in the server console on first start.</p>}

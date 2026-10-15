@@ -99,13 +99,21 @@ export async function migrate(db: Db, after?: (t: Db) => Promise<void>): Promise
 
 /** Splits a migration file into statements (no dollar-quoted bodies are used in migrations). */
 function splitSql(sql: string): string[] {
-  return sql
+  // Strip `-- comments` (outside string literals), then split on statement-ending semicolons.
+  const noComments = sql
     .split('\n')
-    .filter((l) => !l.trim().startsWith('--'))
+    .map((l) => {
+      let inStr = false, out = ''
+      for (let i = 0; i < l.length; i++) {
+        const c = l[i]
+        if (c === "'") inStr = !inStr
+        if (!inStr && c === '-' && l[i + 1] === '-') break
+        out += c
+      }
+      return out
+    })
     .join('\n')
-    .split(/;\s*(?:\n|$)/)
-    .map((s) => s.trim())
-    .filter(Boolean)
+  return noComments.split(/;\s*(?:\n|$)/).map((s) => s.trim()).filter(Boolean)
 }
 
 async function init(): Promise<Db> {

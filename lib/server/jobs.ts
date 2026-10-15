@@ -3,7 +3,7 @@ import type { Db } from './db'
 import { getDb } from './db'
 import { newId } from './ids'
 
-export type JobKind = 'export.build' | 'deletion.execute' | 'retention.prune' | 'followups.remind'
+export type JobKind = 'export.build' | 'deletion.execute' | 'retention.prune' | 'followups.remind' | 'email.deliver' | 'automation.run' | 'tasks.due'
 
 /**
  * Background jobs live in Postgres (no extra broker to own or operate). `npm run worker` processes them;
@@ -46,6 +46,12 @@ export async function runDueJobs(limit = 20): Promise<number> {
 async function handle(db: Db, kind: JobKind, p: Record<string, string>) {
   const privacy = await import('./services/privacy')
   switch (kind) {
+    case 'email.deliver':
+      return (await import('./email')).deliverEmail(db, p.mailId)
+    case 'automation.run':
+      return (await import('./services/automations')).executeRun(db, p.runId)
+    case 'tasks.due':
+      return (await import('./services/automations')).fireDueTasks(db)
     case 'export.build':
       return privacy.buildExport(db, p.exportId, p.userId)
     case 'deletion.execute':

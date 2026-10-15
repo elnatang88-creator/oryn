@@ -100,3 +100,6 @@ Add a new numbered file in `db/migrations/` (e.g. `0002_*.sql`); never edit an a
 | `analytics_events.session_id` | Per-tab random id for client events |
 
 Terminology decided in this pass: a **card** is a projection of one identity for a context (front + back = first layer). Its **capsule** is what else that person gets on "Learn more" (deck, booking, portfolio). Tables keep the name `capsules`.
+
+## Platform tables (migration 0006)
+`auth_tokens` (verify/reset, hash only) · `email_outbox` · `events` + slug/description/timezone/starts_at/ends_at/capacity/published/registration_open/waitlist/registration_fields/ticket_types/brand · `registrations` (= tickets; `token_hash`, status confirmed/waitlisted/cancelled, `checked_in_at`) · `check_ins` · `leads` · `lead_notes` · `tasks` · `automations` · `automation_runs` (idempotency key) · `stations` + mode/destination_url/config/transfer_code_hash · `station_interactions` (kind + time only) · `users` + email_verified_at/username/notify_email/ai_consent_at · `organizations.pipeline_stages`.

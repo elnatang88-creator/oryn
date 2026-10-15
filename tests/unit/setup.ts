@@ -1,3 +1,4 @@
+process.env.EMAIL_TRANSPORT ??= 'none' // keep test output quiet; delivery itself is tested explicitly
 import { beforeAll } from 'vitest'
 import crypto from 'node:crypto'
 import { createPgliteDb, createPgDb, migrate, setDb } from '@/lib/server/db'

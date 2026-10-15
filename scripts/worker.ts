@@ -13,6 +13,7 @@ async function main() {
     const today = new Date().toISOString().slice(0, 10)
     if (today !== lastDaily) {
       await enqueue(db, 'followups.remind', {})
+      await enqueue(db, 'tasks.due', {})
       lastDaily = today
     }
     const n = await runDueJobs(50)

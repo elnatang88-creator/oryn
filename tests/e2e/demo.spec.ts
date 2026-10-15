@@ -136,7 +136,7 @@ test('seeded demo account: Today, station code, event rules', async ({ page, bro
   await expect(page.getByTestId('demo-banner')).toBeVisible() // fictional data is always labelled
 
   await page.goto('/stations')
-  const link = page.getByTestId('station').first().locator('a[href^="/q/"]')
+  const link = page.getByTestId('station').first().locator('a[href^="/s/"]')
   const href = await link.getAttribute('href')
   await shot(page, '08-stations')
   const r = await recipient(browser)

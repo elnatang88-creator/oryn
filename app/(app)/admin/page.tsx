@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requireUser } from '@/lib/server/request'
 import { adminOverview } from '@/lib/server/services/admin'
@@ -18,7 +19,8 @@ export default async function AdminPage() {
   const m = await productMetrics()
   return (
     <>
-      <PageHeader title="Admin console" sub="Every visit here is recorded in the audit log." />
+      <PageHeader title="Command Center" sub="Every visit here is recorded in the audit log." />
+      <nav className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1" aria-label="Modules" data-testid="admin-modules">{['users', 'businesses', 'events', 'stations', 'subscriptions', 'wallet', 'health', 'audit', 'flags'].map((m) => <Link key={m} href={`/admin/${m}`} className="shrink-0 rounded-full border border-soft-300 bg-white px-3.5 py-2 text-sm font-semibold capitalize">{m}</Link>)}</nav>
       <dl className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {Object.entries(data.stats).map(([k, v]) => <div key={k} className="card px-4 py-3"><dt className="text-xs uppercase tracking-wide text-ink-muted">{k.replace(/_/g, ' ')}</dt><dd className="text-2xl font-bold text-navy-900">{v}</dd></div>)}
       </dl>

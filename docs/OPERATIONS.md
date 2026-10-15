@@ -105,3 +105,9 @@ Works with `DATABASE_URL` pointing to a pooled connection. The embedded database
 ## Monitoring hook points
 
 `console.error` tags: `[action]` (server action failures), `[api]`, `[jobs]`, `[analytics]`. Wire these to the error-reporting provider once chosen.
+
+## Email, automations and AI (added 2026-10-15)
+- **Email** goes through `email_outbox` and the job queue. Set `EMAIL_TRANSPORT=smtp` and `SMTP_URL=smtps://user:pass@host:465` (your own server). Failed deliveries retry 5× with backoff, then show as `failed`; without a transport in production they are `skipped` and visible in Command Center → Health.
+- **Automations** run as `automation.run` jobs; every run and its per-action result is in `automation_runs` (Business → Automations → Recent runs). Daily sweep (`/api/jobs?daily=1`, via the scheduler) fires `tasks.due` and follow-up reminders.
+- **AI** is off unless `ORYN_AI_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set *and* the user enabled AI assistance. Every task is audited (`ai.task` with provider used, never the content).
+- **Health** page (`/admin/health`) shows transports, wallet configuration, job and mail queues.

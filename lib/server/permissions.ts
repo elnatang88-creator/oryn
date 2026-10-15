@@ -6,14 +6,14 @@ export type Role = 'owner' | 'admin' | 'manager' | 'member'
 export type Permission =
   | 'org.view' | 'org.manage' | 'org.billing' | 'members.view' | 'members.manage'
   | 'events.view' | 'events.manage' | 'participants.manage' | 'stations.view' | 'stations.manage'
-  | 'audit.view' | 'insights.view' | 'data.export'
+  | 'audit.view' | 'insights.view' | 'data.export' | 'leads.view' | 'leads.manage' | 'automations.manage' | 'checkin.perform'
 
 /** The Permission entity: role -> permissions. Kept in code so it is reviewed like code. */
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  owner: ['org.view', 'org.manage', 'org.billing', 'members.view', 'members.manage', 'events.view', 'events.manage', 'participants.manage', 'stations.view', 'stations.manage', 'audit.view', 'insights.view', 'data.export'],
-  admin: ['org.view', 'org.manage', 'members.view', 'members.manage', 'events.view', 'events.manage', 'participants.manage', 'stations.view', 'stations.manage', 'audit.view', 'insights.view', 'data.export'],
-  manager: ['org.view', 'members.view', 'events.view', 'events.manage', 'participants.manage', 'stations.view', 'stations.manage', 'insights.view'],
-  member: ['org.view', 'members.view', 'events.view', 'stations.view'],
+  owner: ['org.view', 'org.manage', 'org.billing', 'members.view', 'members.manage', 'events.view', 'events.manage', 'participants.manage', 'stations.view', 'stations.manage', 'audit.view', 'insights.view', 'data.export', 'leads.view', 'leads.manage', 'automations.manage', 'checkin.perform'],
+  admin: ['org.view', 'org.manage', 'members.view', 'members.manage', 'events.view', 'events.manage', 'participants.manage', 'stations.view', 'stations.manage', 'audit.view', 'insights.view', 'data.export', 'leads.view', 'leads.manage', 'automations.manage', 'checkin.perform'],
+  manager: ['org.view', 'members.view', 'events.view', 'events.manage', 'participants.manage', 'stations.view', 'stations.manage', 'insights.view', 'leads.view', 'leads.manage', 'automations.manage', 'checkin.perform'],
+  member: ['org.view', 'members.view', 'events.view', 'stations.view', 'leads.view', 'leads.manage', 'checkin.perform'],
 }
 
 export async function membership(db: Db, userId: string, orgId: string): Promise<{ role: Role } | null> {

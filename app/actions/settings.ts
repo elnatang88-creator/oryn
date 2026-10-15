@@ -128,3 +128,14 @@ export async function profileAction(_: ActionState, fd: FormData) {
     return 'Saved.'
   })
 }
+
+export async function notificationPrefsAction(_: ActionState, fd: FormData) {
+  return run(async () => {
+    const user = await requireUser()
+    const { setNotificationPrefs, setUsername } = await import('@/lib/server/services/auth')
+    await setNotificationPrefs(user.id, { notifyEmail: fd.get('notify_email') === 'on', aiConsent: fd.get('ai_consent') === 'on' })
+    if (fd.has('username')) await setUsername(user.id, str(fd, 'username'))
+    revalidatePath('/', 'layout')
+    return 'Saved.'
+  })
+}

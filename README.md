@@ -58,3 +58,15 @@ tests/unit/          Service tests on a real in-memory Postgres
 tests/e2e/           Playwright: the founder demo on phone + desktop, slow network, no-JS
 legacy/              The earlier prototype, preserved unchanged (not built). See docs/LEGACY_AUDIT.md
 ```
+
+## Platform modules (2026-10-15)
+
+| Area | Where | Docs |
+|---|---|---|
+| Events: public page, registration, tickets, check-in | `/events/<id>` → Public page & registration · `/e/<slug>` · `/register/<slug>` · `/ticket/<token>` · `/events/<id>/checkin` | FEATURE_STATUS.md |
+| Stations (NFC + QR, one URL): card · lead capture · registration · check-in · booking · custom page | `/stations` · public `/s/<code>` (`/q/<code>` alias) | DECISIONS.md E9 |
+| Business: leads pipeline, tasks, automations, CSV | `/business`, `/business/tasks`, `/business/automations` | |
+| Accounts: email verification, password reset, notification prefs, public `/u/<username>` | `/verify`, `/forgot`, `/reset`, `/settings/notifications` | |
+| Search ⌘K, AI assistance (consent + fallback), Command Center | header search · `/admin/<module>` | lib/server/ai.ts |
+
+Environment template: `.env.example` (local works with nothing set). Jobs: `npm run worker` or the scheduler container (`/api/jobs?daily=1` once a day runs reminders and due tasks).

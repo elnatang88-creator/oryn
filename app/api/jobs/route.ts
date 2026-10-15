@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET
   const given = req.headers.get('authorization')?.replace(/^Bearer /, '') ?? ''
   if (!secret || !safeEqual(given, secret)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  if (req.nextUrl.searchParams.get('daily') === '1') await enqueue(await getDb(), 'followups.remind', {})
+  if (req.nextUrl.searchParams.get('daily') === '1') { const db = await getDb(); await enqueue(db, 'followups.remind', {}); await enqueue(db, 'tasks.due', {}) }
   const ran = await runDueJobs(50)
   return NextResponse.json({ ran })
 }
