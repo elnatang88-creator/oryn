@@ -62,7 +62,7 @@ describe('collections and card lifecycle', () => {
     const copy = await duplicateCapsule(u.id, id)
     const { capsule: c } = await getCapsule(u.id, copy)
     expect(c.name).toBe('Original copy'); expect(c.is_default).toBe(false); expect(c.design.material).toBe('gold'); expect(c.fields).toHaveLength(4); expect(c.private_note).toBe('keep')
-    await updateCapsule(u.id, copy, { ...c, name: 'Changed', design: { ...c.design, material: 'white' } })
+    await updateCapsule(u.id, copy, { ...c, accent: 'blue', name: 'Changed', design: { ...c.design, material: 'white' } })
     expect((await getCapsule(u.id, id)).capsule.design.material).toBe('gold')
     await setDefaultCapsule(u.id, copy)
     expect((await listCapsules(u.id)).find((x) => x.id === copy)!.is_default).toBe(true)
