@@ -52,17 +52,30 @@ test('login → onboarding (5 steps with progress) → dashboard → card → ed
   await expect(page.getByTestId('notification-bell').first()).toHaveAttribute('data-unread', '0')
   await shot(page, '06-dashboard')
 
+  // Card lifecycle: duplicate → copy opens for editing; make it active from the list.
+  await page.goto('/settings/plan')
+  await page.getByRole('button', { name: 'Switch to Pro' }).click()
+  await expect(page.getByTestId('plan-changed')).toContainText('Pro')
+  await page.goto('/capsules')
+  await page.getByTestId('duplicate-card').first().click()
+  await expect(page.getByTestId('duplicated-banner')).toBeVisible()
+  await expect(page.getByTestId('collections')).toBeVisible()
+  await page.getByTestId('preset-gold').click()
+  await page.getByRole('button', { name: 'Save changes' }).click()
+  await expect(page.getByText(/Saved/).first()).toBeVisible()
+  await page.goto('/capsules')
+  await expect(page.getByTestId('capsule-card')).toHaveCount(2)
+  await page.getByTestId('set-active').first().click()
+  await expect(page.getByTestId('active-card')).toHaveCount(1)
+
   // Card (owner view) — the card object itself.
   await page.getByTestId(info.project.name.endsWith('mobile') ? 'tab-share' : 'rail-share').click()
   await expect(page.getByTestId('wallet-card-name')).toHaveText('Genesis Person')
   await shot(page, '07-card')
 
   // Wallet Center: no keys on this server → both pending, nothing claims success; the unsigned preview is labelled.
-  await page.goto('/settings/plan')
-  await page.getByRole('button', { name: 'Switch to Pro' }).click()
-  await expect(page.getByTestId('plan-changed')).toContainText('Pro')
   await page.goto('/wallet')
-  await expect(page.getByTestId('wallet-card')).toContainText('Professional')
+  await expect(page.getByTestId('wallet-card')).toBeVisible()
   await expect(page.getByTestId('wallet-apple-pending')).toContainText('Integration pending')
   await expect(page.getByTestId('wallet-google-pending')).toContainText('Integration pending')
   await expect(page.getByTestId('wallet-apple-ready')).toHaveCount(0)

@@ -153,6 +153,9 @@ test('location denied → event fallback; demo members are labelled and reply (s
   await expect(daniel).toContainText('Demo')
   await daniel.getByTestId('nearby-person-open').click()
   await expect(d.page.getByTestId('person-sheet')).toContainText('Demo member')
+  // Safety controls are present on every person sheet (block is private, report also blocks).
+  await expect(d.page.getByTestId('person-block')).toBeVisible()
+  await expect(d.page.getByTestId('person-report')).toBeVisible()
   await expect(d.page.getByTestId('person-card')).toBeVisible()
   await shot(d.page, '04-person')
   await d.page.getByTestId('person-connect').click()
@@ -220,16 +223,16 @@ test('Card Studio is the source of truth: an edit shows on Share and Present', a
   const s = await phone(browser)
   await signInDemo(s.page)
   await s.page.goto('/capsules/cap_demo_conf')
-  await s.page.getByTestId('preset-marble').click()
+  await s.page.getByTestId('preset-white').click()
   await s.page.getByTestId('back-brand').click()
   await s.page.getByRole('button', { name: 'Save changes' }).click()
   await expect(s.page.getByText(/Saved/).first()).toBeVisible()
   await s.page.goto('/share/quick')
-  await expect(s.page.getByTestId('wallet-card').locator('[data-material]').first()).toHaveAttribute('data-material', 'marble')
+  await expect(s.page.getByTestId('wallet-card').locator('[data-material]').first()).toHaveAttribute('data-material', 'white')
   await expect(s.page.getByTestId('card-back-details')).toHaveCount(1)
   await expect(s.page.getByTestId('card-back-qr')).toHaveCount(0) // "Details only": no code on the back
   await s.page.getByTestId('open-present').click()
-  await expect(s.page.getByTestId('present-view').locator('[data-material]').first()).toHaveAttribute('data-material', 'marble')
+  await expect(s.page.getByTestId('present-view').locator('[data-material]').first()).toHaveAttribute('data-material', 'white')
   // FLOW E — change a permission: the public card follows at once (server-side projection).
   await s.page.goto('/capsules/cap_demo_conf')
   await s.page.getByTestId('layer-email-hidden').click()
@@ -244,7 +247,7 @@ test('Card Studio is the source of truth: an edit shows on Share and Present', a
   await r.ctx.close()
   // Put the shared demo card back as it was for the other suites.
   await s.page.goto('/capsules/cap_demo_conf')
-  await s.page.getByTestId('preset-navy').click()
+  await s.page.getByTestId('preset-midnight').click()
   await s.page.getByTestId('back-qr').click()
   await s.page.getByTestId('layer-email-instant').click()
   await s.page.getByRole('button', { name: 'Save changes' }).click()

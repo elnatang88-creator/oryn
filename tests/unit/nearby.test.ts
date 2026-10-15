@@ -167,3 +167,40 @@ describe('Nearby: stopping shares withdraws a pending offer', () => {
     expect((await listConnections(b.id)).map((c) => c.name)).not.toContain('Withdrawn A')
   })
 })
+
+describe('Nearby: block and report', () => {
+  it('blocking hides both people from each other, declines pending requests and refuses new ones; the blocked person is never told', async () => {
+    const { blockNearby, listBlocked, unblockUser } = await import('@/lib/server/services/nearby')
+    const a = await member('Blocker'), b = await member('Blocked')
+    await heartbeat(a.id, { cell: HERE }); await heartbeat(b.id, { cell: HERE })
+    const hb = (await nearbyState(a.id)).people.find((p) => p.name === 'Blocked')!.handle
+    await requestNearby(b.id, (await nearbyState(b.id)).people.find((p) => p.name === 'Blocker')!.handle)
+    expect((await nearbyState(a.id)).incoming).toHaveLength(1)
+    await blockNearby(a.id, hb)
+    expect((await nearbyState(a.id)).people.map((p) => p.name)).not.toContain('Blocked')
+    expect((await nearbyState(b.id)).people.map((p) => p.name)).not.toContain('Blocker')
+    expect((await nearbyState(a.id)).incoming).toHaveLength(0)
+    // B sees nothing: no notification, their request simply shows as not accepted.
+    const d = await db()
+    expect(await d.query(`SELECT 1 FROM notifications WHERE user_id = $1 AND body ILIKE '%block%'`, [b.id])).toHaveLength(0)
+    await expect(requestNearby(a.id, hb)).rejects.toSatisfy((e) => e instanceof AppError && e.code === 'not_found')
+    expect((await listBlocked(a.id)).map((x) => x.name)).toEqual(['Blocked'])
+    await unblockUser(a.id, b.id)
+    expect((await nearbyState(a.id)).people.map((p) => p.name)).toContain('Blocked')
+  })
+
+  it('reporting records a report for the platform team, blocks, validates the reason and is rate-limited', async () => {
+    const { reportNearby } = await import('@/lib/server/services/nearby')
+    const a = await member('Reporter'), b = await member('Reported')
+    await heartbeat(a.id, { cell: HERE }); await heartbeat(b.id, { cell: HERE })
+    const hb = (await nearbyState(a.id)).people.find((p) => p.name === 'Reported')!.handle
+    await expect(reportNearby(a.id, hb, 'because', '')).rejects.toSatisfy((e) => e instanceof AppError && e.code === 'invalid')
+    const r = await reportNearby(a.id, hb, 'harassment', 'x'.repeat(900))
+    const d = await db()
+    const [row] = await d.query<{ reason: string; details: string; status: string; reported_user_id: string }>(`SELECT reason, details, status, reported_user_id FROM abuse_reports WHERE id = $1`, [r.id])
+    expect(row).toMatchObject({ reason: 'harassment', status: 'open', reported_user_id: b.id })
+    expect(row.details).toHaveLength(500)
+    expect((await nearbyState(a.id)).people.map((p) => p.name)).not.toContain('Reported')
+    expect(await d.query(`SELECT 1 FROM audit_events WHERE action = 'user.reported' AND actor_user_id = $1`, [a.id])).toHaveLength(1)
+  })
+})

@@ -117,6 +117,7 @@ async function candidates(db: Db, me: string, handle?: string): Promise<{ mine: 
        LEFT JOIN events e ON e.id = p.event_id
       WHERE p.user_id <> $1 AND p.expires_at > now() AND u.deleted_at IS NULL AND u.nearby_visibility <> 'off'
         AND ($5::text IS NULL OR p.handle = $5)
+        AND NOT EXISTS (SELECT 1 FROM user_blocks b WHERE (b.blocker_user_id = $1 AND b.blocked_user_id = p.user_id) OR (b.blocker_user_id = p.user_id AND b.blocked_user_id = $1))
         AND (
           (p.event_id IS NOT NULL AND p.event_id = $2)
           OR (p.visibility <> 'event' AND p.cell = ANY($3::text[]))
@@ -197,6 +198,8 @@ export async function requestNearby(me: string, handle: string) {
   if (!mine) throw new AppError('forbidden', 'Turn on Nearby to connect with people around you.')
   const target = people[0]
   if (!target) throw new AppError('not_found', 'That person is no longer nearby.')
+  const [blocked] = await db.query(`SELECT 1 FROM user_blocks WHERE (blocker_user_id = $1 AND blocked_user_id = $2) OR (blocker_user_id = $2 AND blocked_user_id = $1)`, [me, target.user_id])
+  if (blocked) throw new AppError('not_found', 'That person is no longer nearby.')
   await rateLimit(db, `nearby-connect:${me}`, 60, 3600)
 
   const [existing] = await db.query<{ id: string }>(`SELECT id FROM connections WHERE owner_user_id = $1 AND contact_user_id = $2 AND status = 'active'`, [me, target.user_id])
@@ -239,4 +242,63 @@ async function simulateDemoReplies(db: Db, me: string) {
       WHERE r.from_user_id = $1 AND r.kind = 'member' AND r.status = 'pending' AND u.email LIKE '%@oryn.local' AND f.email LIKE '%@oryn.local'
         AND r.created_at < now() - interval '2 seconds'`, [me])
   for (const r of due) await respondToRequest(r.owner_user_id, r.id, true)
+}
+
+// ─── Safety: block and report ────────────────────────────────────────────────────────────────────
+
+export const REPORT_REASONS = ['spam', 'harassment', 'impersonation', 'inappropriate', 'other'] as const
+export type ReportReason = (typeof REPORT_REASONS)[number]
+
+async function userIdForHandle(db: Db, handle: string) {
+  if (typeof handle !== 'string' || !/^nb_[A-Za-z0-9_-]{6,40}$/.test(handle)) throw notFound('That person')
+  // Handles are rotating and only valid while present; we resolve the user id behind it, never expose it.
+  const [row] = await db.query<{ user_id: string }>(`SELECT user_id FROM nearby_presence WHERE handle = $1`, [handle])
+  if (!row) throw notFound('That person')
+  return row.user_id
+}
+
+/**
+ * Block: they disappear from my Nearby and I from theirs; their pending requests to me are declined silently;
+ * new requests either way are refused. The blocked person is never told.
+ */
+export async function blockNearby(me: string, handle: string) {
+  const db = await getDb()
+  const them = await userIdForHandle(db, handle)
+  if (them === me) throw new AppError('invalid', 'You can’t block yourself.')
+  await db.tx(async (t) => {
+    await t.query(`INSERT INTO user_blocks (blocker_user_id, blocked_user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`, [me, them])
+    await t.query(`UPDATE connection_requests SET status = 'declined', responded_at = now() WHERE owner_user_id = $1 AND from_user_id = $2 AND status = 'pending'`, [me, them])
+    await t.query(`UPDATE connection_requests SET status = 'declined', responded_at = now() WHERE owner_user_id = $2 AND from_user_id = $1 AND status = 'pending'`, [me, them])
+    await audit(t, { actor: me, action: 'user.blocked', targetType: 'user', targetId: them, meta: { via: 'nearby' } })
+  })
+  return { blocked: true }
+}
+
+export async function unblockUser(me: string, them: string) {
+  const db = await getDb()
+  await db.query(`DELETE FROM user_blocks WHERE blocker_user_id = $1 AND blocked_user_id = $2`, [me, them])
+  await audit(db, { actor: me, action: 'user.unblocked', targetType: 'user', targetId: them })
+}
+
+export async function listBlocked(me: string) {
+  const db = await getDb()
+  return db.query<{ user_id: string; name: string; created_at: Date }>(
+    `SELECT b.blocked_user_id AS user_id, u.display_name AS name, b.created_at FROM user_blocks b JOIN users u ON u.id = b.blocked_user_id WHERE b.blocker_user_id = $1 ORDER BY b.created_at DESC`, [me])
+}
+
+/** Report abuse: recorded for the platform team, rate-limited, and the reported person is blocked at the same time. */
+export async function reportNearby(me: string, handle: string, reason: string, details: string) {
+  const db = await getDb()
+  if (!REPORT_REASONS.includes(reason as ReportReason)) throw new AppError('invalid', 'Choose a reason.')
+  const them = await userIdForHandle(db, handle)
+  if (them === me) throw new AppError('invalid', 'You can’t report yourself.')
+  await rateLimit(db, `report:${me}`, 10, 86400)
+  const id = newId('rep')
+  await db.tx(async (t) => {
+    await t.query(`INSERT INTO abuse_reports (id, reporter_user_id, reported_user_id, reason, details, surface) VALUES ($1,$2,$3,$4,$5,'nearby')`, [id, me, them, reason, String(details ?? '').slice(0, 500)])
+    await t.query(`INSERT INTO user_blocks (blocker_user_id, blocked_user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`, [me, them])
+    await t.query(`UPDATE connection_requests SET status = 'declined', responded_at = now() WHERE ((owner_user_id = $1 AND from_user_id = $2) OR (owner_user_id = $2 AND from_user_id = $1)) AND status = 'pending'`, [me, them])
+    await audit(t, { actor: me, action: 'user.reported', targetType: 'user', targetId: them, meta: { reason, report: id } })
+  })
+  return { reported: true, id }
 }

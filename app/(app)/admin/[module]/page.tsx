@@ -50,7 +50,7 @@ export default async function AdminModulePage({ params, searchParams }: { params
           <div><dt className="text-ink-muted">Jobs</dt><dd className="font-semibold">{process.env.CRON_SECRET ? 'scheduler secret set' : 'no CRON_SECRET'}</dd></div>
         </dl>
       )}
-      {['users', 'businesses', 'events', 'stations', 'audit'].includes(module) && <form className="mb-4"><input dir="auto" name="q" defaultValue={q} className="input mt-0" placeholder="Search" aria-label="Search" /></form>}
+      {['users', 'businesses', 'events', 'stations', 'audit', 'reports'].includes(module) && <form className="mb-4"><input dir="auto" name="q" defaultValue={q} className="input mt-0" placeholder="Search" aria-label="Search" /></form>}
       <div className="card overflow-x-auto">
         <table className="w-full text-left text-sm" data-testid="admin-table">
           <thead className="text-ink-muted"><tr>{cols.map((c) => <th key={c} className="px-3 py-2 font-semibold">{c.replace(/_/g, ' ')}</th>)}</tr></thead>

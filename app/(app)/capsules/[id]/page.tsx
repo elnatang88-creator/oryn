@@ -14,7 +14,7 @@ import { normalizeDesign } from '@/lib/card-design'
 
 export const metadata = { title: 'Edit capsule' }
 
-export default async function EditCapsulePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string }> }) {
+export default async function EditCapsulePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; duplicated?: string }> }) {
   const [{ id }, sp] = await Promise.all([params, searchParams])
   const user = await requireUser()
   const res = await getCapsule(user.id, id).catch((e) => { if (e instanceof AppError) return null; throw e })
@@ -23,6 +23,7 @@ export default async function EditCapsulePage({ params, searchParams }: { params
   const plan = await userPlan(await getDb(), user.id)
   return (
     <>
+      {sp.duplicated && <p className="card mb-6 border-electric/30 bg-soft-100 px-5 py-4 font-semibold text-navy-900" role="status" data-testid="duplicated-banner">This is a copy. Rename it and change what it shows — the original is untouched.</p>}
       {sp.created && (
         <div className="card mb-6 flex flex-wrap items-center justify-between gap-3 border-electric/30 bg-soft-100 px-5 py-4" data-testid="created-banner">
           <p className="font-semibold text-navy-900">Your capsule is ready. Share it whenever you like.</p>

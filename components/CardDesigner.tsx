@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from 'react'
 import {
-  BACK_LABELS, CARD_BACKS, CARD_FONTS, CARD_LAYOUTS, FINISHES, FINISH_LABELS, FOILS, FOIL_SPECS, FONT_SPECS, LAYOUT_LABELS, MATERIALS, MATERIAL_SPECS, PRESETS,
+  BACK_LABELS, CARD_BACKS, CARD_FONTS, CARD_LAYOUTS, FINISHES, FINISH_LABELS, FOILS, FOIL_SPECS, FONT_SPECS, LAYOUT_LABELS, MATERIALS, MATERIAL_SPECS, PRESETS, EXTRA_MATERIALS,
   designVars, type CardDesign,
 } from '@/lib/card-design'
 
@@ -13,8 +13,9 @@ export function CardDesigner({ value, onChange, initialsText }: { value: CardDes
   return (
     <div className="space-y-5" data-testid="card-designer">
       <div>
-        <span className="label">Start from a design</span>
-        <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <span className="label">Collection</span>
+        <p className="hint">Seven looks, each fully editable below.</p>
+        <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7" data-testid="collections">
           {PRESETS.map((p) => {
             const v = designVars({ ...p.design, base: value.base, back: value.back })
             return (
@@ -23,13 +24,13 @@ export function CardDesigner({ value, onChange, initialsText }: { value: CardDes
                 <span className="relative block aspect-[1.586] overflow-hidden rounded-lg" style={{ background: v['--mat'] }}>
                   <span className="lc-foil absolute bottom-1 start-2 text-[15px]" style={{ '--foil': v['--foil'], fontFamily: v['--card-font'], filter: v['--foil-shadow'] } as CSSProperties}>{initialsText}</span>
                 </span>
-                <span className="mt-1 block truncate">{p.label}</span>
+                <span className="mt-1 block truncate"><span className="text-ink-faint">{p.letter}</span> · {p.label}</span>
               </button>
             )
           })}
         </div>
       </div>
-      <Choice label="Material" items={MATERIALS.map((m) => [m, MATERIAL_SPECS[m].label])} value={value.material} onPick={(m) => set({ material: m })}
+      <Choice label="Material" items={MATERIALS.filter((m) => !EXTRA_MATERIALS.includes(m) || m === value.material).map((m) => [m, MATERIAL_SPECS[m].label])} value={value.material} onPick={(m) => set({ material: m })}
         swatch={(m) => (m === 'custom' ? value.base : MATERIAL_SPECS[m].bg!)} testid="material" />
       {value.material === 'custom' && (
         <label className="inline-flex min-h-[44px] items-center gap-3 rounded-xl border border-soft-300 bg-white px-3 text-sm font-semibold">

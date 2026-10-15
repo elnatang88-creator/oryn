@@ -3,10 +3,10 @@ import { Lock, Globe2 } from 'lucide-react'
 
 export function PageHeader({ title, sub, action }: { title: string; sub?: string; action?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3 animate-rise">
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-3 animate-rise sm:mb-6">
       <div>
         <h1 className="h1">{title}</h1>
-        {sub && <p className="mt-1 text-[15px] text-ink-muted">{sub}</p>}
+        {sub && <p className="mt-1 text-[14px] leading-snug text-ink-muted sm:text-[15px]">{sub}</p>}
       </div>
       {action}
     </div>

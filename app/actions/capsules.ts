@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { listCapsules } from '@/lib/server/services/capsules'
 import { revalidatePath } from 'next/cache'
-import { archiveCapsule, createCapsule, setDefaultCapsule, templateFields, updateCapsule, updatePolicy } from '@/lib/server/services/capsules'
+import { archiveCapsule, createCapsule, duplicateCapsule, setDefaultCapsule, templateFields, updateCapsule, updatePolicy } from '@/lib/server/services/capsules'
 import { requireUser } from '@/lib/server/request'
 import { invalid } from '@/lib/server/errors'
 import { MODES, type Mode } from '@/lib/capsule-model'
@@ -96,4 +96,11 @@ export async function archiveCapsuleAction(fd: FormData) {
   const user = await requireUser()
   await archiveCapsule(user.id, str(fd, 'id'))
   redirect('/capsules')
+}
+
+export async function duplicateCapsuleAction(fd: FormData) {
+  const user = await requireUser()
+  const id = await duplicateCapsule(user.id, str(fd, 'id'))
+  revalidatePath('/capsules')
+  redirect(`/capsules/${id}?duplicated=1`)
 }

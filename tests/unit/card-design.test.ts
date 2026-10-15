@@ -40,3 +40,33 @@ describe('card design', () => {
     expect(css).not.toMatch(/<|;\s*}|javascript:|https?:/i)
   })
 })
+
+describe('collections and card lifecycle', () => {
+  it('every collection resolves to a valid design and a wallet colour set', async () => {
+    const { PRESETS, MATERIALS, normalizeDesign: norm, designVars: vars } = await import('@/lib/card-design')
+    const { walletColors } = await import('@/lib/server/wallet')
+    expect(PRESETS.map((p) => p.id)).toEqual(['obsidian', 'platinum', 'titanium', 'midnight', 'gold', 'white', 'custom'])
+    for (const p of PRESETS) {
+      const d = norm({ ...p.design, base: '#112233', back: 'qr' })
+      expect(d.material).toBe(p.design.material)
+      expect(vars(d)['--mat']).toBeTruthy()
+      expect(walletColors(d).background).toMatch(/^#[0-9a-f]{6}$/i)
+    }
+    for (const m of MATERIALS) expect(walletColors(norm({ material: m, base: '#445566' })).foreground).toMatch(/^#/)
+  })
+
+  it('duplicate makes an independent copy (design, fields, policy, private note), never the active card', async () => {
+    const { duplicateCapsule, listCapsules, setDefaultCapsule } = await import('@/lib/server/services/capsules')
+    const u = await makeUser('pro', 'Dup Person')
+    const id = await createCapsule(u.id, { name: 'Original', mode: 'professional', display_name: 'Dup Person', fields: fields(), private_note: 'keep', design: { ...DEFAULT_DESIGN, material: 'gold' } })
+    const copy = await duplicateCapsule(u.id, id)
+    const { capsule: c } = await getCapsule(u.id, copy)
+    expect(c.name).toBe('Original copy'); expect(c.is_default).toBe(false); expect(c.design.material).toBe('gold'); expect(c.fields).toHaveLength(4); expect(c.private_note).toBe('keep')
+    await updateCapsule(u.id, copy, { ...c, name: 'Changed', design: { ...c.design, material: 'white' } })
+    expect((await getCapsule(u.id, id)).capsule.design.material).toBe('gold')
+    await setDefaultCapsule(u.id, copy)
+    expect((await listCapsules(u.id)).find((x) => x.id === copy)!.is_default).toBe(true)
+    const stranger = await makeUser('pro', 'Stranger')
+    await expect(duplicateCapsule(stranger.id, id)).rejects.toThrow()
+  })
+})

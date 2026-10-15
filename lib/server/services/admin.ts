@@ -74,7 +74,7 @@ export async function isFlagOn(key: string) {
 }
 
 // ─── Command Center modules ──────────────────────────────────────────────────────────────────────
-export const ADMIN_MODULES = ['users', 'businesses', 'events', 'stations', 'subscriptions', 'wallet', 'health', 'audit', 'flags'] as const
+export const ADMIN_MODULES = ['users', 'businesses', 'events', 'stations', 'subscriptions', 'wallet', 'reports', 'health', 'audit', 'flags'] as const
 export type AdminModule = (typeof ADMIN_MODULES)[number]
 
 export async function adminModule(adminId: string, module: AdminModule, q = '') {
@@ -102,6 +102,10 @@ export async function adminModule(adminId: string, module: AdminModule, q = '') 
       const [presence] = await db.query<Record<string, number>>(`SELECT count(*)::int AS nearby_present FROM nearby_presence WHERE expires_at > now()`)
       return [{ ...jobs, ...Object.fromEntries(Object.entries(mail).map(([k, v]) => [`mail_${k}`, v])), ...runs, ...presence }]
     }
+    case 'reports':
+      return db.query(`SELECT r.id, r.reason, r.status, r.surface, left(r.details, 120) AS details, rep.email AS reported, u.email AS reporter, r.created_at
+                         FROM abuse_reports r JOIN users rep ON rep.id = r.reported_user_id LEFT JOIN users u ON u.id = r.reporter_user_id
+                        WHERE ($1 = '%%' OR rep.email ILIKE $1 OR r.reason ILIKE $1) ORDER BY (r.status = 'open') DESC, r.created_at DESC LIMIT 200`, [like])
     case 'audit':
       return db.query(`SELECT a.id, a.action, a.target_type, a.target_id, a.created_at, u.email AS actor FROM audit_events a LEFT JOIN users u ON u.id = a.actor_user_id WHERE ($1 = '%%' OR a.action ILIKE $1 OR coalesce(u.email, '') ILIKE $1) ORDER BY a.created_at DESC LIMIT 200`, [like])
     case 'flags':
@@ -129,6 +133,7 @@ export async function operationalAlerts(adminId: string): Promise<OpsAlert[]> {
             count(*) FILTER (WHERE status = 'queued' AND created_at < now() - interval '30 minutes')::int AS queued_old FROM email_outbox`)
   const [r] = await db.query<{ failed_24h: number }>(`SELECT count(*) FILTER (WHERE status = 'failed' AND created_at > now() - interval '1 day')::int AS failed_24h FROM automation_runs`)
   const [u] = await db.query<{ demo: number }>(`SELECT count(*)::int AS demo FROM users WHERE email LIKE '%@oryn.local'`)
+  const [rep] = await db.query<{ open: number }>(`SELECT count(*)::int AS open FROM abuse_reports WHERE status = 'open'`)
   const out: OpsAlert[] = []
   if (j.failed) out.push({ level: 'critical', title: `${j.failed} failed job${j.failed === 1 ? '' : 's'}`, detail: 'Jobs exhausted their retries. Inspect last_error in the jobs table; re-queue after fixing the cause.' })
   if (j.stuck) out.push({ level: 'warning', title: `${j.stuck} job${j.stuck === 1 ? '' : 's'} running for over 15 minutes`, detail: 'A worker may have died mid-job. The next run reclaims them; if it repeats, check the scheduler container.' })
@@ -137,6 +142,7 @@ export async function operationalAlerts(adminId: string): Promise<OpsAlert[]> {
   if (m.queued_old) out.push({ level: 'warning', title: `${m.queued_old} email${m.queued_old === 1 ? '' : 's'} waiting over 30 minutes`, detail: 'Delivery jobs are not running. Check the scheduler.' })
   if (prod && m.skipped_24h) out.push({ level: 'warning', title: `${m.skipped_24h} email${m.skipped_24h === 1 ? '' : 's'} skipped in the last 24 h`, detail: 'EMAIL_TRANSPORT is not set to smtp. Verification, reset and ticket mails reach nobody.' })
   if (r.failed_24h) out.push({ level: 'warning', title: `${r.failed_24h} automation run${r.failed_24h === 1 ? '' : 's'} failed today`, detail: 'Open Business → Automations → run log for the error.' })
+  if (rep.open) out.push({ level: 'warning', title: `${rep.open} open abuse report${rep.open === 1 ? '' : 's'}`, detail: 'Review them under Command Center → Reports.' })
   if (!process.env.CRON_SECRET) out.push({ level: prod ? 'critical' : 'info', title: 'No CRON_SECRET', detail: 'Background jobs (email, automations, reminders, deletions) cannot be triggered.' })
   if (prod && (process.env.EMAIL_TRANSPORT ?? 'none') !== 'smtp') out.push({ level: 'warning', title: 'Email transport is not SMTP', detail: 'Set EMAIL_TRANSPORT=smtp and SMTP_URL to deliver mail.' })
   if (prod && u.demo) out.push({ level: 'critical', title: `${u.demo} demo account${u.demo === 1 ? '' : 's'} present in production`, detail: 'ORYN_SEED_DEMO must be false in production; remove the @oryn.local accounts.' })

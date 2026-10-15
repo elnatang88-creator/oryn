@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Pencil, Plus, SlidersHorizontal } from 'lucide-react'
+import { Copy, Pencil, Plus, SlidersHorizontal, Star } from 'lucide-react'
+import { duplicateCapsuleAction, setDefaultAction } from '@/app/actions/capsules'
 import { requireUser } from '@/lib/server/request'
 import { listCapsules } from '@/lib/server/services/capsules'
 import { cardFor } from '@/lib/server/services/owner-card'
@@ -45,6 +46,12 @@ export default async function CardsPage() {
                   <a href={`/share/use?capsule=${c.id}`} className="btn-share min-h-[44px] px-2 text-sm"><ExchangeCardsIcon className="h-4 w-4" /> {c.is_default ? 'Share' : 'Use'}</a>
                   <Link href={`/capsules/${c.id}`} className="btn-more min-h-[44px] px-2 text-sm"><Pencil className="h-4 w-4" aria-hidden="true" /> Edit</Link>
                   <Link href={`/capsules/${c.id}/visibility`} className="btn-more min-h-[44px] px-2 text-sm"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Rules</Link>
+                </div>
+                <div className="mt-2 flex items-center justify-between gap-2 text-sm">
+                  {!c.is_default ? (
+                    <form action={setDefaultAction}><input type="hidden" name="id" value={c.id} /><button className="btn-quiet min-h-[40px] px-2 text-sm font-semibold text-electric-600" data-testid="set-active"><Star className="h-4 w-4" aria-hidden="true" /> Make active</button></form>
+                  ) : <span className="px-2 text-xs text-ink-muted">Used by Share, Nearby, Present and Wallet</span>}
+                  <form action={duplicateCapsuleAction}><input type="hidden" name="id" value={c.id} /><button className="btn-quiet min-h-[40px] px-2 text-sm" data-testid="duplicate-card"><Copy className="h-4 w-4" aria-hidden="true" /> Duplicate</button></form>
                 </div>
               </li>
             )

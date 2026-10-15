@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overflow-x: clip; }
   body { @apply bg-soft-50 text-ink antialiased; }
   :focus-visible { outline: 3px solid #4D84FF; outline-offset: 2px; border-radius: 6px; }
   @media (prefers-reduced-motion: reduce) {
@@ -29,7 +29,7 @@
   .chip-public { @apply chip bg-soft-100 text-electric-600; }
   .chip-private { @apply chip bg-navy-900 text-white; }
   .chip-muted { @apply chip bg-soft-100 text-ink-muted; }
-  .h1 { @apply text-[26px] font-bold tracking-tight text-navy-900 sm:text-3xl; }
+  .h1 { @apply text-[24px] font-bold leading-tight tracking-tight text-navy-900 sm:text-3xl; }
   .h2 { @apply text-lg font-bold text-navy-900; }
 }
 

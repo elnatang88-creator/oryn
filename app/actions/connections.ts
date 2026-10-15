@@ -112,3 +112,10 @@ export async function readNotificationAction(fd: FormData) {
   revalidatePath('/notifications')
   if (link.startsWith('/') && !link.startsWith('//')) redirect(link)
 }
+
+export async function unblockAction(fd: FormData) {
+  const user = await requireUser()
+  const { unblockUser } = await import('@/lib/server/services/nearby')
+  await unblockUser(user.id, str(fd, 'id'))
+  revalidatePath('/settings/privacy')
+}

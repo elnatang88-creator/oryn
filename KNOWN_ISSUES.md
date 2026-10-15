@@ -23,4 +23,4 @@ Updated 2026-10-15 (Genesis V2). Nothing here is hidden behind a working-looking
 | K17 | Apple pass images are 1×1 placeholders until brand art is supplied (`buildPkpass(json, images)`). | Passes would show no logo. | Needs assets |
 | K18 | The 5-step onboarding indicator counts "Appearance" as step 4 inside the card editor (no separate screen). | Cosmetic; the progress bar jumps 3 → 5 after creating the card. | Minor |
 | K19 | Operational alerts are computed on page load of Command Center → Health; there is no outbound alerting (email/webhook) yet. | Someone must open the page. | Not started |
-
+| K20 | No loading skeletons: a route-level `loading.tsx` broke post-action refreshes under Next 15.5 and was reverted (docs/ORYN_DECISIONS.md T6). | Brief blank content area on slow navigations. | P1, per page |

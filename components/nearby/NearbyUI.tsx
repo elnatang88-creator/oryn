@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Check, ChevronDown, ChevronRight, Info, Loader2, MapPin, Radar, UserPlus, WifiOff } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, Flag, Info, Loader2, MapPin, Radar, ShieldBan, UserPlus, WifiOff } from 'lucide-react'
 import { Sheet } from '../Sheet'
 import { CardFace, BrandBack } from '../LuxuryCard'
 import { CardStage } from '../CardStage'
@@ -323,6 +323,7 @@ export function NearbyScreen({ initialVisibility, events, presentHref, myCard }:
                   : <button type="button" onClick={() => connect(live)} disabled={pending === live.handle} className="btn-share w-full" data-testid="person-connect">{pending === live.handle ? <Loader2 className="h-5 w-5 animate-spin" /> : <UserPlus className="h-5 w-5" aria-hidden="true" />} {live.relation === 'requested_you' ? 'Accept and connect' : 'Connect'}</button>}
               <p className="mt-2 text-center text-xs text-ink-muted">Details are exchanged only when you both agree.</p>
             </div>
+            <SafetyRow person={live} onBlock={async () => { await n.block(live.handle); setPerson(null) }} onReport={async (reason, details) => { await n.report(live.handle, reason, details); setPerson(null) }} />
           </>
         )}
       </Sheet>
@@ -339,5 +340,41 @@ function RelationButton({ p, busy, onConnect }: { p: Person; busy: boolean; onCo
     <button type="button" onClick={onConnect} disabled={busy} className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-full bg-electric px-3.5 text-sm font-semibold text-white shadow-lift disabled:opacity-70" data-testid="nearby-connect">
       {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" aria-hidden="true" />} {p.relation === 'requested_you' ? 'Accept' : 'Connect'}
     </button>
+  )
+}
+
+const REASONS: [string, string][] = [['spam', 'Spam or sales'], ['harassment', 'Harassment'], ['impersonation', 'Pretending to be someone else'], ['inappropriate', 'Inappropriate content'], ['other', 'Something else']]
+
+/** Block (private, instant) and Report (goes to the ORYN team, also blocks). Nothing here is ever shown to the other person. */
+function SafetyRow({ person, onBlock, onReport }: { person: Person; onBlock: () => Promise<void>; onReport: (reason: string, details: string) => Promise<void> }) {
+  const [mode, setMode] = useState<'idle' | 'block' | 'report' | 'busy'>('idle')
+  const [reason, setReason] = useState('spam')
+  const [details, setDetails] = useState('')
+  const [err, setErr] = useState<string | null>(null)
+  const run = async (fn: () => Promise<void>) => { setMode('busy'); setErr(null); try { await fn() } catch (e) { setErr((e as Error).message); setMode('idle') } }
+  if (mode === 'block') return (
+    <div className="mt-4 rounded-2xl bg-soft-100 p-4 text-sm" data-testid="block-confirm">
+      <p className="font-semibold text-navy-900">Block {person.name}?</p>
+      <p className="mt-1 text-ink-muted">You stop seeing each other in Nearby and requests are refused. They are not told. You can undo this in Settings → Data &amp; privacy.</p>
+      <div className="mt-3 grid grid-cols-2 gap-2"><button type="button" className="btn-more min-h-[44px]" onClick={() => setMode('idle')}>Cancel</button><button type="button" className="btn-stop min-h-[44px]" onClick={() => run(onBlock)} data-testid="block-confirm-yes">Block</button></div>
+    </div>
+  )
+  if (mode === 'report') return (
+    <form className="mt-4 rounded-2xl bg-soft-100 p-4 text-sm" data-testid="report-form" onSubmit={(e) => { e.preventDefault(); run(() => onReport(reason, details)) }}>
+      <p className="font-semibold text-navy-900">Report {person.name}</p>
+      <p className="mt-1 text-ink-muted">Goes to the ORYN team. Reporting also blocks them.</p>
+      <select value={reason} onChange={(e) => setReason(e.target.value)} className="input mt-3" aria-label="Reason" data-testid="report-reason">{REASONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+      <textarea value={details} onChange={(e) => setDetails(e.target.value.slice(0, 500))} className="input min-h-[70px] py-3" placeholder="What happened? (optional)" aria-label="Details" />
+      <div className="mt-3 grid grid-cols-2 gap-2"><button type="button" className="btn-more min-h-[44px]" onClick={() => setMode('idle')}>Cancel</button><button className="btn-stop min-h-[44px]" data-testid="report-submit">Send report</button></div>
+    </form>
+  )
+  return (
+    <div className="mt-4">
+      {err && <p className="mb-2 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-signal-stop" role="alert">{err}</p>}
+      <div className="flex justify-center gap-4 text-xs font-semibold text-ink-muted">
+        <button type="button" onClick={() => setMode('block')} disabled={mode === 'busy'} className="inline-flex min-h-[40px] items-center gap-1 px-2 hover:text-ink" data-testid="person-block"><ShieldBan className="h-4 w-4" aria-hidden="true" /> Block</button>
+        <button type="button" onClick={() => setMode('report')} disabled={mode === 'busy'} className="inline-flex min-h-[40px] items-center gap-1 px-2 hover:text-ink" data-testid="person-report"><Flag className="h-4 w-4" aria-hidden="true" /> Report</button>
+      </div>
+    </div>
   )
 }

@@ -4,7 +4,7 @@
  * (gradients + inline SVG textures) and self-hosted fonts — no images or third-party assets.
  */
 
-export const MATERIALS = ['obsidian', 'midnight', 'pearl', 'carbon', 'marble', 'titanium', 'custom'] as const
+export const MATERIALS = ['obsidian', 'platinum', 'titanium', 'midnight', 'gold', 'white', 'pearl', 'carbon', 'marble', 'custom'] as const
 export const FOILS = ['gold', 'rosegold', 'champagne', 'silver', 'electric', 'graphite', 'ivory'] as const
 export const FINISHES = ['matte', 'foil', 'holo'] as const
 export const CARD_FONTS = ['classic', 'editorial', 'modern', 'bold'] as const
@@ -35,6 +35,9 @@ export const MATERIAL_SPECS: Record<Material, MaterialSpec> = {
   pearl: { label: 'Pearl', bg: 'linear-gradient(125deg,#fdfcf9 0%,#efe8dc 32%,#fbf9f4 52%,#e7ded0 78%,#f7f3ec 100%)', texture: 'linear-gradient(115deg, rgba(255,210,230,.35), rgba(190,225,255,.35) 40%, rgba(255,240,200,.35) 70%, rgba(210,200,255,.35))', blend: 'soft-light', ink: 'rgba(52,44,32,.72)', foil: 'gold', sheen: 0.5, shadow: 'drop-shadow(0 .12cqw 0 rgba(90,70,30,.35))' },
   carbon: { label: 'Carbon', bg: 'repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 2px, transparent 2px 7px), repeating-linear-gradient(-45deg, rgba(0,0,0,.45) 0 2px, transparent 2px 7px), linear-gradient(135deg,#23252a,#0e0f12)', texture: noise(1.2, 0.06), blend: 'overlay', ink: 'rgba(235,240,255,.72)', foil: 'electric', sheen: 0.2 },
   marble: { label: 'Marble', bg: marble, texture: 'linear-gradient(120deg, rgba(255,255,255,.4), transparent 60%)', blend: 'soft-light', ink: 'rgba(25,22,20,.72)', foil: 'gold', sheen: 0.45, shadow: 'drop-shadow(0 .12cqw 0 rgba(60,45,20,.4))' },
+  platinum: { label: 'Platinum', bg: 'repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 1px, rgba(0,0,0,.035) 1px 2px, transparent 2px 3px), linear-gradient(135deg,#b9bec6 0%,#eef0f3 30%,#c3c8cf 52%,#f4f5f7 74%,#aab0b8 100%)', texture: noise(0.6, 0.05), blend: 'overlay', ink: 'rgba(24,27,33,.82)', foil: 'silver', sheen: 0.45, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,255,255,.5))' },
+  gold: { label: 'Signature Gold', bg: 'radial-gradient(120% 100% at 18% 0%, #f1dfae 0%, #d9bf7d 38%, #b8964a 72%, #8e6f2c 100%)', texture: noise(0.8, 0.07), blend: 'soft-light', ink: 'rgba(58,40,8,.8)', foil: 'ivory', sheen: 0.5, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,245,210,.5))' },
+  white: { label: 'Pure White', bg: 'linear-gradient(135deg,#ffffff 0%,#f4f5f8 45%,#ffffff 70%,#eceef2 100%)', texture: 'linear-gradient(135deg, rgba(0,0,0,.025), transparent 50%, rgba(0,0,0,.03))', blend: 'multiply', ink: 'rgba(28,30,36,.78)', foil: 'graphite', sheen: 0.35, shadow: 'drop-shadow(0 .14cqw 0 rgba(255,255,255,.9)) drop-shadow(0 -.08cqw 0 rgba(0,0,0,.12))' },
   titanium: { label: 'Titanium', bg: 'repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 1px, rgba(0,0,0,.05) 1px 2px, transparent 2px 4px), linear-gradient(135deg,#676b72 0%,#c9ccd1 42%,#8b8f96 70%,#55595f 100%)', texture: noise(0.7, 0.06), blend: 'overlay', ink: 'rgba(18,20,24,.8)', foil: 'graphite', sheen: 0.4, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,255,255,.35))' },
   custom: { label: 'Your colour', texture: noise(0.9, 0.07), blend: 'overlay', ink: 'rgba(255,255,255,.78)', foil: 'gold', sheen: 0.28 },
 }
@@ -60,14 +63,20 @@ export const FONT_SPECS: Record<CardFont, { label: string; family: string; weigh
 
 export const LAYOUT_LABELS: Record<CardLayout, string> = { monogram: 'Monogram', signature: 'Signature', minimal: 'Minimal', photo: 'Photo' }
 
-export const PRESETS: { id: string; label: string; design: Omit<CardDesign, 'base' | 'back'> }[] = [
-  { id: 'black', label: 'Black', design: { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram' } },
-  { id: 'navy', label: 'Navy Signature', design: { material: 'midnight', foil: 'silver', finish: 'foil', font: 'editorial', layout: 'signature' } },
-  { id: 'pearl', label: 'Pearl', design: { material: 'pearl', foil: 'gold', finish: 'holo', font: 'classic', layout: 'minimal' } },
-  { id: 'carbon', label: 'Carbon', design: { material: 'carbon', foil: 'electric', finish: 'foil', font: 'modern', layout: 'signature' } },
-  { id: 'marble', label: 'Marble', design: { material: 'marble', foil: 'gold', finish: 'matte', font: 'editorial', layout: 'monogram' } },
-  { id: 'titanium', label: 'Titanium', design: { material: 'titanium', foil: 'graphite', finish: 'matte', font: 'modern', layout: 'minimal' } },
+/**
+ * The ORYN collections. Each is a complete look (material, foil, finish, lettering, layout); every part stays
+ * editable afterwards. "Custom" starts from the person's own colour.
+ */
+export const PRESETS: { id: string; label: string; letter: string; design: Omit<CardDesign, 'base' | 'back'> }[] = [
+  { id: 'obsidian', label: 'Obsidian', letter: 'A', design: { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram' } },
+  { id: 'platinum', label: 'Platinum', letter: 'B', design: { material: 'platinum', foil: 'graphite', finish: 'matte', font: 'modern', layout: 'minimal' } },
+  { id: 'titanium', label: 'Titanium', letter: 'C', design: { material: 'titanium', foil: 'graphite', finish: 'matte', font: 'modern', layout: 'signature' } },
+  { id: 'midnight', label: 'Midnight', letter: 'D', design: { material: 'midnight', foil: 'silver', finish: 'foil', font: 'editorial', layout: 'signature' } },
+  { id: 'gold', label: 'Signature Gold', letter: 'E', design: { material: 'gold', foil: 'ivory', finish: 'foil', font: 'classic', layout: 'signature' } },
+  { id: 'white', label: 'Pure White', letter: 'F', design: { material: 'white', foil: 'graphite', finish: 'matte', font: 'editorial', layout: 'minimal' } },
+  { id: 'custom', label: 'Custom', letter: 'G', design: { material: 'custom', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram' } },
 ]
+export const EXTRA_MATERIALS: Material[] = ['pearl', 'carbon', 'marble']
 
 const HEX = /^#[0-9a-f]{6}$/i
 

@@ -140,5 +140,8 @@ export function useNearby({ initialVisibility, promptForLocation, pollMs = 2500 
     return r
   }, [refresh])
 
-  return { visibility, data, loc, locate, eventId, setEventId, online, live, error, presence, changeVisibility, connect, respond, refresh }
+  const block = useCallback(async (handle: string) => { await post('/api/v1/nearby/block', { handle }); refresh() }, [refresh])
+  const report = useCallback(async (handle: string, reason: string, details: string) => { await post('/api/v1/nearby/report', { handle, reason, details }); refresh() }, [refresh])
+
+  return { visibility, data, loc, locate, eventId, setEventId, online, live, error, presence, changeVisibility, connect, respond, refresh, block, report }
 }

@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { requireUser } from '@/lib/server/request'
 import { privacyOverview } from '@/lib/server/services/privacy'
 import { listShares } from '@/lib/server/services/sharing'
+import { listBlocked } from '@/lib/server/services/nearby'
+import { unblockAction } from '@/app/actions/connections'
 import { cancelDeletionAction, deletionAction, exportAction, retentionAction } from '@/app/actions/settings'
 import { revokeAllAction, revokeShareAction } from '@/app/actions/sharing'
 import { ActionForm, Submit } from '@/components/Forms'
@@ -11,7 +13,7 @@ export const metadata = { title: 'Data & privacy' }
 
 export default async function PrivacyPage() {
   const user = await requireUser()
-  const [o, shares] = await Promise.all([privacyOverview(user.id), listShares(user.id, { activeOnly: true, limit: 20 })])
+  const [o, shares, blocked] = await Promise.all([privacyOverview(user.id), listShares(user.id, { activeOnly: true, limit: 20 }), listBlocked(user.id)])
   return (
     <>
       <PageHeader title="Data & privacy" sub="Plain answers about what ORYN holds and who can see it." />
@@ -75,6 +77,20 @@ export default async function PrivacyPage() {
             <div><label className="label" htmlFor="delpw">Enter your password to confirm</label><input dir="auto" id="delpw" name="password" type="password" className="input" autoComplete="current-password" /></div>
             <Submit className="btn-stop w-full">Delete my account</Submit>
           </ActionForm>
+        )}
+      </section>
+      <section className="card mb-6 p-5" data-testid="blocked-people">
+        <h2 className="h2">Blocked people</h2>
+        <p className="mt-1 text-[15px] text-ink-muted">People you blocked in Nearby. They were never told. Unblocking lets you see each other again.</p>
+        {blocked.length === 0 ? <p className="mt-3 text-sm text-ink-muted">Nobody blocked.</p> : (
+          <ul className="mt-3 divide-y divide-soft-100">
+            {blocked.map((b) => (
+              <li key={b.user_id} className="flex min-h-[48px] items-center justify-between gap-3 py-2">
+                <span className="min-w-0"><span dir="auto" className="block truncate font-medium">{b.name}</span><span className="block text-xs text-ink-muted">blocked {relTime(b.created_at)}</span></span>
+                <form action={unblockAction}><input type="hidden" name="id" value={b.user_id} /><button className="btn-quiet text-sm" data-testid="unblock">Unblock</button></form>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
       <p className="mt-6 text-center text-sm text-ink-muted"><Link href="/privacy" className="underline">Privacy notice</Link></p>

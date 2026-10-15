@@ -30,6 +30,9 @@ const MATERIAL_COLORS: Record<string, { background: string; foreground: string; 
   carbon: { background: '#16171b', foreground: '#d6e2ff', label: '#86aaff' },
   marble: { background: '#efece6', foreground: '#1c1a17', label: '#7a5a17' },
   titanium: { background: '#8b8f96', foreground: '#121418', label: '#2d3035' },
+  platinum: { background: '#d7dade', foreground: '#181b21', label: '#4a4f58' },
+  gold: { background: '#cfb26a', foreground: '#3a2808', label: '#6b5520' },
+  white: { background: '#ffffff', foreground: '#1c1e24', label: '#6b7280' },
 }
 
 export function walletColors(design: CardDesign) {

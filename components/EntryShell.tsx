@@ -5,9 +5,9 @@ import { DEFAULT_DESIGN, PRESETS, type CardDesign } from '@/lib/card-design'
 
 // Sample cards only: fictional names, never real people.
 const FAN: { preset: string; name: string; headline: string; base?: string }[] = [
-  { preset: 'pearl', name: 'Maya Stone', headline: 'Designer' },
-  { preset: 'black', name: 'Noa Adler', headline: 'Product lead' },
-  { preset: 'navy', name: 'Eli Ward', headline: 'Founder' },
+  { preset: 'gold', name: 'Maya Stone', headline: 'Designer' },
+  { preset: 'obsidian', name: 'Noa Adler', headline: 'Product lead' },
+  { preset: 'midnight', name: 'Eli Ward', headline: 'Founder' },
 ]
 const design = (id: string): CardDesign => ({ ...DEFAULT_DESIGN, ...PRESETS.find((p) => p.id === id)!.design })
 

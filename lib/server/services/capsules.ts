@@ -213,6 +213,26 @@ export async function archiveCapsule(userId: string, capsuleId: string) {
   })
 }
 
+/** A copy of a card (design, fields, policy) as a new draft named "<name> copy"; never the default, no shares. */
+export async function duplicateCapsule(userId: string, capsuleId: string) {
+  const db = await getDb()
+  const src = await loadOwned(db, userId, capsuleId)
+  const plan = await userPlan(db, userId)
+  const [{ n }] = await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM capsules WHERE owner_user_id = $1 AND status = 'active'`, [userId])
+  await requireCapability(db, plan, 'capsules.multiple', userId)
+  if (n >= plan.limits.capsules) throw invalid(`Your plan includes up to ${plan.limits.capsules} capsules. Archive one to make room.`)
+  const id = newId('cap')
+  await db.tx(async (t) => {
+    await t.query(
+      `INSERT INTO capsules (id, owner_user_id, org_id, name, mode, display_name, headline, message, avatar_url, accent, fields, primary_action, private_note, is_default, design)
+       SELECT $1, owner_user_id, org_id, left(name || ' copy', 60), mode, display_name, headline, message, avatar_url, accent, fields, primary_action, private_note, false, design FROM capsules WHERE id = $2`, [id, capsuleId])
+    await t.query(`INSERT INTO visibility_policies (capsule_id, duration_minutes, one_time, interaction_level, allow_expanded)
+                   SELECT $1, duration_minutes, one_time, interaction_level, allow_expanded FROM visibility_policies WHERE capsule_id = $2`, [id, capsuleId])
+    await audit(t, { actor: userId, action: 'capsule.duplicated', targetType: 'capsule', targetId: id, meta: { from: src.id } })
+  })
+  return id
+}
+
 export async function defaultCapsuleId(userId: string): Promise<string | null> {
   const db = await getDb()
   const [c] = await db.query<{ id: string }>(`SELECT id FROM capsules WHERE owner_user_id = $1 AND status = 'active' ORDER BY is_default DESC, updated_at DESC LIMIT 1`, [userId])

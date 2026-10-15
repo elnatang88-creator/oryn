@@ -2,7 +2,7 @@
 
 Legend: **Implemented** = code is in the repo and wired end to end · **Tested** = covered by automated tests that pass (evidence column) · **Partial** = works for a defined subset, limits stated · **Blocked** = needs something outside this repository · **Not implemented**.
 
-Test evidence as of 2026-10-15 (Genesis V2): `npm test` 76/76 (PGlite and PostgreSQL 16) · `npm run test:e2e` 35/35 (Pixel 7, desktop, two-phone Nearby, iPhone QA, platform, genesis desktop + mobile) · typecheck, lint, production build clean · 36 screenshots in docs/screenshots/genesis-*. Everything is still a **local/staging demo** — not production-verified on company infrastructure, and no real-device wallet pass exists.
+Test evidence as of 2026-10-15 (premium transformation pass): `npm test` 80/80 (PGlite and PostgreSQL 16) · `npm run test:e2e` 35/35 (Pixel 7, desktop, two-phone Nearby, iPhone QA, platform, genesis desktop + mobile) · typecheck, lint, production build clean · 36 screenshots in docs/screenshots/genesis-*. Everything is still a **local/staging demo** — not production-verified on company infrastructure, and no real-device wallet pass exists.
 
 | Area (directive §) | Status | Evidence / notes |
 |---|---|---|
@@ -14,10 +14,10 @@ Test evidence as of 2026-10-15 (Genesis V2): `npm test` 76/76 (PGlite and Postgr
 | Roles (individual, workspace roles, staff, platform admin) (§6) | Tested | `permissions.ts`; exhibitor = workspace member with a booth station; "Event organizer" = workspace manager+ |
 | Digital identity: profile, field, visibility, `/u/<username>` (§7) | Tested | `platform.test` usernames; `platform.spec` `/u/` resolves to the active card |
 | Multiple identity contexts (§7) | Tested | Cards = contexts (professional / personal / social modes) |
-| Card builder, templates, materials, QR, VCF, analytics (§8) | Tested | `card-design.test`, `core-flow.test`, `qa.spec` (vCard decoded) · Logo/photo upload: **Not implemented** (photo URL only) |
+| Card builder, collections A–G, materials, duplicate/make active/archive, QR, VCF, analytics (§8) | Tested | `card-design.test` (collections, duplicate), `core-flow.test`, `qa.spec`, `genesis.spec` · Logo/photo upload: **Not implemented** (photo URL only) |
 | ORYN Connect: requests, directory, tags, notes, reminders, timeline, export (§9) | Tested | `relationships.test`, `nearby.spec` · Duplicate detection/merge: **Not implemented** |
 | ORYN Pulse (connection animation) (§9) | Tested | "ConnectedMoment" in `nearby.spec` |
-| ORYN Presence: event/area discovery, consent (§10) | Tested | `nearby.test`, `nearby.spec` · Interest matching, meeting requests, availability: **Not implemented** |
+| ORYN Presence: event/area discovery, consent, block, report (§10) | Tested | `nearby.test` (block/report), `nearby.spec` · Interest matching, meeting requests, availability: **Not implemented** |
 | Stations: provisioning, modes, remote destination, validated redirects, transfer, scan analytics (§11) | Tested | `platform.test` "stations v2"; `platform.spec` lead capture; `/q/` alias kept for printed codes |
 | Station experience (§12): card · lead form · registration · check-in · booking/link hand-off | Tested | Product catalog mode: **Not implemented** (use "custom page") |
 | Events: create, publish, public page, schedule fields, capacity, branding (§13) | Partial | Public page + registration settings tested; schedules/sessions and branding upload: **Not implemented** |
@@ -37,7 +37,7 @@ Test evidence as of 2026-10-15 (Genesis V2): `npm test` 76/76 (PGlite and Postgr
 | Ticket states Valid · Checked in · Cancelled · Expired | Tested | `genesis.spec` all four states |
 | Global search ⌘K (§25) | Tested | Authorization test in `platform.test` |
 | Subscriptions: plans, entitlements, limits, simulated billing (§26) | Tested | `plans.test`; real billing **Blocked** on a payment provider |
-| Command Center (§27) incl. operational alerts | Tested (modules) · Implemented (alerts) | Modules users/businesses/events/stations/subscriptions/wallet/health/audit/flags; admin-only (404 otherwise); Health lists alerts (failed jobs/mail, stuck queue, missing CRON_SECRET, non-SMTP transport, demo accounts in production, wallet pending) |
+| Command Center (§27) incl. operational alerts and abuse reports | Tested (modules) · Implemented (alerts) | Modules users/businesses/events/stations/subscriptions/wallet/health/audit/flags; admin-only (404 otherwise); Health lists alerts (failed jobs/mail, stuck queue, missing CRON_SECRET, non-SMTP transport, demo accounts in production, wallet pending) |
 | Database: migrations, indexes, constraints, transactions (§28) | Tested | Raw SQL on PostgreSQL (DECISIONS E2), 6 migrations |
 | Security (§29) | Tested | `security.test`, SECURITY.md audit (demo hint removed from production builds, camera policy fixed, wallet audit events); external pen test **not done** |
 | Reliability: health, jobs, retries, backups, logging (§31) | Partial | Health endpoint, job retries, pg_dump backups in the Docker stack; no monitoring backend yet |

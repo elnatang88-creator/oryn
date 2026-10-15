@@ -49,6 +49,8 @@ export async function buildExport(db: Db, exportId: string, userId: string) {
     interactions: await q(`SELECT share_session_id, kind, field_kind, created_at FROM interactions WHERE owner_user_id = $1`),
     membersWhoViewedMe: await q(`SELECT v.capsule_id, u.display_name AS viewer_name, v.view_count, v.expanded, v.first_viewed_at, v.last_viewed_at FROM capsule_views v JOIN users u ON u.id = v.viewer_user_id WHERE v.owner_user_id = $1`),
     nearbyPresence: await q(`SELECT cell, event_id, visibility, started_at, expires_at FROM nearby_presence WHERE user_id = $1`),
+    blockedPeople: await q(`SELECT blocked_user_id, created_at FROM user_blocks WHERE blocker_user_id = $1`),
+    abuseReportsFiled: await q(`SELECT reason, surface, status, created_at FROM abuse_reports WHERE reporter_user_id = $1`),
     capsulesIViewed: await q(`SELECT c.name AS capsule_name, o.display_name AS owner_name, v.view_count, v.first_viewed_at, v.last_viewed_at FROM capsule_views v JOIN capsules c ON c.id = v.capsule_id JOIN users o ON o.id = v.owner_user_id WHERE v.viewer_user_id = $1`),
     connectionRequests: await q(`SELECT id, from_name, from_contact, message, status, created_at, responded_at FROM connection_requests WHERE owner_user_id = $1`),
     connections: await q(`SELECT * FROM connections WHERE owner_user_id = $1`),
@@ -156,6 +158,8 @@ export async function executeDeletion(db: Db, requestId: string, userId: string)
     // Mail we sent them, their one-time tokens, their lead notes' authorship and tasks: gone or de-identified.
     await t.query(`DELETE FROM email_outbox WHERE user_id = $1 OR to_email = $2`, [userId, u.email])
     await t.query(`DELETE FROM auth_tokens WHERE user_id = $1`, [userId])
+    await t.query(`DELETE FROM user_blocks WHERE blocker_user_id = $1 OR blocked_user_id = $1`, [userId])
+    await t.query(`DELETE FROM abuse_reports WHERE reporter_user_id = $1 OR reported_user_id = $1`, [userId])
     await t.query(`UPDATE registrations SET user_id = NULL WHERE user_id = $1`, [userId])
     await t.query(`DELETE FROM jobs WHERE payload->>'userId' = $1`, [userId])
     await t.query(`DELETE FROM subscriptions WHERE subject_type = 'user' AND subject_id = $1`, [userId])
