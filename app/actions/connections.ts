@@ -103,3 +103,12 @@ export async function setTagsAction(_: ActionState, fd: FormData) {
 export async function quickFollowUpFormAction(fd: FormData) {
   await quickFollowUpAction({}, fd)
 }
+
+export async function readNotificationAction(fd: FormData) {
+  const user = await requireUser()
+  const { markNotificationRead } = await import('@/lib/server/services/today')
+  await markNotificationRead(user.id, str(fd, 'id'))
+  const link = str(fd, 'link')
+  revalidatePath('/notifications')
+  if (link.startsWith('/') && !link.startsWith('//')) redirect(link)
+}

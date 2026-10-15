@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Bell, CheckCircle2, Circle, QrCode, UserPlus } from 'lucide-react'
+import { ArrowRight, Bell, Briefcase, CalendarDays, CheckCircle2, Circle, Layers, QrCode, Ticket, UserPlus, Wallet } from 'lucide-react'
 import { requireUser } from '@/lib/server/request'
 import { relationshipSummary, todaySummary } from '@/lib/server/services/today'
 import { listCapsules } from '@/lib/server/services/capsules'
@@ -10,6 +10,10 @@ import { Empty, PageHeader, Section, fmtDate, relTime } from '@/components/ui'
 import { listViewers, viewerSummary } from '@/lib/server/services/viewers'
 import { ViewersPanel } from '@/components/ViewersPanel'
 import { LiveRefresh } from '@/components/LiveRefresh'
+import { listMyOrgs } from '@/lib/server/services/orgs'
+import { myRegistrations } from '@/lib/server/services/registrations'
+import { pipelineSummary } from '@/lib/server/services/crm'
+import { stationAnalytics } from '@/lib/server/services/stations'
 
 export const metadata = { title: 'Today' }
 
@@ -31,6 +35,15 @@ export default async function TodayPage() {
   const [t, capsules, vs, rs] = await Promise.all([todaySummary(user.id), listCapsules(user.id), viewerSummary(user.id), relationshipSummary(user.id)])
   const viewers = vs.canSeeWho ? await listViewers(user.id, 8) : null
   const first = user.display_name.split(' ')[0]
+  // Role-adaptive: workspace blocks appear only for members of a workspace; everyone sees their card, passes and tickets.
+  const [orgs, tickets] = await Promise.all([listMyOrgs(user.id), myRegistrations(user.id)])
+  const upcoming = tickets.filter((r) => r.status !== 'cancelled' && !r.checked_in_at && (!r.starts_at || new Date(r.starts_at).getTime() > Date.now() - 6 * 3600_000)).slice(0, 3)
+  const workspaces = await Promise.all(orgs.map(async (o) => ({
+    org: o,
+    pipeline: await pipelineSummary(user.id, o.id).catch(() => null),
+    stations: await stationAnalytics(user.id, o.id, 7).catch(() => null),
+  })))
+  const primary = capsules.find((c) => c.is_default) ?? capsules[0]
 
   if (capsules.length === 0) {
     return (
@@ -46,6 +59,21 @@ export default async function TodayPage() {
       <PageHeader title="Today" sub="Who you met, what’s next, and what’s working." />
 
       <LiveRefresh />
+      {primary && (
+        <section className="mb-6 grid grid-cols-[1fr_auto] items-center gap-3 rounded-capsule bg-navy-900 px-5 py-4 text-white shadow-lift" aria-label="Your card" data-testid="primary-card">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-silver">Your card</p>
+            <p dir="auto" className="truncate text-lg font-bold">{primary.display_name}</p>
+            <p dir="auto" className="truncate text-sm text-silver">{primary.name}{primary.headline ? ` · ${primary.headline}` : ''} · {capsules.length > 1 ? `${capsules.length} cards, this one is active` : 'active card'}</p>
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold">
+              <Link href={`/capsules/${primary.id}`} className="inline-flex items-center gap-1 text-electric-300 hover:underline"><Layers className="h-4 w-4" aria-hidden="true" /> Edit</Link>
+              <Link href="/wallet" className="inline-flex items-center gap-1 text-electric-300 hover:underline"><Wallet className="h-4 w-4" aria-hidden="true" /> Wallet</Link>
+            </div>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- starts a share, so it must never be prefetched */}
+          <a href="/share/quick" className="btn-share" data-testid="today-share">Share</a>
+        </section>
+      )}
       <section className="mb-8" aria-labelledby="week" data-testid="this-week">
         <h2 id="week" className="h2 mb-3">This week</h2>
         <dl className="grid grid-cols-4 gap-2">
@@ -74,6 +102,32 @@ export default async function TodayPage() {
         )}
       </section>
       <ViewersPanel summary={vs} viewers={viewers} />
+
+      {upcoming.length > 0 && (
+        <Section title="Your tickets" aside={<Link href="/events" className="text-sm font-semibold text-electric-600">Events</Link>}>
+          <ul className="card divide-y divide-soft-100" data-testid="my-tickets">
+            {upcoming.map((r) => (
+              <li key={r.id}>
+                <Link href={`/ticket/${r.token}`} className="flex min-h-[60px] items-center gap-3 px-4 py-3 hover:bg-soft-50">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-soft-100 text-electric-600"><Ticket className="h-5 w-5" aria-hidden="true" /></span>
+                  <span className="min-w-0 flex-1"><span dir="auto" className="block truncate font-semibold">{r.event_name}</span><span className="block truncate text-sm text-ink-muted">{r.starts_at ? fmtDate(r.starts_at) : 'Date to be announced'} · {r.status === 'waitlisted' ? 'Waitlisted' : 'Valid ticket'}</span></span>
+                  <ArrowRight className="h-5 w-5 text-ink-faint" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {workspaces.map(({ org, pipeline, stations }) => (pipeline || stations) && (
+        <Section key={org.id} title={org.name} aside={<Link href={`/business?org=${org.id}`} className="text-sm font-semibold text-electric-600">Workspace</Link>}>
+          <div className="grid grid-cols-3 gap-2" data-testid="workspace-pulse">
+            {pipeline && <Link href={`/business/tasks?org=${org.id}`} className="card flex min-h-[64px] flex-col items-center justify-center px-2 text-center hover:border-electric-400"><span className="text-xl font-bold text-navy-900">{pipeline.tasks.mine}</span><span className="text-[11px] font-semibold text-ink-muted">My tasks{pipeline.tasks.overdue ? ` · ${pipeline.tasks.overdue} overdue` : ''}</span></Link>}
+            {pipeline && <Link href={`/business?org=${org.id}`} className="card flex min-h-[64px] flex-col items-center justify-center px-2 text-center hover:border-electric-400"><span className="text-xl font-bold text-navy-900">{pipeline.stages.reduce((a, x) => a + x.n, 0)}</span><span className="text-[11px] font-semibold text-ink-muted"><Briefcase className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />Leads</span></Link>}
+            {stations && <Link href={`/stations?org=${org.id}`} className="card flex min-h-[64px] flex-col items-center justify-center px-2 text-center hover:border-electric-400"><span className="text-xl font-bold text-navy-900">{stations.reduce((a, x) => a + x.scans, 0)}</span><span className="text-[11px] font-semibold text-ink-muted"><CalendarDays className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />Station scans · 7d</span></Link>}
+          </div>
+        </Section>
+      ))}
 
       {t.notifications.length > 0 && (
         <div className="card mb-6 flex items-start gap-3 px-4 py-3">

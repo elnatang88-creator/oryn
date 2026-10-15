@@ -11,10 +11,11 @@ const KEYS = ['ORYN_GOOGLE_WALLET_ISSUER_ID', 'ORYN_GOOGLE_WALLET_SA_EMAIL', 'OR
 afterEach(() => { for (const k of KEYS) delete process.env[k] })
 
 describe('Wallet', () => {
-  it('never claims to be ready when it is not: Apple always needs the signing service; Google needs its keys', () => {
+  it('never claims to be ready when it is not: Apple needs the certificate chain; Google needs its keys', () => {
     const s = walletStatus()
     expect(s.apple.configured).toBe(false)
-    expect(s.apple.missing.join(' ')).toContain('Pass signing')
+    expect(s.apple.missing).toHaveLength(5)
+    expect(s.apple.missing.join(' ')).toContain('WWDR')
     expect(s.google.configured).toBe(false)
     expect(s.google.missing).toHaveLength(3)
   })

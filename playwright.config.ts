@@ -21,6 +21,9 @@ export default defineConfig({
   projects: [
     { name: 'phone', testMatch: 'demo.spec.ts', use: { ...devices['Pixel 7'] } },
     { name: 'platform', testMatch: 'platform.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1360, height: 900 } } },
+    // Genesis walkthrough: the same journey on a desktop and on a phone, with screenshots of every required screen.
+    { name: 'genesis-desktop', testMatch: 'genesis.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1360, height: 900 } } },
+    { name: 'genesis-mobile', testMatch: 'genesis.spec.ts', use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: devices['iPhone 13'].userAgent } },
     { name: 'desktop', testMatch: 'demo.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1360, height: 900 } } },
     // Two phones side by side for Nearby / Present / Wallet (iPhone-size, touch).
     { name: 'nearby', testMatch: 'nearby.spec.ts', use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: devices['iPhone 13'].userAgent } },

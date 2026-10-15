@@ -5,6 +5,7 @@ import { templateFields, listCapsules } from '@/lib/server/services/capsules'
 import { createCapsuleAction } from '@/app/actions/capsules'
 import { CapsuleEditor } from '@/components/CapsuleEditor'
 import { PageHeader, PlanGate } from '@/components/ui'
+import { OnboardingProgress } from '@/components/OnboardingProgress'
 import { MODES, type Mode } from '@/lib/capsule-model'
 import Link from 'next/link'
 import { MODE_COPY } from '@/lib/capsule-model'
@@ -27,7 +28,8 @@ export default async function NewCapsulePage({ searchParams }: { searchParams: P
   if (!mode) {
     return (
       <>
-        <PageHeader title={sp.first ? 'Your first capsule' : 'Create a capsule'} sub="Where will you use it? You can change everything later." />
+        {sp.first && <OnboardingProgress step={2} />}
+        <PageHeader title={sp.first ? 'What kind of card first?' : 'Create a card'} sub="Where will you use it? You can change everything later." />
         <ul className="grid gap-3 sm:grid-cols-2">
           {MODES.map((m) => (
             <li key={m}>
@@ -44,7 +46,8 @@ export default async function NewCapsulePage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader title={`New ${MODE_COPY[mode].label.toLowerCase()} capsule`} sub="Fill in only what you want. Choose where each detail appears." />
+      {sp.first && <OnboardingProgress step={3} />}
+      <PageHeader title={sp.first ? 'Your card' : `New ${MODE_COPY[mode].label.toLowerCase()} card`} sub={sp.first ? 'Your name is enough to start. Appearance (step 4) is right below — skip it and change it any time.' : 'Fill in only what you want. Choose where each detail appears.'} />
       <CapsuleEditor
         action={createCapsuleAction}
         submitLabel="Create capsule"

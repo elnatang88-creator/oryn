@@ -60,6 +60,7 @@ export default async function WalletPage({ params, searchParams }: { params: Pro
             {order.map((p) => <PlatformRow key={p} s={status[p]} back={`/share/${share.id}/wallet`} />)}
           </div>
         )}
+        <p className="mt-4 text-center text-sm"><Link href="/wallet" className="font-semibold text-electric-600">Wallet Center · pass link, status and help</Link></p>
         <p className="mt-6 text-xs text-ink-muted">ORYN never says a pass was added — your phone’s Wallet does. Adding a pass creates one permanent link for it. You can stop that link any time from Today or Data &amp; privacy; the pass then opens “no longer shared”.</p>
       </div>
     </div>

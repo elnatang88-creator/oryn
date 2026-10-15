@@ -16,7 +16,9 @@ RUN npm run build
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
-RUN groupadd --system oryn && useradd --system --gid oryn --home /app oryn
+# openssl: PKCS#7 signing of Apple Wallet passes (lib/server/wallet-pkpass.ts). Nothing else is installed.
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/* \
+ && groupadd --system oryn && useradd --system --gid oryn --home /app oryn
 COPY --from=build --chown=oryn:oryn /app/.next/standalone ./
 COPY --from=build --chown=oryn:oryn /app/.next/static ./.next/static
 COPY --from=build --chown=oryn:oryn /app/public ./public

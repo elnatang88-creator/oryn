@@ -1,15 +1,17 @@
 import type { Config } from 'tailwindcss'
 
-/** ORYN visual language: deep navy, electric blue, white and soft blue. Calm surfaces, one bright accent. */
+/** Visual language (ORIAN direction, 2026-10-15): obsidian, midnight navy, graphite, premium white, silver, electric blue. */
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        navy: { 950: '#000A24', 900: '#011441', 800: '#0B2157', 700: '#1C2E63', 600: '#2A3F7E' },
-        electric: { DEFAULT: '#0053FD', 600: '#0046D6', 400: '#4D84FF', 300: '#86AAFF' },
-        soft: { 50: '#F6F8FE', 100: '#EDF2FF', 200: '#DCE6FF', 300: '#C3D3FB' },
-        ink: { DEFAULT: '#0B1530', muted: '#5B6785', faint: '#8A94AD' },
+        navy: { 950: '#08090D', 900: '#07132B', 800: '#0F1E3F', 700: '#1B2B52', 600: '#2A3C6B' },
+        graphite: { DEFAULT: '#151A24', 700: '#1D2430', 600: '#262E3C' },
+        silver: { DEFAULT: '#B9C3D3', 300: '#D6DDE8' },
+        electric: { DEFAULT: '#246BFD', 600: '#1A57D6', 400: '#5C8DFF', 300: '#8FB0FF' },
+        soft: { 50: '#F7F9FC', 100: '#EEF2F8', 200: '#DEE5F0', 300: '#C9D3E2' },
+        ink: { DEFAULT: '#0B1220', muted: '#5A6578', faint: '#8A94A8' },
         signal: { ok: '#0F8A5F', warn: '#A35A00', stop: '#C4283A' },
       },
       fontFamily: {

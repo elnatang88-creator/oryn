@@ -4,6 +4,7 @@ import { currentUser } from '@/lib/server/request'
 import { signUpAction } from '@/app/actions/auth'
 import { ActionForm, Submit } from '@/components/Forms'
 import { EntryShell } from '@/components/EntryShell'
+import { OnboardingProgress } from '@/components/OnboardingProgress'
 
 export const metadata = { title: 'Create your account' }
 
@@ -12,6 +13,7 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
   if (await currentUser()) redirect(next.startsWith('/') && !next.startsWith('//') ? next : '/today')
   return (
     <EntryShell compact>
+      <OnboardingProgress step={1} />
       <h1 className="text-2xl font-bold text-navy-900">Create your account</h1>
       <p className="mt-1 text-ink-muted">Three things. Then your first capsule.</p>
       <ActionForm action={signUpAction} className="mt-6 space-y-4">

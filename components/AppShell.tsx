@@ -4,6 +4,7 @@ import { ExchangeCardsIcon } from './OrynIcons'
 import { CommandMenu, SearchButton } from './CommandMenu'
 import { Logo } from './Logo'
 import { NavLink } from './NavLink'
+import { NotificationBell } from './NotificationBell'
 import { signOutAction } from '@/app/actions/auth'
 
 const NAV = [
@@ -19,7 +20,7 @@ const NAV = [
 ]
 
 /** Calm workspace frame. Desktop: left rail. Phone: bottom bar with Share in the thumb zone. */
-export function AppShell({ user, children }: { user: { display_name: string; plan_key: string; email: string; email_verified_at?: Date | null }; children: React.ReactNode }) {
+export function AppShell({ user, unread = 0, children }: { user: { display_name: string; plan_key: string; email: string; email_verified_at?: Date | null }; unread?: number; children: React.ReactNode }) {
   const demo = user.email.endsWith('@oryn.local')
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[248px_1fr]">
@@ -30,6 +31,7 @@ export function AppShell({ user, children }: { user: { display_name: string; pla
         <a href="/share/quick" className="btn-share mt-8 w-full" data-testid="rail-share"><ExchangeCardsIcon className="h-5 w-5" /> Share my card</a>
         <div className="mt-4"><SearchButton /></div>
         <nav className="mt-4 flex-1 space-y-1" aria-label="Main">
+          <NotificationBell initial={unread} />
           {NAV.map((n) => (
             <NavLink key={n.href} href={n.href} className="flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-medium text-ink-muted hover:bg-soft-100 hover:text-ink" activeClassName="!bg-soft-100 !text-navy-900 font-semibold">
               <n.icon className="h-5 w-5" aria-hidden="true" /> {n.label}
@@ -46,7 +48,7 @@ export function AppShell({ user, children }: { user: { display_name: string; pla
       <div className="pb-28 lg:pb-10">
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-soft-200 bg-white/90 px-4 backdrop-blur lg:hidden">
           <Link href="/today"><Logo /></Link>
-          <span className="flex items-center gap-1"><SearchButton compact /><Link href="/settings" className="btn-quiet" aria-label="Settings"><Settings className="h-5 w-5" /></Link></span>
+          <span className="flex items-center gap-1"><SearchButton compact /><NotificationBell initial={unread} compact /><Link href="/settings" className="btn-quiet" aria-label="Settings"><Settings className="h-5 w-5" /></Link></span>
         </header>
         {demo && <p className="bg-navy-900 px-4 py-2 text-center text-xs font-semibold text-soft-200" role="note" data-testid="demo-banner">Demo account · all people, requests and numbers here are fictional sample data</p>}
         {!demo && user.email_verified_at === null && <p className="bg-amber-50 px-4 py-2 text-center text-xs font-semibold text-amber-900" role="note" data-testid="verify-banner">Confirm your email to secure your account. <Link href="/settings/security" className="underline">Resend the link</Link></p>}

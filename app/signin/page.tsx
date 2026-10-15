@@ -10,7 +10,8 @@ export const metadata = { title: 'Sign in' }
 export default async function SignIn({ searchParams }: { searchParams: Promise<{ next?: string; reset?: string }> }) {
   const { next = '', reset = '' } = await searchParams
   if (await currentUser()) redirect('/today')
-  const demo = process.env.NODE_ENV !== 'production' || process.env.ORYN_SEED_DEMO === 'true'
+  // The local-demo hint is a development aid only: production builds never print sign-in hints, even with demo data seeded.
+  const demo = process.env.NODE_ENV !== 'production'
   return (
     <EntryShell compact>
       <h1 className="text-2xl font-bold text-navy-900">Welcome back</h1>

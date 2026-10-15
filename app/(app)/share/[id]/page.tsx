@@ -18,6 +18,7 @@ import { listCapsules, getCapsule } from '@/lib/server/services/capsules'
 import { cardFor } from '@/lib/server/services/owner-card'
 import { CardSwitcher } from '@/components/CardSwitcher'
 import { TrackOnMount } from '@/components/TrackOnMount'
+import { OnboardingProgress } from '@/components/OnboardingProgress'
 
 export const metadata = { title: 'My card' }
 
@@ -41,6 +42,7 @@ export default async function WalletSharePage({ params, searchParams }: { params
         <TrackOnMount name="share_opened" props={{ card_id: capsule.id, surface: first ? 'first_run' : 'share' }} />
         {first ? (
           <div className="text-center" data-testid="first-run">
+            <OnboardingProgress step={5} tone="dark" />
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-electric-300">Your card is ready</p>
             <h1 className="mt-1 text-2xl font-bold">This is you on ORYN</h1>
           </div>
@@ -65,7 +67,7 @@ export default async function WalletSharePage({ params, searchParams }: { params
           <>
             {first && <p className="mt-5 text-center text-sm text-soft-200">Three ways to give it:</p>}
             <div className={`${first ? 'mt-3' : 'mt-5'} grid grid-cols-2 gap-3`}>
-              <Link href="/share/nearby" className="btn-share min-h-[60px] rounded-2xl text-[16px]" data-testid="open-nearby"><Radar className="h-5 w-5" aria-hidden="true" /> {first ? 'Find someone' : 'Nearby'}</Link>
+              <Link href="/share/nearby" className="btn-share min-h-[60px] rounded-2xl text-[16px]" data-testid="open-nearby"><Radar className="h-5 w-5" aria-hidden="true" /> {first ? 'Find nearby' : 'Nearby'}</Link>
               <Link href={`/share/${share.id}/present`} className="btn min-h-[60px] rounded-2xl bg-white text-[16px] text-navy-900 hover:bg-soft-100" data-testid="open-present"><Maximize2 className="h-5 w-5" aria-hidden="true" /> Present card</Link>
             </div>
             <Link href={`/share/${share.id}/wallet`} className="btn mt-3 min-h-[52px] w-full rounded-2xl border border-white/15 bg-white/5 text-[15px] text-white hover:bg-white/10" data-testid="open-wallet"><Wallet className="h-5 w-5" aria-hidden="true" /> Add to Wallet</Link>

@@ -102,7 +102,7 @@
 @media (prefers-reduced-motion: reduce) { .lc-foil { animation: none !important; } .lc-tilt, .lc-flipper { transition: none; } }
 
 /* ── Entry screen (welcome / sign in / sign up) ─────────────────────────────── */
-.entry-stage { background: radial-gradient(120% 80% at 50% 0%, #0b1f5c 0%, #020a24 55%, #01040f 100%); }
+.entry-stage { background: radial-gradient(120% 80% at 50% 0%, #0f2a5e 0%, #07132B 55%, #08090D 100%); }
 .entry-glow { position: absolute; inset: -20% -20% auto; height: 70%; background: radial-gradient(50% 50% at 50% 50%, rgba(216,181,106,0.22), transparent 70%); filter: blur(10px); animation: entry-breathe 6s ease-in-out infinite; }
 .entry-logo { animation: entry-in .9s cubic-bezier(.2,.8,.2,1) both; }
 .entry-fan { position: absolute; left: 50%; top: 50%; width: min(60vw, 280px); aspect-ratio: 1.586; transform: translate(-50%, -50%); perspective: 1400px; }

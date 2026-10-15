@@ -19,10 +19,13 @@ export default async function TicketPage({ params, searchParams }: { params: Pro
   const url = `${await appOrigin()}/ticket/${token}`
   const svg = await qrSvg(url)
   const type = t.ticket_types.find((x) => x.id === t.ticket_type_id)
-  const state = t.status === 'cancelled' ? 'cancelled' : t.checked_in_at ? 'used' : t.status === 'waitlisted' ? 'waitlisted' : 'valid'
+  // Ticket states: Valid · Checked in · Cancelled · Expired (the event ended and this ticket was never used) · Waitlisted.
+  const ended = t.ends_at ? new Date(t.ends_at).getTime() < Date.now() : t.starts_at ? new Date(t.starts_at).getTime() + 24 * 3600_000 < Date.now() : false
+  const state = t.status === 'cancelled' ? 'cancelled' : t.checked_in_at ? 'used' : ended ? 'expired' : t.status === 'waitlisted' ? 'waitlisted' : 'valid'
+  const STATE_LABEL: Record<typeof state, string> = { valid: 'Valid', used: 'Checked in', cancelled: 'Cancelled', expired: 'Expired', waitlisted: 'Waitlisted' }
   return (
     <RecipientFrame>
-      {sp.new && <p className="mb-3 rounded-2xl bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-signal-ok" data-testid="ticket-new">{state === 'waitlisted' ? 'You’re on the waitlist.' : 'You’re registered. This is your ticket.'}</p>}
+      {sp.new && (state === 'valid' || state === 'waitlisted') && <p className="mb-3 rounded-2xl bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-signal-ok" data-testid="ticket-new">{state === 'waitlisted' ? 'You’re on the waitlist.' : 'You’re registered. This is your ticket.'}</p>}
       {sp.again && <p className="mb-3 rounded-2xl bg-soft-100 px-4 py-3 text-center text-sm font-semibold text-navy-900">You were already registered — here’s your ticket again.</p>}
       {sp.cancelled && <p className="mb-3 rounded-2xl bg-soft-100 px-4 py-3 text-center text-sm font-semibold text-navy-900">{state === 'cancelled' ? 'Your registration is cancelled.' : 'This registration couldn’t be cancelled.'}</p>}
       <article className="overflow-hidden rounded-capsule bg-white shadow-capsule" data-testid="ticket" data-state={state}>
@@ -31,7 +34,7 @@ export default async function TicketPage({ params, searchParams }: { params: Pro
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-electric-300">{t.org_name}</p>
             <h1 dir="auto" className="mt-1 text-2xl font-bold leading-tight">{t.event_name}</h1>
           </div>
-          <LogoMark size={26} className="shrink-0 opacity-80" />
+          <div className="flex shrink-0 flex-col items-end gap-2"><LogoMark size={26} className="opacity-80" /><span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${state === 'valid' ? 'bg-emerald-400/20 text-emerald-200' : state === 'used' ? 'bg-electric/30 text-electric-300' : 'bg-white/10 text-soft-200'}`} data-testid="ticket-state">{STATE_LABEL[state]}</span></div>
         </div>
         <div className="px-6 py-5">
           <p dir="auto" className="text-xl font-bold text-navy-900" data-testid="ticket-name">{t.name}</p>
@@ -46,12 +49,13 @@ export default async function TicketPage({ params, searchParams }: { params: Pro
             <>
               <div className="mx-auto w-full max-w-[260px] rounded-2xl bg-white p-2 ring-1 ring-soft-200" role="img" aria-label="Your ticket code" data-testid="ticket-qr" dangerouslySetInnerHTML={{ __html: svg }} />
               <p className="mt-3 text-sm font-semibold text-navy-900">Show this at the door</p>
-              <p className="text-xs text-ink-muted">Registration {t.id.slice(4, 12).toUpperCase()}</p>
+              <p className="text-xs text-ink-muted">Registration {t.id.replace(/^reg_/, '').replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase()}</p>
             </>
           )}
           {state === 'used' && <p className="flex items-center justify-center gap-2 text-lg font-bold text-signal-ok" data-testid="ticket-used"><CheckCircle2 className="h-6 w-6" aria-hidden="true" /> Checked in · {new Date(t.checked_in_at!).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })}</p>}
           {state === 'waitlisted' && <p className="text-lg font-bold text-navy-900">On the waitlist</p>}
           {state === 'cancelled' && <p className="text-lg font-bold text-ink-muted">Cancelled</p>}
+          {state === 'expired' && <p className="text-lg font-bold text-ink-muted" data-testid="ticket-expired">Expired · the event has ended</p>}
         </div>
         {(state === 'valid' || state === 'waitlisted') && (
           <form action={cancelRegistrationAction} className="border-t border-soft-100 px-6 py-3 text-center">

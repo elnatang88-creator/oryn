@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { encodeCell } from '@/lib/geocell'
+import { useLive } from '@/lib/live'
 import type { CardDesign } from '@/lib/card-design'
 
 export type Visibility = 'off' | 'everyone' | 'connections' | 'event'
@@ -108,10 +109,13 @@ export function useNearby({ initialVisibility, promptForLocation, pollMs = 2500 
     } catch (e) { if (alive.current) setError((e as Error).message) }
   }, [])
 
-  // While I'm waiting on an answer, check every second so "connected" lands immediately (until realtime push exists).
+  // Realtime: the server stream (/api/v1/stream, SSE) pushes a `nearby` event whenever my state changes and we
+  // refresh at once. While the stream is connected the poll slows to a safety net; without it (old browsers,
+  // proxies that cut long requests) polling stays the transport, faster while I'm waiting on an answer.
+  const live = useLive(['nearby'], { onEvent: (name) => { if (name === 'nearby') refresh() } })
   const [hurryUntil, setHurryUntil] = useState(0)
   const waiting = !!data?.outgoing.some((o) => o.status === 'waiting') && Date.now() < hurryUntil
-  const every = waiting ? 1000 : pollMs
+  const every = live ? Math.max(pollMs * 6, 15_000) : waiting ? 1000 : pollMs
   useEffect(() => {
     refresh()
     const t = setInterval(() => { if (document.visibilityState === 'visible') refresh() }, every)
@@ -136,5 +140,5 @@ export function useNearby({ initialVisibility, promptForLocation, pollMs = 2500 
     return r
   }, [refresh])
 
-  return { visibility, data, loc, locate, eventId, setEventId, online, error, presence, changeVisibility, connect, respond, refresh }
+  return { visibility, data, loc, locate, eventId, setEventId, online, live, error, presence, changeVisibility, connect, respond, refresh }
 }

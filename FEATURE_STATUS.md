@@ -2,12 +2,12 @@
 
 Legend: **Implemented** = code is in the repo and wired end to end · **Tested** = covered by automated tests that pass (evidence column) · **Partial** = works for a defined subset, limits stated · **Blocked** = needs something outside this repository · **Not implemented**.
 
-Test evidence as of 2026-10-15: `npm test` 70/70 (PGlite and PostgreSQL 16) · `npm run test:e2e` 31/31 (Pixel 7, desktop, two-phone Nearby, iPhone QA, platform) · typecheck, lint, production build clean. Everything is still a **local/staging demo** — not production-verified on company infrastructure.
+Test evidence as of 2026-10-15 (Genesis V2): `npm test` 76/76 (PGlite and PostgreSQL 16) · `npm run test:e2e` 35/35 (Pixel 7, desktop, two-phone Nearby, iPhone QA, platform, genesis desktop + mobile) · typecheck, lint, production build clean · 36 screenshots in docs/screenshots/genesis-*. Everything is still a **local/staging demo** — not production-verified on company infrastructure, and no real-device wallet pass exists.
 
 | Area (directive §) | Status | Evidence / notes |
 |---|---|---|
-| Welcome, animated entry, onboarding (§3) | Tested | `demo.spec` entry screen; first card → first-run card |
-| Design system tokens (§4) | Partial | Tailwind tokens, card system, sheets, buttons. Palette is ORYN navy/electric (founders' identity), not the §4 hex list — see KNOWN_ISSUES K1. RTL: `dir="auto"` on user text; full RTL layout not done |
+| Welcome, animated entry, onboarding (§3) | Tested | `demo.spec` entry screen; `genesis.spec` 5-step progress (Identity → Profile type → Your card → Appearance → Share) |
+| Design system tokens (§4) | Implemented | ORIAN palette tokens (Obsidian/Midnight Navy/Graphite/Premium White/Silver/Electric Blue) in `tailwind.config.ts`; card materials, motion with reduced-motion. Brand name by configuration (`NEXT_PUBLIC_BRAND_NAME`). RTL: `dir="auto"` on user text; full RTL layout not done |
 | Unified app, navigation, role menus (§5) | Implemented | Routes use existing names (`/today`, `/capsules`, `/connections`, `/business`…) rather than §5's exact list — DECISIONS E1 |
 | Accounts: sign-up/in/out, sessions, devices, deletion, export (§6) | Tested | `security.test`, `deletion.test`, `qa.spec` |
 | Email verification, password reset, notification prefs (§6) | Tested | `platform.test` "email verification and password reset"; `platform.spec` account flow |
@@ -28,14 +28,17 @@ Test evidence as of 2026-10-15: `npm test` 70/70 (PGlite and PostgreSQL 16) · `
 | Business workspaces, roles, isolation (§17) | Tested | `security.test` tenant isolation; `platform.test` outsider checks |
 | CRM: stages (custom), notes, tasks, assignment, filters, CSV (§18) | Tested | `platform.test` "CRM and automations" |
 | Automation engine: 7 triggers, 6 actions, idempotent runs, retries, history (§19) | Tested | Idempotency and condition tests; UI run log |
-| Wallet engine: Apple pass.json + Google object + RS256 save link (§20–21) | Blocked | `wallet.test`; needs company Apple/Google accounts; Apple signing service not built — docs/NEARBY_AND_WALLET.md |
+| Wallet engine: Apple .pkpass packaging + PKCS#7 signing, Google object + RS256 save link, Wallet Center (§20–21) | Tested (code) · Blocked (device) | `pkpass.test` (ZIP, manifest, signed with a self-signed chain and verified, unsigned preview labelled), `wallet.test`; `genesis.spec` Wallet Center. Real installation needs the company's Apple certificates / Google issuer — WALLET_INTEGRATION.md |
 | Analytics: real events, attribution, Insights, Today (§22) | Tested | `relationships.test`; CSV: leads/registrations only · Date filters / station comparison charts: **Partial** (30-day tables) |
 | AI: bio, follow-up, lead summary, tips; consent; fallback (§23) | Tested | Fallback path tested; the Anthropic path is code-reviewed but **not exercised** (no key in CI) |
-| Notifications: in-app, email outbox, prefs (§24) | Tested | Push notifications: **Not implemented** |
+| Notifications: in-app center (read/unread, history, deep links), live bell (SSE), email outbox, prefs (§24) | Tested | `genesis.spec` (stream + center); Push notifications: **Not implemented** |
+| Realtime: SSE stream for notifications, Nearby, check-in stats; reconnect + poll fallback | Tested | `/api/v1/stream` asserted in `genesis.spec`; Nearby and check-in flows pass with the stream active |
+| Personal dashboard (role-adaptive): primary card + quick share, tickets, workspace pulse | Tested | `genesis.spec` individual (no workspace blocks) vs. workspace member |
+| Ticket states Valid · Checked in · Cancelled · Expired | Tested | `genesis.spec` all four states |
 | Global search ⌘K (§25) | Tested | Authorization test in `platform.test` |
 | Subscriptions: plans, entitlements, limits, simulated billing (§26) | Tested | `plans.test`; real billing **Blocked** on a payment provider |
-| Command Center (§27) | Tested | Modules users/businesses/events/stations/subscriptions/wallet/health/audit/flags; admin-only (404 otherwise) |
+| Command Center (§27) incl. operational alerts | Tested (modules) · Implemented (alerts) | Modules users/businesses/events/stations/subscriptions/wallet/health/audit/flags; admin-only (404 otherwise); Health lists alerts (failed jobs/mail, stuck queue, missing CRON_SECRET, non-SMTP transport, demo accounts in production, wallet pending) |
 | Database: migrations, indexes, constraints, transactions (§28) | Tested | Raw SQL on PostgreSQL (DECISIONS E2), 6 migrations |
-| Security (§29) | Tested | `security.test`, SECURITY_MODEL.md; external pen test **not done** |
+| Security (§29) | Tested | `security.test`, SECURITY.md audit (demo hint removed from production builds, camera policy fixed, wallet audit events); external pen test **not done** |
 | Reliability: health, jobs, retries, backups, logging (§31) | Partial | Health endpoint, job retries, pg_dump backups in the Docker stack; no monitoring backend yet |
 | Localization / Hebrew (§4) | Partial | Hebrew text renders correctly (RTL auto); UI strings are English only |

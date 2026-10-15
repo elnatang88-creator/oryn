@@ -1,6 +1,7 @@
 import 'server-only'
 import { z } from 'zod'
 import { getDb } from '../db'
+import { walletStatus } from '../wallet'
 import { audit } from '../audit'
 import { invalid, notFound } from '../errors'
 import { requirePlatformAdmin } from '../permissions'
@@ -106,4 +107,39 @@ export async function adminModule(adminId: string, module: AdminModule, q = '') 
     case 'flags':
       return db.query(`SELECT key, enabled, description, updated_at FROM feature_flags ORDER BY key`)
   }
+}
+
+export interface OpsAlert { level: 'critical' | 'warning' | 'info'; title: string; detail: string }
+
+/**
+ * Operational alerts: what an operator should act on now, derived from live counts and configuration.
+ * No secrets are read back — only whether something is set.
+ */
+export async function operationalAlerts(adminId: string): Promise<OpsAlert[]> {
+  const db = await getDb()
+  await requirePlatformAdmin(db, adminId)
+  const prod = process.env.NODE_ENV === 'production'
+  const [j] = await db.query<{ failed: number; stuck: number; overdue: number }>(
+    `SELECT count(*) FILTER (WHERE status = 'failed')::int AS failed,
+            count(*) FILTER (WHERE status = 'running' AND run_at < now() - interval '15 minutes')::int AS stuck,
+            count(*) FILTER (WHERE status = 'queued' AND run_at < now() - interval '10 minutes')::int AS overdue FROM jobs`)
+  const [m] = await db.query<{ failed: number; skipped_24h: number; queued_old: number }>(
+    `SELECT count(*) FILTER (WHERE status = 'failed')::int AS failed,
+            count(*) FILTER (WHERE status = 'skipped' AND created_at > now() - interval '1 day')::int AS skipped_24h,
+            count(*) FILTER (WHERE status = 'queued' AND created_at < now() - interval '30 minutes')::int AS queued_old FROM email_outbox`)
+  const [r] = await db.query<{ failed_24h: number }>(`SELECT count(*) FILTER (WHERE status = 'failed' AND created_at > now() - interval '1 day')::int AS failed_24h FROM automation_runs`)
+  const [u] = await db.query<{ demo: number }>(`SELECT count(*)::int AS demo FROM users WHERE email LIKE '%@oryn.local'`)
+  const out: OpsAlert[] = []
+  if (j.failed) out.push({ level: 'critical', title: `${j.failed} failed job${j.failed === 1 ? '' : 's'}`, detail: 'Jobs exhausted their retries. Inspect last_error in the jobs table; re-queue after fixing the cause.' })
+  if (j.stuck) out.push({ level: 'warning', title: `${j.stuck} job${j.stuck === 1 ? '' : 's'} running for over 15 minutes`, detail: 'A worker may have died mid-job. The next run reclaims them; if it repeats, check the scheduler container.' })
+  if (j.overdue) out.push({ level: 'warning', title: `${j.overdue} queued job${j.overdue === 1 ? '' : 's'} overdue`, detail: 'The scheduler is not calling /api/jobs. Check CRON_SECRET and the scheduler service.' })
+  if (m.failed) out.push({ level: 'critical', title: `${m.failed} email${m.failed === 1 ? '' : 's'} failed to send`, detail: 'SMTP rejected the message or the server is unreachable. See email_outbox.last_error.' })
+  if (m.queued_old) out.push({ level: 'warning', title: `${m.queued_old} email${m.queued_old === 1 ? '' : 's'} waiting over 30 minutes`, detail: 'Delivery jobs are not running. Check the scheduler.' })
+  if (prod && m.skipped_24h) out.push({ level: 'warning', title: `${m.skipped_24h} email${m.skipped_24h === 1 ? '' : 's'} skipped in the last 24 h`, detail: 'EMAIL_TRANSPORT is not set to smtp. Verification, reset and ticket mails reach nobody.' })
+  if (r.failed_24h) out.push({ level: 'warning', title: `${r.failed_24h} automation run${r.failed_24h === 1 ? '' : 's'} failed today`, detail: 'Open Business → Automations → run log for the error.' })
+  if (!process.env.CRON_SECRET) out.push({ level: prod ? 'critical' : 'info', title: 'No CRON_SECRET', detail: 'Background jobs (email, automations, reminders, deletions) cannot be triggered.' })
+  if (prod && (process.env.EMAIL_TRANSPORT ?? 'none') !== 'smtp') out.push({ level: 'warning', title: 'Email transport is not SMTP', detail: 'Set EMAIL_TRANSPORT=smtp and SMTP_URL to deliver mail.' })
+  if (prod && u.demo) out.push({ level: 'critical', title: `${u.demo} demo account${u.demo === 1 ? '' : 's'} present in production`, detail: 'ORYN_SEED_DEMO must be false in production; remove the @oryn.local accounts.' })
+  if (!walletStatus().apple.configured || !walletStatus().google.configured) out.push({ level: 'info', title: 'Wallet integrations pending', detail: `Apple: ${walletStatus().apple.configured ? 'configured' : 'missing certificates'} · Google: ${walletStatus().google.configured ? 'configured' : 'missing issuer account'}. Members see “Integration pending”.` })
+  return out
 }

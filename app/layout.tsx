@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import './fonts.css'
 import './globals.css'
+import { BRAND } from '@/lib/brand'
 import { ServiceWorker } from '@/components/ServiceWorker'
 
 export const metadata: Metadata = {
-  title: { default: 'ORYN', template: '%s · ORYN' },
+  title: { default: BRAND, template: `%s · ${BRAND}` },
   description: 'Share only what you choose. Let the other person decide what happens next.',
   manifest: '/manifest.webmanifest',
   robots: { index: true, follow: true },
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#011441',
+  themeColor: '#07132B',
   viewportFit: 'cover',
 }
 

@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 export const POST = api({ auth: true, mutation: true }, async ({ req, userId }) => {
   const form = await req.formData().catch(() => null)
   const back = String(form?.get('back') ?? '')
-  const safeBack = /^\/share\/[A-Za-z0-9_-]+\/wallet$/.test(back) ? back : null
+  const safeBack = /^(\/share\/[A-Za-z0-9_-]+\/wallet|\/wallet)$/.test(back) ? back : null
   try {
     return NextResponse.redirect(await googleWalletSaveLink(userId!, await appOrigin()), 303)
   } catch (e) {

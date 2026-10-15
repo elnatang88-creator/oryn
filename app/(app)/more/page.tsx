@@ -1,11 +1,13 @@
 import Link from 'next/link'
-import { Briefcase, CalendarCheck, CalendarDays, ChevronRight, LineChart, QrCode, Settings, UsersRound } from 'lucide-react'
+import { Bell, Briefcase, CalendarCheck, CalendarDays, ChevronRight, LineChart, QrCode, Settings, UsersRound, Wallet } from 'lucide-react'
 import { signOutAction } from '@/app/actions/auth'
 import { PageHeader } from '@/components/ui'
 
 export const metadata = { title: 'More' }
 
 const ITEMS = [
+  { href: '/notifications', label: 'Notifications', icon: Bell },
+  { href: '/wallet', label: 'Wallet passes', icon: Wallet },
   { href: '/follow-ups', label: 'Follow-ups', icon: CalendarCheck },
   { href: '/events', label: 'Events', icon: CalendarDays },
   { href: '/business', label: 'Business · leads, tasks, automations', icon: Briefcase },

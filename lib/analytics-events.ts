@@ -20,7 +20,7 @@ export type ClientEvent = (typeof CLIENT_EVENTS)[number]
 
 export const SERVER_ONLY_EVENTS = [
   'connection_created', 'nearby_visibility_enabled', 'nearby_visibility_disabled',
-  'wallet_add_failed', 'tags_updated', 'context_updated', 'public_card_cta_clicked',
+  'wallet_add_failed', 'wallet_preview_built', 'tags_updated', 'context_updated', 'public_card_cta_clicked',
 ] as const
 export type ServerOnlyEvent = (typeof SERVER_ONLY_EVENTS)[number]
 

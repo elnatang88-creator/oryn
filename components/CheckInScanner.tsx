@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useLive } from '@/lib/live'
 import { Camera, CameraOff, Check, Loader2, Search, XCircle } from 'lucide-react'
 
 type Result = { status: 'ok'; name: string; company: string } | { status: 'already'; name: string; at: string } | { status: 'not_found' } | { status: 'cancelled' | 'waitlisted'; name: string }
@@ -52,7 +53,9 @@ export function CheckInScanner({ eventId }: { eventId: string }) {
     try { const res = await fetch(`/api/v1/events/${eventId}/registrations?q=${encodeURIComponent(term)}`, { cache: 'no-store' }); if (res.ok) setFound((await res.json()).data) } catch { /* offline */ }
   }
 
-  useEffect(() => { refreshStats(); const t = setInterval(refreshStats, 15000); return () => clearInterval(t) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Live door counts: the server stream pushes `checkin` whenever the numbers change; the 15 s poll is the fallback.
+  const live = useLive(['checkin'], { event: eventId, onEvent: (name, data) => { if (name === 'checkin') setStats(data as typeof stats) } })
+  useEffect(() => { refreshStats(); const t = setInterval(refreshStats, live ? 60000 : 15000); return () => clearInterval(t) }, [live]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (cam !== 'on') return

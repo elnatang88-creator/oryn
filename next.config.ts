@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'same-origin' },
           { key: 'X-Frame-Options', value: 'DENY' },
           // Geolocation: own origin only, for opt-in Nearby (the phone reduces it to a ~150 m cell before sending).
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()' },
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()' },
           ...(dev ? [] : [{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' }]),
         ],
       },

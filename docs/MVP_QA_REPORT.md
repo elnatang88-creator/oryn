@@ -154,3 +154,11 @@ E2E_DATABASE_URL=postgres://user@host/empty_db npm run test:e2e
 npm run verify:env                                # run with the target environment's variables
 npm run verify:http https://your-staging-url
 ```
+
+## Genesis V2 pass (2026-10-15)
+
+Gate: typecheck clean · lint clean · `npm test` 76/76 on PGlite and on PostgreSQL 16 · production build clean · `npm run test:e2e` 35/35 (phone, desktop, platform, nearby, iphone, genesis-desktop, genesis-mobile) · 36 screenshots `docs/screenshots/genesis-{desktop,mobile}-NN-*.png` covering Login, Onboarding (steps 1/2/5), Editor, Dashboard (individual + workspace member), Card, Wallet Center, Notifications, Station, Registration, Ticket (Valid / Checked in / Expired), Check-in, Business, Command Center.
+
+Defects found and fixed during the pass: Today card block showed the card's internal name instead of the person's name; entry screenshots were captured mid-animation; "Find someone" wrapped on phones; expired/used tickets still showed the "You're registered" banner; registration code could start with `_`; `Permissions-Policy: camera=()` blocked the check-in scanner; the demo sign-in hint appeared in production builds; genesis and platform specs shared one demo event (capacity + required question + dates), fixed in the spec.
+
+Not verified (unchanged): real iPhone Safari / Android, SMTP delivery, Apple/Google wallet installation (no certificates), SSE behind the company proxy, external penetration test.

@@ -8,8 +8,9 @@ import type { CardDesign } from '../card-design'
  * WORKING HERE: the card data contract, Apple `pass.json` (generic style — an identity/membership credential,
  * not a coupon, store card or boarding pass), the Google Wallet Generic object, and signing the Google
  * "Save to Wallet" link (RS256 JWT) once an issuer and service account are configured.
- * INTEGRATION REQUIRED: Apple pass signing (PKCS#7 detached signature with the company's Pass Type ID
- * certificate + Apple WWDR certificate) and zip packaging; the Apple web service for pass updates; creating
+ * Apple packaging + signing lives in wallet-pkpass.ts (ZIP + manifest + PKCS#7 via OpenSSL).
+ * INTEGRATION REQUIRED: the company's Apple Pass Type ID certificate + WWDR certificate (signing is refused
+ * without them; only a clearly-labelled unsigned preview exists), the Apple web service for pass updates, and
  * the Google issuer account and class. Until configured, the UI says so and nothing pretends to succeed.
  */
 
@@ -56,11 +57,11 @@ export function walletStatus(): Record<WalletPlatform, WalletStatus> {
     ['ORYN_GOOGLE_WALLET_SA_KEY_PEM', 'Service account private key'],
   ]
   const missingApple = appleNeed.filter(([k]) => !env(k)).map(([, d]) => d)
-  // Signing and packaging .pkpass files is not built yet, so Apple stays "integration required" even with keys.
-  missingApple.push('Pass signing and .pkpass packaging service (not built yet)')
   const missingGoogle = googleNeed.filter(([k]) => !env(k)).map(([, d]) => d)
+  // Packaging + PKCS#7 signing are first-party (lib/server/wallet-pkpass.ts, OpenSSL). Apple is "configured"
+  // only when the company's certificate chain is present; without it only an unsigned development preview exists.
   return {
-    apple: { platform: 'apple', configured: false, missing: missingApple },
+    apple: { platform: 'apple', configured: missingApple.length === 0, missing: missingApple },
     google: { platform: 'google', configured: missingGoogle.length === 0, missing: missingGoogle },
   }
 }
@@ -127,6 +128,10 @@ export function googleSaveUrl(object: ReturnType<typeof googleGenericObject>, o:
   const input = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(payload))}`
   const sig = crypto.createSign('RSA-SHA256').update(input).sign(o.privateKeyPem)
   return `https://pay.google.com/gp/v/save/${input}.${b64url(sig)}`
+}
+
+export function appleConfig() {
+  return { teamId: env('ORYN_APPLE_TEAM_ID'), passTypeId: env('ORYN_APPLE_PASS_TYPE_ID') }
 }
 
 export function googleConfig() {

@@ -72,3 +72,22 @@ export async function myEventRelationships(userId: string, eventId: string) {
        FROM connections c WHERE c.owner_user_id = $1 AND c.event_id = $2 AND c.status = 'active'`, [userId, eventId])
   return s
 }
+
+// ─── Notification center ─────────────────────────────────────────────────────────────────────────
+export interface Notification { id: string; kind: string; body: string; link: string | null; read_at: Date | null; created_at: Date }
+
+export async function listNotifications(userId: string, limit = 60) {
+  const db = await getDb()
+  return db.query<Notification>(`SELECT id, kind, body, link, read_at, created_at FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`, [userId, limit])
+}
+
+export async function unreadCount(userId: string) {
+  const db = await getDb()
+  const [r] = await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM notifications WHERE user_id = $1 AND read_at IS NULL`, [userId])
+  return r.n
+}
+
+export async function markNotificationRead(userId: string, id: string) {
+  const db = await getDb()
+  await db.query(`UPDATE notifications SET read_at = now() WHERE id = $1 AND user_id = $2 AND read_at IS NULL`, [id, userId])
+}

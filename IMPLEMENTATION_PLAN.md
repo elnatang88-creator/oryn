@@ -22,6 +22,25 @@ Each slice connects UI → server action/API → service (authorization) → dat
 
 Priority follows the directive's order; 1–7 are vertical slices with tests before moving on.
 
+## Genesis V2 slices (2026-10-15)
+
+| # | Slice | Scope | Status |
+|---|---|---|---|
+| G1 | Baseline + branding by configuration | typecheck/lint/unit/E2E baseline; `NEXT_PUBLIC_BRAND_NAME`, text wordmark, generated manifest (DECISIONS E11) | T |
+| G2 | ORIAN visual tokens | palette in `tailwind.config.ts`, entry stage gradient, theme colour | T (screenshots) |
+| G3 | Onboarding 5 steps with progress | `OnboardingProgress` on signup → profile type → card → share | T (`genesis.spec`) |
+| G4 | Notification center + bell | `/notifications` (read/unread, history, deep links), `NotificationBell` live via SSE | T |
+| G5 | Realtime (SSE) | `/api/v1/stream` + `useLive`; wired into Nearby, check-in stats, bell; poll fallback (E13) | T (stream asserted in E2E; Nearby/check-in keep their existing tests) |
+| G6 | Apple Wallet engine | `wallet-pkpass.ts` ZIP/manifest/PKCS#7, `POST /api/v1/wallet/apple`, signed vs. labelled unsigned preview (E12) | T (`pkpass.test`, self-signed chain) · device install **B** (certificates) |
+| G7 | Wallet Center `/wallet` | card, platform status, pass link + QR + stop, install steps, troubleshooting | T |
+| G8 | Ticket states | Valid · Checked in · Cancelled · Expired · Waitlisted (E15) | T |
+| G9 | Role-adaptive dashboard | primary card + quick share, tickets, workspace pulse only for members | T |
+| G10 | Command Center operational alerts | jobs/mail/automations/config/demo-accounts alerts on Health | IM (rendered in E2E screenshot; alert conditions unit-untested) |
+| G11 | Security fixes | no demo hint in production builds (E14), `camera=(self)`, wallet audit events | T (sign-in assertion) |
+| G12 | Docs + screenshots | ARCHITECTURE, WALLET_INTEGRATION, SECURITY, DEPLOYMENT, FEATURE_STATUS, KNOWN_ISSUES; 36 genesis screenshots desktop + mobile | IM |
+
+Not done in this pass (unchanged status): Web Push, paid tickets/billing, file uploads, Hebrew UI/RTL, duplicate merge, event schedules, external pen test, staging on company infrastructure.
+
 ## Next steps (recoverable from here)
 1. Configure SMTP on staging (`EMAIL_TRANSPORT=smtp`, `SMTP_URL`) and run the account flows for real.
 2. Real-phone pass: camera check-in (BarcodeDetector/jsQR), station taps via NFC tag, Nearby on iPhone Safari.
