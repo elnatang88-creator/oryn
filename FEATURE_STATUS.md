@@ -2,7 +2,7 @@
 
 Legend: **Implemented** = code is in the repo and wired end to end · **Tested** = covered by automated tests that pass (evidence column) · **Partial** = works for a defined subset, limits stated · **Blocked** = needs something outside this repository · **Not implemented**.
 
-Test evidence as of 2026-10-15 (premium transformation pass): `npm test` 80/80 (PGlite and PostgreSQL 16) · `npm run test:e2e` 35/35 (Pixel 7, desktop, two-phone Nearby, iPhone QA, platform, genesis desktop + mobile) · typecheck, lint, production build clean · 36 screenshots in docs/screenshots/genesis-*. Everything is still a **local/staging demo** — not production-verified on company infrastructure, and no real-device wallet pass exists.
+Test evidence as of 2026-10-15 (final MVP pass): `npm test` 82/82 (PGlite and PostgreSQL 16) · `npm run test:e2e` 35/35 (Pixel 7, desktop, two-phone Nearby, iPhone QA, platform, genesis desktop + mobile) · typecheck, lint, production build clean · 36 screenshots in docs/screenshots/genesis-*. Everything is still a **local/staging demo** — not production-verified on company infrastructure, and no real-device wallet pass exists.
 
 | Area (directive §) | Status | Evidence / notes |
 |---|---|---|

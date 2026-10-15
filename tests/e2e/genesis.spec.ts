@@ -15,7 +15,7 @@ async function signIn(page: Page, email: string) {
   await expect(page).toHaveURL(/\/(today|capsules)/)
 }
 
-test('login → onboarding (5 steps with progress) → dashboard → card → editor → wallet center → notifications', async ({ page }, info) => {
+test('login → onboarding (5 steps with progress) → dashboard → card → editor → wallet center → notifications', async ({ page, browser }, info) => {
   // Login screen: in a production build there is no demo-credential hint on the page.
   await page.goto('/signin')
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible()
@@ -44,6 +44,11 @@ test('login → onboarding (5 steps with progress) → dashboard → card → ed
   await expect(page.getByTestId('first-run')).toBeVisible()
   await expect(page.getByTestId('onboarding-progress')).toHaveAttribute('data-step', '5')
   await shot(page, '05-onboarding-5-share')
+  // The flagship: a new card is Obsidian Black, engraved, with the reveal settled.
+  await expect(page.getByTestId('wallet-card').locator('[data-material]').first()).toHaveAttribute('data-material', 'obsidian')
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.waitForTimeout(1300)
+  await shot(page, '05b-obsidian-black')
 
   // Dashboard: the primary card block with quick share; no workspace blocks for an individual.
   await page.goto('/today')
@@ -61,17 +66,36 @@ test('login → onboarding (5 steps with progress) → dashboard → card → ed
   await expect(page.getByTestId('duplicated-banner')).toBeVisible()
   await expect(page.getByTestId('collections')).toBeVisible()
   await page.getByTestId('preset-gold').click()
+  await shot(page, '04b-studio-collections')
+  // Logo upload: resized on the device into the design, persisted, shown on the card.
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAQklEQVR42u3OMQEAAAgDoGn/zjOGDxBJOkk5cuTIkSNHjhw5cuTIkSNHjhw5cuTIkSNHjhw5cuTIkSNHjhw5cuTI0bsBTnkA/ZQ3Qe0AAAAASUVORK5CYII=', 'base64')
+  await page.getByTestId('logo-file').setInputFiles({ name: 'logo.png', mimeType: 'image/png', buffer: png })
+  await expect(page.getByTestId('logo-preview')).toBeVisible()
   await page.getByRole('button', { name: 'Save changes' }).click()
   await expect(page.getByText(/Saved/).first()).toBeVisible()
+  await page.reload()
+  await expect(page.getByTestId('logo-preview')).toBeVisible()
+  await expect(page.getByTestId('card-logo').first()).toBeVisible()
   await page.goto('/capsules')
   await expect(page.getByTestId('capsule-card')).toHaveCount(2)
   await page.getByTestId('set-active').first().click()
   await expect(page.getByTestId('active-card')).toHaveCount(1)
 
-  // Card (owner view) — the card object itself.
+  // Card (owner view) — the card object itself; the public card (no account) carries the same design and logo.
   await page.getByTestId(info.project.name.endsWith('mobile') ? 'tab-share' : 'rail-share').click()
   await expect(page.getByTestId('wallet-card-name')).toHaveText('Genesis Person')
+  await expect(page.getByTestId('wallet-card').locator('[data-material]').first()).toHaveAttribute('data-material', 'gold')
+  await expect(page.getByTestId('wallet-card').getByTestId('card-logo').first()).toBeVisible()
+  await page.waitForTimeout(1300) // reveal animation
   await shot(page, '07-card')
+  const publicUrl = (await page.getByTestId('share-url').textContent())!.trim()
+  const anon = await (await browser.newContext(info.project.name.endsWith('mobile') ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {})).newPage()
+  await anon.goto(publicUrl)
+  await expect(anon.getByTestId('capsule-name')).toHaveText('Genesis Person')
+  await expect(anon.locator('[data-material]').first()).toHaveAttribute('data-material', 'gold')
+  await expect(anon.getByTestId('card-logo').first()).toBeVisible()
+  await shot(anon, '07b-public-card')
+  await anon.close()
 
   // Wallet Center: no keys on this server → both pending, nothing claims success; the unsigned preview is labelled.
   await page.goto('/wallet')

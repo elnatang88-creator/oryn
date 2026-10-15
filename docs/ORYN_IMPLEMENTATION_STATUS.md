@@ -4,9 +4,11 @@ Labels: **WORKING AND VERIFIED** (automated tests pass on this commit) · **IMPL
 
 | Directive § | Feature | Status | Evidence / gap |
 |---|---|---|---|
-| 3 | Collections A–G (Obsidian, Platinum, Titanium, Midnight, Signature Gold, Pure White, Custom) | WORKING AND VERIFIED | `card-design.test` collections; `genesis.spec` |
+| 2 | Collections: Obsidian Black, Platinum Elite, Royal Gold first; Titanium, Midnight, Pure White, Custom | WORKING AND VERIFIED | `card-design.test` collections; `genesis.spec` (Royal Gold + logo) |
 | 3 | Front/back, double-tap flip, 3D tilt, gestures, reduced motion, fallback | WORKING AND VERIFIED | `qa.spec`, `nearby.spec` (flip), CSS reduced-motion |
-| 3 | Logo, profile image | PARTIALLY IMPLEMENTED | URL fields only; no upload/cropping pipeline (K10) |
+| 3 | Logo upload (resized on device, stored in the design, shown on every surface incl. the public card) | WORKING AND VERIFIED | `card-design.test` logo; `genesis.spec` upload → public card |
+| 3 | Profile photo | PARTIALLY IMPLEMENTED | https URL only; no upload/cropping yet (K10) |
+| 1 | ORIAN Black flagship: engraved finish, metallic gloss, touch drag rotation, device-motion tilt, reveal animation | WORKING AND VERIFIED (Chromium) · IMPLEMENTED BUT NOT VERIFIED (device motion on a real iPhone) | `genesis.spec` 05b screenshot; motion permission prompt needs a real device |
 | 4 | Visual editor, live preview, save, duplicate, make active, archive | WORKING AND VERIFIED | `card-design.test` duplicate; `genesis.spec`; archive in `core-flow` |
 | 4 | Draft/publish | PARTIALLY IMPLEMENTED | Saving is immediate and versioned; no separate draft state |
 | 5 | Identity capsules (8 modes, separate fields/links/policy/sharing) | WORKING AND VERIFIED | `core-flow.test`, `plans.test`, `qa.spec` |
@@ -27,6 +29,7 @@ Labels: **WORKING AND VERIFIED** (automated tests pass on this commit) · **IMPL
 | 19 | Security & privacy audit | WORKING AND VERIFIED (automated) · BLOCKED (external pen test) | SECURITY.md |
 | 20 | Performance | PARTIALLY IMPLEMENTED | Standalone build, no heavy deps, lazy sheets; no Lighthouse run recorded |
 | 21 | Demo environment and 16-step walkthrough | WORKING AND VERIFIED (steps map to passing specs) | docs/ORYN_MASTER_PLAN.md walkthrough |
+| 5 | Live iPhone preview URL | BLOCKED | No hosting or credentials in this repository/session; exact steps in docs/IPHONE_DEMO.md (LAN in 10 min, VPS with TLS in 30 min) |
 
 ## Required environment variables
 See DEPLOYMENT.md (table) and `.env.example`. Minimum for production: `DATABASE_URL`, `ORYN_SECRET`, `ORYN_PUBLIC_URL`, `CRON_SECRET`, `EMAIL_TRANSPORT=smtp` + `SMTP_URL` + `EMAIL_FROM`, `ORYN_SEED_DEMO=false`.

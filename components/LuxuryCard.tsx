@@ -14,6 +14,12 @@ export interface CardIdentity {
  * The ORYN card face. Pure markup + CSS variables from the design system, so it renders on the server
  * (recipient page loads fast, works without JavaScript) and in the editor's live preview alike.
  */
+/** The mark in the corner: the uploaded logo when there is one, else the ORYN mark in the card's foil. */
+function Mark({ design, className = 'lc-mark' }: { design: CardDesign; className?: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return design.logo ? <img className={`${className} lc-logo`} src={design.logo} alt="" data-testid="card-logo" /> : <div className={className} aria-hidden="true" />
+}
+
 export function CardFace({ design, identity, nameTestId }: { design: CardDesign; identity: CardIdentity; nameTestId?: string }) {
   const { displayName, headline, company, avatarUrl } = identity
   const name = (size: string) => (
@@ -24,7 +30,7 @@ export function CardFace({ design, identity, nameTestId }: { design: CardDesign;
   if (design.layout === 'monogram') {
     body = (
       <div className="lc-face lc-l-monogram">
-        <div className="lc-mark" aria-hidden="true" />
+        <Mark design={design} />
         <div className="lc-mono lc-foil" dir="auto" aria-hidden="true">{initials(displayName)}</div>
         <div className="lc-rule" style={{ width: '14cqw' }} />
         {name('5.4cqw')}
@@ -34,20 +40,20 @@ export function CardFace({ design, identity, nameTestId }: { design: CardDesign;
   } else if (design.layout === 'signature') {
     body = (
       <div className="lc-face lc-l-signature">
-        <div className="lc-top"><div className="lc-company lc-foil" dir="auto">{company ?? ''}</div><div className="lc-mark" aria-hidden="true" /></div>
+        <div className="lc-top"><div className="lc-company lc-foil" dir="auto">{company ?? ''}</div><Mark design={design} /></div>
         <div className="lc-bottom">{name('8.2cqw')}<div className="lc-rule" style={{ width: '22cqw' }} />{sub}</div>
       </div>
     )
   } else if (design.layout === 'minimal') {
     body = (
       <div className="lc-face lc-l-minimal">
-        {name('8.6cqw')}<div className="lc-rule" style={{ width: '18cqw' }} />{sub}<div className="lc-mark" aria-hidden="true" />
+        {name('8.6cqw')}<div className="lc-rule" style={{ width: '18cqw' }} />{sub}<Mark design={design} />
       </div>
     )
   } else {
     body = (
       <div className="lc-face lc-l-photo">
-        <div className="lc-mark" aria-hidden="true" />
+        <Mark design={design} />
         {avatarUrl
           // eslint-disable-next-line @next/next/no-img-element
           ? <img className="lc-photo" src={avatarUrl} alt="" referrerPolicy="no-referrer" />
@@ -59,7 +65,7 @@ export function CardFace({ design, identity, nameTestId }: { design: CardDesign;
   return (
     <div className="lc-holder">
       <div className={`lc-card lc-finish-${design.finish}`} style={designVars(design) as CSSProperties} data-material={design.material} data-testid="luxury-card">
-        <div className="lc-texture" /><div className="lc-holo" /><div className="lc-sheen" /><div className="lc-edge" />
+        <div className="lc-texture" /><div className="lc-holo" /><div className="lc-sheen" /><div className="lc-gloss" /><div className="lc-edge" />
         {body}
       </div>
     </div>
@@ -88,7 +94,7 @@ export function BrandBack({ design, name }: { design: CardDesign; name: string }
     <div className={`lc-card lc-finish-${design.finish}`} style={designVars(design) as CSSProperties} data-material={design.material} data-testid="card-back-brand">
       <div className="lc-texture" /><div className="lc-holo" /><div className="lc-sheen" /><div className="lc-edge" />
       <div className="lc-back-brand">
-        <div className="lc-mark lc-mark-lg" aria-hidden="true" />
+        <Mark design={design} className="lc-mark lc-mark-lg" />
         <div className="lc-hint lc-foil" dir="auto">{name}</div>
       </div>
     </div>
@@ -120,7 +126,7 @@ export function DetailsBack({ design, name, details, qrSvg, qrTestId }: { design
           ) : <p className="lc-back-empty">Just a hello — no details on this card.</p>}
         </div>
         {qrSvg && <div className="lc-qr lc-qr-sm" data-testid={qrTestId} role="img" aria-label="Code that opens this card" dangerouslySetInnerHTML={{ __html: qrSvg }} />}
-        <div className="lc-mark lc-back-mark" aria-hidden="true" />
+        <Mark design={design} className="lc-mark lc-back-mark" />
       </div>
     </div>
     </div>

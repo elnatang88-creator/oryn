@@ -18,3 +18,9 @@ Supersedes nothing; complements docs/MVP_QA_REPORT.md (history) and FEATURE_STAT
 Gate 2026-10-15 (commit after `fad973f`): typecheck clean · lint clean · `npm test` 80/80 on PGlite and 80/80 on PostgreSQL 16 · production build clean · `npm run test:e2e` 35/35 after two spec fixes (a preset id renamed by the collections, and the loading-skeleton revert below).
 
 Defects found and fixed during this pass: route-level `loading.tsx` broke every post-action refresh (15 E2E failures → reverted, ORYN_DECISIONS T6); `preset-navy`/`preset-marble` ids replaced by collection ids in two specs.
+
+## Final MVP pass (same day)
+Gate: typecheck clean · lint clean · `npm test` 82/82 on PGlite and on PostgreSQL 16 · production build clean · `npm run test:e2e` 35/35 · new screenshots `genesis-*-05b-obsidian-black`, `04b-studio-collections`, `07b-public-card`.
+Added: engraved finish, metallic gloss band, touch drag rotation + device-motion tilt, reveal animation, logo upload (device-side resize → data URL in the design, validated server-side, SVG never stored raw), collections reordered (Obsidian Black, Platinum Elite, Royal Gold first), Obsidian Black engraved as the default for new cards.
+Fixed during the pass: three unit expectations (design now carries `logo: null`; new collection order), the welcome headline assertion, and the local PostgreSQL 16 service that had stopped (restarted as the postgres user).
+Not verified: device-motion tilt and the iOS permission prompt on a real iPhone; everything listed under "What was not verified" above.

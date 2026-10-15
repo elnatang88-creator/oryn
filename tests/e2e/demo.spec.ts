@@ -269,7 +269,7 @@ test('who viewed you: a signed-in member is told, and the Pro owner sees their p
 
 test('entry screen: installed app opens on a welcome screen that leads to sign-up and sign-in', async ({ page }) => {
   await page.goto('/welcome')
-  await expect(page.getByRole('heading', { name: 'Your card. Your rules.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'A card people ask about.' })).toBeVisible()
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
   expect(overflow).toBeLessThanOrEqual(0)
   await page.getByTestId('welcome-create').click()

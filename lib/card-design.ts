@@ -6,7 +6,7 @@
 
 export const MATERIALS = ['obsidian', 'platinum', 'titanium', 'midnight', 'gold', 'white', 'pearl', 'carbon', 'marble', 'custom'] as const
 export const FOILS = ['gold', 'rosegold', 'champagne', 'silver', 'electric', 'graphite', 'ivory'] as const
-export const FINISHES = ['matte', 'foil', 'holo'] as const
+export const FINISHES = ['matte', 'foil', 'holo', 'engraved'] as const
 export const CARD_FONTS = ['classic', 'editorial', 'modern', 'bold'] as const
 export const CARD_LAYOUTS = ['monogram', 'signature', 'minimal', 'photo'] as const
 /** What the back of the card shows: a code that opens the card, or the ORYN mark only (no code). */
@@ -19,9 +19,15 @@ export type CardFont = (typeof CARD_FONTS)[number]
 export type CardLayout = (typeof CARD_LAYOUTS)[number]
 export type CardBackKind = (typeof CARD_BACKS)[number]
 
-export interface CardDesign { material: Material; foil: Foil; finish: Finish; font: CardFont; layout: CardLayout; base: string; back: CardBackKind }
+export interface CardDesign { material: Material; foil: Foil; finish: Finish; font: CardFont; layout: CardLayout; base: string; back: CardBackKind; logo?: string | null }
 
-export const DEFAULT_DESIGN: CardDesign = { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram', base: '#0f3d2e', back: 'qr' }
+/** An uploaded logo lives inside the design as a small data URL (resized on the phone before upload). */
+export const LOGO_MAX_CHARS = 90_000
+const LOGO_RE = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/
+export function isValidLogo(v: unknown): v is string { return typeof v === 'string' && v.length <= LOGO_MAX_CHARS && LOGO_RE.test(v) }
+
+/** New cards start as the flagship: Obsidian Black, engraved. */
+export const DEFAULT_DESIGN: CardDesign = { material: 'obsidian', foil: 'gold', finish: 'engraved', font: 'classic', layout: 'signature', base: '#0f3d2e', back: 'qr' }
 export const BACK_LABELS: Record<CardBackKind, string> = { qr: 'Details + small code', brand: 'Details only' }
 
 const svg = (body: string, w = 300, h = 300) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'>${body}</svg>`)}")`
@@ -30,13 +36,13 @@ const marble = `${svg(`<filter id='m' x='0' y='0'><feTurbulence type='turbulence
 
 interface MaterialSpec { label: string; bg?: string; texture: string; blend: string; ink: string; foil: Foil; sheen: number; shadow?: string }
 export const MATERIAL_SPECS: Record<Material, MaterialSpec> = {
-  obsidian: { label: 'Obsidian', bg: 'radial-gradient(120% 90% at 18% 0%, #2a2a31 0%, #0d0d10 55%, #050506 100%)', texture: noise(0.9, 0.09), blend: 'overlay', ink: 'rgba(255,255,255,.74)', foil: 'gold', sheen: 0.22 },
+  obsidian: { label: 'Obsidian Black', bg: 'repeating-linear-gradient(100deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px), radial-gradient(120% 90% at 18% 0%, #2c2d34 0%, #101114 48%, #050506 100%)', texture: noise(0.9, 0.09), blend: 'overlay', ink: 'rgba(255,255,255,.74)', foil: 'gold', sheen: 0.3 },
   midnight: { label: 'Midnight', bg: 'radial-gradient(120% 100% at 15% 0%, #1a3a92 0%, #011441 55%, #000a24 100%)', texture: noise(0.9, 0.08), blend: 'overlay', ink: 'rgba(222,231,255,.78)', foil: 'silver', sheen: 0.24 },
   pearl: { label: 'Pearl', bg: 'linear-gradient(125deg,#fdfcf9 0%,#efe8dc 32%,#fbf9f4 52%,#e7ded0 78%,#f7f3ec 100%)', texture: 'linear-gradient(115deg, rgba(255,210,230,.35), rgba(190,225,255,.35) 40%, rgba(255,240,200,.35) 70%, rgba(210,200,255,.35))', blend: 'soft-light', ink: 'rgba(52,44,32,.72)', foil: 'gold', sheen: 0.5, shadow: 'drop-shadow(0 .12cqw 0 rgba(90,70,30,.35))' },
   carbon: { label: 'Carbon', bg: 'repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 2px, transparent 2px 7px), repeating-linear-gradient(-45deg, rgba(0,0,0,.45) 0 2px, transparent 2px 7px), linear-gradient(135deg,#23252a,#0e0f12)', texture: noise(1.2, 0.06), blend: 'overlay', ink: 'rgba(235,240,255,.72)', foil: 'electric', sheen: 0.2 },
   marble: { label: 'Marble', bg: marble, texture: 'linear-gradient(120deg, rgba(255,255,255,.4), transparent 60%)', blend: 'soft-light', ink: 'rgba(25,22,20,.72)', foil: 'gold', sheen: 0.45, shadow: 'drop-shadow(0 .12cqw 0 rgba(60,45,20,.4))' },
-  platinum: { label: 'Platinum', bg: 'repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 1px, rgba(0,0,0,.035) 1px 2px, transparent 2px 3px), linear-gradient(135deg,#b9bec6 0%,#eef0f3 30%,#c3c8cf 52%,#f4f5f7 74%,#aab0b8 100%)', texture: noise(0.6, 0.05), blend: 'overlay', ink: 'rgba(24,27,33,.82)', foil: 'silver', sheen: 0.45, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,255,255,.5))' },
-  gold: { label: 'Signature Gold', bg: 'radial-gradient(120% 100% at 18% 0%, #f1dfae 0%, #d9bf7d 38%, #b8964a 72%, #8e6f2c 100%)', texture: noise(0.8, 0.07), blend: 'soft-light', ink: 'rgba(58,40,8,.8)', foil: 'ivory', sheen: 0.5, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,245,210,.5))' },
+  platinum: { label: 'Platinum Elite', bg: 'repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 1px, rgba(0,0,0,.035) 1px 2px, transparent 2px 3px), linear-gradient(135deg,#b9bec6 0%,#eef0f3 30%,#c3c8cf 52%,#f4f5f7 74%,#aab0b8 100%)', texture: noise(0.6, 0.05), blend: 'overlay', ink: 'rgba(24,27,33,.82)', foil: 'silver', sheen: 0.45, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,255,255,.5))' },
+  gold: { label: 'Royal Gold', bg: 'radial-gradient(120% 100% at 18% 0%, #f1dfae 0%, #d9bf7d 38%, #b8964a 72%, #8e6f2c 100%)', texture: noise(0.8, 0.07), blend: 'soft-light', ink: 'rgba(58,40,8,.8)', foil: 'ivory', sheen: 0.5, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,245,210,.5))' },
   white: { label: 'Pure White', bg: 'linear-gradient(135deg,#ffffff 0%,#f4f5f8 45%,#ffffff 70%,#eceef2 100%)', texture: 'linear-gradient(135deg, rgba(0,0,0,.025), transparent 50%, rgba(0,0,0,.03))', blend: 'multiply', ink: 'rgba(28,30,36,.78)', foil: 'graphite', sheen: 0.35, shadow: 'drop-shadow(0 .14cqw 0 rgba(255,255,255,.9)) drop-shadow(0 -.08cqw 0 rgba(0,0,0,.12))' },
   titanium: { label: 'Titanium', bg: 'repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 1px, rgba(0,0,0,.05) 1px 2px, transparent 2px 4px), linear-gradient(135deg,#676b72 0%,#c9ccd1 42%,#8b8f96 70%,#55595f 100%)', texture: noise(0.7, 0.06), blend: 'overlay', ink: 'rgba(18,20,24,.8)', foil: 'graphite', sheen: 0.4, shadow: 'drop-shadow(0 .12cqw 0 rgba(255,255,255,.35))' },
   custom: { label: 'Your colour', texture: noise(0.9, 0.07), blend: 'overlay', ink: 'rgba(255,255,255,.78)', foil: 'gold', sheen: 0.28 },
@@ -52,7 +58,7 @@ export const FOIL_SPECS: Record<Foil, { label: string; g: string }> = {
   ivory: { label: 'White', g: 'linear-gradient(115deg,#d8dbe0 0%,#ffffff 30%,#eceef2 55%,#ffffff 75%,#d8dbe0 100%)' },
 }
 
-export const FINISH_LABELS: Record<Finish, string> = { matte: 'Matte', foil: 'Foil', holo: 'Holographic' }
+export const FINISH_LABELS: Record<Finish, string> = { matte: 'Matte', foil: 'Foil', holo: 'Holographic', engraved: 'Engraved' }
 
 export const FONT_SPECS: Record<CardFont, { label: string; family: string; weight: number; track: string }> = {
   classic: { label: 'Classic', family: '"Bellefair", "Frank Ruhl Libre", Georgia, serif', weight: 400, track: '.04em' },
@@ -68,11 +74,11 @@ export const LAYOUT_LABELS: Record<CardLayout, string> = { monogram: 'Monogram',
  * editable afterwards. "Custom" starts from the person's own colour.
  */
 export const PRESETS: { id: string; label: string; letter: string; design: Omit<CardDesign, 'base' | 'back'> }[] = [
-  { id: 'obsidian', label: 'Obsidian', letter: 'A', design: { material: 'obsidian', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram' } },
-  { id: 'platinum', label: 'Platinum', letter: 'B', design: { material: 'platinum', foil: 'graphite', finish: 'matte', font: 'modern', layout: 'minimal' } },
-  { id: 'titanium', label: 'Titanium', letter: 'C', design: { material: 'titanium', foil: 'graphite', finish: 'matte', font: 'modern', layout: 'signature' } },
-  { id: 'midnight', label: 'Midnight', letter: 'D', design: { material: 'midnight', foil: 'silver', finish: 'foil', font: 'editorial', layout: 'signature' } },
-  { id: 'gold', label: 'Signature Gold', letter: 'E', design: { material: 'gold', foil: 'ivory', finish: 'foil', font: 'classic', layout: 'signature' } },
+  { id: 'obsidian', label: 'Obsidian Black', letter: 'A', design: { material: 'obsidian', foil: 'gold', finish: 'engraved', font: 'classic', layout: 'signature' } },
+  { id: 'platinum', label: 'Platinum Elite', letter: 'B', design: { material: 'platinum', foil: 'graphite', finish: 'engraved', font: 'modern', layout: 'minimal' } },
+  { id: 'gold', label: 'Royal Gold', letter: 'C', design: { material: 'gold', foil: 'ivory', finish: 'foil', font: 'classic', layout: 'signature' } },
+  { id: 'titanium', label: 'Titanium', letter: 'D', design: { material: 'titanium', foil: 'graphite', finish: 'matte', font: 'modern', layout: 'signature' } },
+  { id: 'midnight', label: 'Midnight', letter: 'E', design: { material: 'midnight', foil: 'silver', finish: 'foil', font: 'editorial', layout: 'signature' } },
   { id: 'white', label: 'Pure White', letter: 'F', design: { material: 'white', foil: 'graphite', finish: 'matte', font: 'editorial', layout: 'minimal' } },
   { id: 'custom', label: 'Custom', letter: 'G', design: { material: 'custom', foil: 'gold', finish: 'foil', font: 'classic', layout: 'monogram' } },
 ]
@@ -92,6 +98,7 @@ export function normalizeDesign(input: unknown): CardDesign {
     layout: pick(d.layout, CARD_LAYOUTS, DEFAULT_DESIGN.layout),
     base: typeof d.base === 'string' && HEX.test(d.base) ? d.base.toLowerCase() : DEFAULT_DESIGN.base,
     back: pick(d.back, CARD_BACKS, DEFAULT_DESIGN.back),
+    logo: isValidLogo(d.logo) ? d.logo : null,
   }
 }
 
@@ -101,6 +108,7 @@ export function isValidDesign(input: unknown): boolean {
   return MATERIALS.includes(d.material as Material) && FOILS.includes(d.foil as Foil) && FINISHES.includes(d.finish as Finish)
     && CARD_FONTS.includes(d.font as CardFont) && CARD_LAYOUTS.includes(d.layout as CardLayout) && (d.base === undefined || (typeof d.base === 'string' && HEX.test(d.base)))
     && (d.back === undefined || CARD_BACKS.includes(d.back as CardBackKind))
+    && (d.logo === undefined || d.logo === null || isValidLogo(d.logo))
 }
 
 function rgb(hex: string): [number, number, number] { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }
